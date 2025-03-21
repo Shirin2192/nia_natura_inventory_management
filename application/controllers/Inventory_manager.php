@@ -32,4 +32,7 @@ class Inventory_manager extends CI_Controller {
 	public function add_bottle_size(){
 		$this->load->view('inventory_manager/add_bottle_size');
 	}
+	public function add_bottle_type(){
+		$this->load->view('inventory_manager/add_bottle_type');
+	}
 }
