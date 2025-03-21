@@ -26,4 +26,17 @@ class Admin extends CI_Controller {
 	{
 		$this->load->view('admin/add_staff');
 	}
+	public function add_product()
+	{
+		$this->load->view('inventory_manager/product');
+	}
+	public function add_flavour(){
+		$this->load->view('inventory_manager/add_flavour');
+	}
+	public function add_bottle_size(){
+		$this->load->view('inventory_manager/add_bottle_size');
+	}
+	public function add_bottle_type(){
+		$this->load->view('inventory_manager/add_bottle_type');
+	}
 }
