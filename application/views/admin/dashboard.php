@@ -41,17 +41,7 @@
         <!--**********************************
             Nav header start
         ***********************************-->
-        <div class="nav-header">
-            <div class="brand-logo">
-                <a href="<?= base_url() ?>">
-                    <b class="logo-abbr"><img src="<?= base_url()?>assets/images/logo.png" alt=""> </b>
-                    <span class="logo-compact"><img src="<?= base_url()?>assets/images/logo-compact.png" alt=""></span>
-                    <span class="brand-title">
-                        <img src="<?= base_url()?>assets/images/logo-text.png" alt="">
-                    </span>
-                </a>
-            </div>
-        </div>
+        <?php include('common/nav_head.php')?>
         <!--**********************************
             Nav header end
         ***********************************-->
