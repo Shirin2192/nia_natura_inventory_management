@@ -39,4 +39,7 @@ class Admin extends CI_Controller {
 	public function add_bottle_type(){
 		$this->load->view('inventory_manager/add_bottle_type');
 	}
+	public function add_sale_channel(){
+		$this->load->view('inventory_manager/add_sales_channel');
+	}
 }

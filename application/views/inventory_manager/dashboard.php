@@ -9,7 +9,7 @@
     <!-- theme meta -->
     <meta name="theme-name" content="quixlab" />
   
-    <title>Quixlab - Bootstrap Admin Dashboard Template by Themefisher.com</title>
+    <title>Nia Natura Inventory Management</title>
     <!-- Favicon icon -->
     <?php include('common/css_files.php')?>
 

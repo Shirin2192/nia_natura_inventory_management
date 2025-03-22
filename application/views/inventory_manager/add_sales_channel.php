@@ -55,7 +55,7 @@
                <div class="col p-md-0">
                   <ol class="breadcrumb">
                      <li class="breadcrumb-item"><a href="<?=base_url()?>admin">Dashboard</a></li>
-                     <li class="breadcrumb-item active"><a href="<?=base_url()?>admin/add_order_details">Add Order Detail</a></li>
+                     <li class="breadcrumb-item active"><a href="<?=base_url()?>admin/add_flavour">Add Sales Channel</a></li>
                   </ol>
                </div>
             </div>
@@ -69,26 +69,9 @@
                            <div class="row">
                               <div class="col-lg-6">
                                  <div class="form-group">
-                                    <label class="col-form-label" for="flavour_name">Flavour Name <span class="text-danger">*</span>
+                                    <label class="col-form-label" for="sale_channel">Sale Channel <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-control" id="flavour_name" name="flavour_name">
-                                        <option value="Neem">Neem</option>
-                                        <option value="Tulsi">Tulsi</option>
-                                        <option value="Himalaya">Himalaya</option>
-                                        <option value="Jamun">Jamun</option>
-                                    </select>
-                                 </div>
-                              </div>
-                              <div class="col-lg-6">
-                                 <div class="form-group">
-                                    <label class="col-form-label" for="flavour_name">Flavour Name <span class="text-danger">*</span>
-                                    </label>
-                                    <select class="form-control" id="flavour_name" name="flavour_name">
-                                        <option value="Neem">Neem</option>
-                                        <option value="Tulsi">Tulsi</option>
-                                        <option value="Himalaya">Himalaya</option>
-                                        <option value="Jamun">Jamun</option>
-                                    </select>
+                                    <input type="text" class="form-control" id="sale_channel" name="sale_channel" placeholder="Enter Sale Channel">
                                  </div>
                               </div>
                               
@@ -105,11 +88,11 @@
                <div class="col-lg-12">
                   <div class="card">
                      <div class="card-body">
-                        <h5>Flavour List</h5>
-                        <table id="flavourTable" class="display">
+                        <h5>Sale Channel List</h5>
+                        <table id="salechannelTable" class="display">
                            <thead>
                               <tr>
-                                 <th>Flavour Name</th>
+                                 <th>Sale Channel</th>
                                  <th>Action</th>
                               </tr>
                            </thead>
@@ -149,7 +132,7 @@
          <div class="modal-dialog modal-lg">
             <div class="modal-content">
                <div class="modal-header">
-                  <h5 class="modal-title" id="editModalLabel">Edit Product</h5>
+                  <h5 class="modal-title" id="editModalLabel">Edit Sale Channel</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                </div>
                <div class="modal-body">
@@ -157,8 +140,8 @@
                      <div class="row">
                         <div class="col-lg-6 mb-3">
                            <div class="form-group">
-                              <label class="col-form-label" for="edit_flavour_name">Flavour Name <span class="text-danger">*</span></label>
-                              <input type="text" class="form-control" id="edit_flavour_name" name="edit_flavour_name" placeholder="Enter Product Name">
+                              <label class="col-form-label" for="edit_sale_channel">Sale Channel <span class="text-danger">*</span></label>
+                              <input type="text" class="form-control" id="edit_sale_channel" name="edit_sale_channel" placeholder="Enter Product Name">
                            </div>
                         </div>                      
                      </div>                                       
@@ -192,11 +175,7 @@
       <!--**********************************
          Footer start
          ***********************************-->
-      <div class="footer">
-         <div class="copyright">
-            <p>Copyright &copy; Designed & Developed by <a href="https://themeforest.net/user/quixlab">Quixlab</a> 2018</p>
-         </div>
-      </div>
+		 <?php include('common/footer.php')?>
       <!--**********************************
          Footer end
          ***********************************-->
@@ -210,7 +189,7 @@
       <?php include('common/js_files.php')?>
       <script>
       $(document).ready(function() {
-         $('#flavourTable').DataTable();
+         $('#salechannelTable').DataTable();
 
          // Edit button click event
          $('.edit-btn').on('click', function() {

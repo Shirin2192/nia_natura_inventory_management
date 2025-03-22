@@ -4,7 +4,7 @@
       <meta charset="utf-8">
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
       <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Quixlab - Bootstrap Admin Dashboard Template by Themefisher.com</title>
+      <title>Nia Natura Inventory Management</title>
       <!-- Favicon icon -->
       <?php include('common/css_files.php')?>
    </head>
@@ -72,7 +72,7 @@
                                     <div class="col-lg-6 mb-3">
                                        <div class="form-group">
                                           <label class="col-form-label" for="flavor">Flavor <span class="text-danger">*</span></label>
-                                          <select class="form-control" id="flavor" name="flavor">
+                                          <select class="chosen-select form-control" id="flavor" name="flavor">
                                              <option value="Neem">Neem</option>
                                              <option value="Tulsi">Tulsi</option>
                                              <option value="Himalaya">Himalaya</option>
@@ -84,7 +84,7 @@
                                     <div class="col-lg-6 mb-3">
                                        <div class="form-group">
                                           <label class="col-form-label" for="bottle_size">Bottle Size <span class="text-danger">*</span></label>
-                                          <select class="form-control" id="bottle_size" name="bottle_size">
+                                          <select class="chosen-select form-control" id="bottle_size" name="bottle_size">
                                              <option value="250ml">250ml</option>
                                              <option value="500ml">500ml</option>
                                              <option value="1L">1L</option>
@@ -96,11 +96,12 @@
                                     <div class="col-lg-6 mb-3">
                                        <div class="form-group">
                                           <label class="col-form-label" for="bottle_type">Bottle Type</label>
-                                          <select class="form-control" id="bottle_type" name="bottle_type">
-                                             <option value="glass">Glass</option>
-                                             <option value="plastic">Plastic</option>
-                                             <option value="jar">Jar</option>
-                                          </select>
+                                          <div><select class="chosen-select form-control" data-placeholder="Select an option..."  id="bottle_type" name="bottle_type">
+															<option value=""></option> <!-- Empty option for deselect -->
+															<option value="1">Option 1</option>
+															<option value="2">Option 2</option>
+															<option value="3">Option 3</option>
+														</select></div>
                                        </div>
                                     </div>
                                     <!-- Barcode -->
@@ -156,7 +157,7 @@
                                     <div class="col-lg-6 mb-3">
                                        <div class="form-group">
                                           <label class="col-form-label" for="availability_status">Availability Status</label>
-                                          <select class="form-control" id="availability_status" name="availability_status">
+                                          <select class="chosen-select form-control" id="availability_status" name="availability_status">
                                              <option value="in_stock">In Stock</option>
                                              <option value="out_of_stock">Out of Stock</option>
                                              <option value="backordered">Backordered</option>
@@ -166,7 +167,7 @@
                                     <div class="col-lg-6 mb-3">
                                        <div class="form-group">
                                           <label class="col-form-label" for="sales_channels">Sales Channels</label>
-                                          <select class="form-control" id="sales_channels" name="sales_channels">
+                                          <select class="chosen-select form-control" id="sales_channels" name="sales_channels">
                                              <option value="online">Online</option>
                                              <option value="in_store">Offline</option>
                                              <option value="both">Both</option>
@@ -407,6 +408,10 @@
       <?php include('common/js_files.php')?>
       <script>
          $(document).ready(function() {
+				$(".chosen-select").chosen({
+        allow_single_deselect: true,
+		  heigth: '100%'
+    });
             // Initialize DataTable
             $('#product_table').DataTable();
          

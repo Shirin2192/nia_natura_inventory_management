@@ -4,7 +4,7 @@
       <meta charset="utf-8">
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
       <meta name="viewport" content="width=device-width,initial-scale=1">
-      <title>Quixlab - Bootstrap Admin Dashboard Template by Themefisher.com</title>
+      <title>Nia Natura Inventory Management</title>
       <!-- Favicon icon -->
       <?php include('common/css_files.php')?>
    </head>
@@ -110,8 +110,7 @@
                               <div class="col-lg-6 mb-3">
                                  <div class="form-group">
                                     <label class="col-form-label" for="role">Role/Designation <span class="text-danger">*</span></label>
-                                    <!-- <input type="text" class="form-control" id="role" name="role" placeholder="Enter Role/Designation"> -->
-                                    <select class="form-control choosen" id="val-skill" name="val-skill">
+                                    <select class="form-control chosen-select" id="val-skill" name="val-skill">
                                        <option value="">Please select</option>
                                        <option value="html">HTML</option>
                                        <option value="css">CSS</option>
@@ -288,6 +287,10 @@
       <?php include('common/js_files.php')?>
       <script>
       $(document).ready(function() {
+				$(".chosen-select").chosen({
+        allow_single_deselect: true,
+		  heigth: '100%'
+    });
          $('#staffTable').DataTable();
 
          // Edit button click event

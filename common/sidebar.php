@@ -27,6 +27,11 @@
                             <i class="icon-star menu-icon"></i> <span class="nav-text">Add Bottle Type</span>
                         </a>
                     </li>
+					<li>
+                        <a href="<?= base_url()?>admin/add_sale_channel" aria-expanded="false">
+                            <i class="icon-star menu-icon"></i> <span class="nav-text">Add Sale Channel</span>
+                        </a>
+                    </li>
                     <li>
                         <a href="<?= base_url()?>admin/add_product" aria-expanded="false">
                             <i class="icon-star menu-icon"></i> <span class="nav-text">Add Product</span>
