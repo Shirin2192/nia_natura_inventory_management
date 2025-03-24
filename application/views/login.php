@@ -27,11 +27,6 @@
     <!--*******************
         Preloader end
     ********************-->
-
-    
-
-
-
     <div class="login-form-bg h-100">
         <div class="container h-100">
             <div class="row justify-content-center h-100">
@@ -41,14 +36,16 @@
                             <div class="card-body pt-5">
                                 <a class="text-center" href="<?= base_url();?>"> <h4>Login</h4></a>
         
-                                <form class="mt-5 mb-5 login-input">
+                                <form class="mt-5 mb-5 login-input" id="loginForm">
                                     <div class="form-group">
-                                        <input type="email" class="form-control" placeholder="Email">
+                                        <input type="email" name="email" class="form-control" placeholder="Email">
+                                        <small id="email_error" class="text-danger"></small>
                                     </div>
                                     <div class="form-group">
-                                        <input type="password" class="form-control" placeholder="Password">
+                                        <input type="password" name="password" class="form-control" placeholder="Password">
+                                        <small id="password_error" class="text-danger"></small>
                                     </div>
-                                    <button class="btn login-form__btn submit w-100">Sign In</button>
+                                    <button type="submit" class="btn login-form__btn submit w-100">Sign In</button>
                                 </form>
                                 <!-- <p class="mt-5 login-form__footer">Dont have account? <a href="page-register.html" class="text-primary">Sign Up</a> now</p> -->
                             </div>
@@ -66,6 +63,7 @@
         Scripts
     ***********************************-->
     <?php include('common/js_files.php')?>
+    <script src="<?= base_url()?>assets/view_js/login.js"></script>
 </body>
 </html>
 

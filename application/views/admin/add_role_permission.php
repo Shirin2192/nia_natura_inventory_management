@@ -57,8 +57,8 @@
                 <div class="col p-md-0">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="<?=base_url()?>admin">Dashboard</a></li>
-                        <li class="breadcrumb-item active"><a href="<?=base_url()?>admin/add_bottle_type">Add Bottle
-                                Type</a></li>
+                        <li class="breadcrumb-item active"><a href="<?=base_url()?>admin/add_staff">Role Permissions
+                            </a></li>
                     </ol>
                 </div>
             </div>
@@ -72,14 +72,22 @@
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="col-form-label" for="bottle_type">Bottle Type <span
+                                                <label class="col-form-label" for="module">Module <span
                                                         class="text-danger">*</span>
                                                 </label>
-                                                <input type="text" class="form-control" id="bottle_type"
-                                                    name="bottle_type" placeholder="Enter Bottle Type ">
+                                                <input type="text" class="form-control" id="module" name="module"
+                                                    placeholder="Enter Module">
                                             </div>
                                         </div>
-
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="permission_name">Permission Name
+                                                    <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" class="form-control" id="permission_name"
+                                                    name="permission_name" placeholder="Enter Permission Name">
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="form-group">
                                         <div class="col-lg-8 ml-auto">
@@ -87,50 +95,45 @@
                                         </div>
                                     </div>
                                 </form>
-                                </div>
+                            </div>
                         </div>
                     </div>
-
-
                 </div>
             </div>
-                                <!-- Row for DataTable -->
-                                <div class="container-fluid">
-                                    <div class="row justify-content-center">
-                                        <div class="col-lg-12">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <h5>Bottle Type List</h5>
-                                                    <table id="bottleSizeTable" class="display">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Bottle Type</th>
-                                                                <th>Action</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <!-- Example Row -->
-                                                            <tr>
-                                                                <td>Jar</td>
-                                                                <td>
-                                                                    <button class="btn btn-warning btn-sm edit-btn"
-                                                                        data-toggle="modal"
-                                                                        data-target="#edit_flavour_modal"
-                                                                        data-id="1">Edit</button>
-                                                                    <button class="btn btn-danger btn-sm delete-btn"
-                                                                        data-toggle="modal" data-target="#deleteModal"
-                                                                        data-id="1">Delete</button>
-                                                                </td>
-                                                            </tr>
-                                                            <!-- More rows will be dynamically generated -->
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                           
+            <!-- Row for DataTable -->
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>Role Permission List</h5>
+                                <table id="permissionsTable" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Module</th>
+                                            <th>Permission Name</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Example Data (Replace with Database Data) -->
+                                        <tr>
+                                            <td>Inventory</td>
+                                            <td>View</td>
+                                            <td>
+                                            <button class="btn btn-warning btn-sm edit-btn" data-toggle="modal" data-target="#edit_role_permission_modal" data-id="1">Edit</button>
+                                            <button class="btn btn-danger btn-sm delete-btn" data-toggle="modal" data-target="#deleteModal" data-id="1">Delete</button>
+                                            </td>
+                                        </tr>
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
     <!-- #/ container -->
@@ -138,52 +141,63 @@
     <!--**********************************
          Content body end
          ***********************************-->
-    <!-- Edit Product Modal -->
-    <div class="modal fade" id="edit_flavour_modal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <!-- Edit Modal -->
+    <div class="modal fade" id="edit_role_permission_modal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">Edit Bottle Type</h5>
+                    <h5 class="modal-title" id="editModalLabel">Edit Staff</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="edit-product-form">
+                    <form id="edit-staff-form">
                         <div class="row">
-                            <div class="col-lg-6 mb-3">
+                            <div class="col-lg-6">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_bottle_type">Bottle Type <span
+                                    <label class="col-form-label" for="edit_module">Module <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="edit_bottle_type"
-                                        name="edit_bottle_type" placeholder="Enter Bottle Type">
+                                    <input type="text" class="form-control" id="edit_module" name="edit_module"
+                                        placeholder="Enter Module">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="edit_permission_name">Permission Name <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="edit_permission_name" name="edit_permission_name"
+                                        placeholder="Enter Permission Name">
                                 </div>
                             </div>
                         </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" form="edit-product-form" class="btn btn-primary">Save Changes</button>
+                        </div>
                     </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" form="edit-product-form" class="btn btn-primary">Save Changes</button>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Delete Confirmation Modal -->
+
+    <!-- Delete Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Delete Product</h5>
+                    <h5 class="modal-title" id="deleteModalLabel">Delete Role Permission</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to delete this product?
+                    <p>Are you sure you want to delete this staff member?</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirm-delete">Delete</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
                 </div>
             </div>
         </div>
+    </div>
+
     </div>
     <!--**********************************
          Footer start
@@ -207,14 +221,21 @@
     <?php include('common/js_files.php')?>
     <script>
     $(document).ready(function() {
-        $('#bottleSizeTable').DataTable();
+        $(".chosen-select").chosen({
+            allow_single_deselect: true,
+            heigth: '100%'
+        });
+        $('#staffTable').DataTable();
 
         // Edit button click event
         $('.edit-btn').on('click', function() {
             var id = $(this).data('id');
             // Populate the edit modal fields using AJAX or dummy data
-            $('#edit_flavour_name').val('Neem');
-
+            $('#edit_first_name').val('John');
+            $('#edit_last_name').val('Doe');
+            $('#edit_email').val('john.doe@example.com');
+            $('#edit_phone').val('1234567890');
+            $('#edit_role').val('admin');
         });
 
         // Delete button click event

@@ -1,4 +1,6 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 <script src="<?=base_url()?>assets/plugins/common/common.min.js"></script>
     <script src="<?=base_url()?>assets/js/custom.min.js"></script>
     <script src="<?=base_url()?>assets/js/settings.js"></script>
@@ -27,3 +29,10 @@
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 	<!-- Chosen JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js"></script>
+<!-- SweetAlert v1 CDN -->
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+<script src="<?= base_url()?>assets/view_js/form.js"></script>
+<script>
+    var frontend = "<?= base_url();?>";
+</script>
