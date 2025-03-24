@@ -77,7 +77,8 @@
                                                 </label>
                                                 <input type="text" class="form-control" id="flavour_name"
                                                     name="flavour_name" placeholder="Enter Flavour Name ">
-                                                    <small class="text-danger" id="flavour_name_error"></small> <!-- Error message here -->
+                                                <small class="text-danger" id="flavour_name_error"></small>
+                                                <!-- Error message here -->
                                             </div>
                                         </div>
 
@@ -88,35 +89,35 @@
                                         </div>
                                     </div>
                                 </form>
-                                </div>
+                            </div>
                         </div>
                     </div>
 
 
                 </div>
             </div>
-                                <!-- Row for DataTable -->
-                                <div class="container-fluid">
-                                    <div class="row justify-content-center">
-                                        <div class="col-lg-12">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <h5>Flavour List</h5>
-                                                    <table id="flavourTable" class="display">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Flavour Name</th>
-                                                                <th>Action</th>
-                                                            </tr>
-                                                        </thead>
-                                                        
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                           
+            <!-- Row for DataTable -->
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>Flavour List</h5>
+                                <table id="flavourTable" class="display">
+                                    <thead>
+                                        <tr>
+                                            <th>Flavour Name</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
     <!-- #/ container -->
@@ -124,24 +125,25 @@
     <!--**********************************
          Content body end
          ***********************************-->
-         <!-- View Modal -->
-          <!-- Bootstrap Modal -->
-<!-- Flavour Details Modal -->
-<div class="modal fade" id="flavourModal" tabindex="-1" role="dialog" aria-labelledby="flavourModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="flavourModalLabel">Flavour Details</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" id="flavourContent">
-                <!-- Flavour details will be loaded here -->
+    <!-- View Modal -->
+    <!-- Bootstrap Modal -->
+    <!-- Flavour Details Modal -->
+    <div class="modal fade" id="flavourModal" tabindex="-1" role="dialog" aria-labelledby="flavourModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="flavourModalLabel">Flavour Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="flavourContent">
+                    <!-- Flavour details will be loaded here -->
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- Edit Product Modal -->
     <div class="modal fade" id="editFlavourModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
@@ -150,31 +152,32 @@
                 <div class="modal-header">
                     <h5 class="modal-title" id="editModalLabel">Edit Flavour</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <form id="edit_flavour_form">
-                <div class="modal-body">
-                    
+                    <div class="modal-body">
+
                         <div class="row">
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                <input type="hidden" class="form-control" id="edit_flavour_id"
-                                name="edit_flavour_id">
+                                    <input type="hidden" class="form-control" id="edit_flavour_id"
+                                        name="edit_flavour_id">
                                     <label class="col-form-label" for="edit_flavour_name">Flavour Name <span
                                             class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="edit_flavour_name"
                                         name="edit_flavour_name" placeholder="Enter Product Name">
-                                        <span id="edit_flavour_name_error" class="text-danger"></span>
+                                    <span id="edit_flavour_name_error" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>
-                   
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Close</button>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                            aria-label="Close">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -191,7 +194,8 @@
                     Are you sure you want to delete this product?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class=" close btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
+                    <button type="button" class=" close btn btn-secondary" data-bs-dismiss="modal"
+                        aria-label="Close">Cancel</button>
                     <button type="button" class="btn btn-danger" id="confirm-delete">Delete</button>
                 </div>
             </div>
@@ -200,12 +204,7 @@
     <!--**********************************
          Footer start
          ***********************************-->
-    <div class="footer">
-        <div class="copyright">
-            <p>Copyright &copy; Designed & Developed by <a href="https://themeforest.net/user/quixlab">Quixlab</a> 2018
-            </p>
-        </div>
-    </div>
+         <?php include('common/footer.php')?>
     <!--**********************************
          Footer end
          ***********************************-->
@@ -217,8 +216,8 @@
          Scripts
          ***********************************-->
     <?php include('common/js_files.php')?>
-    <script  src="<?= base_url()?>assets/view_js/flavour.js"></script>
-   
+    <script src="<?= base_url()?>assets/view_js/flavour.js"></script>
+
 </body>
 
 </html>

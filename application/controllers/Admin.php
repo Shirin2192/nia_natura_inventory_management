@@ -148,7 +148,7 @@ class Admin extends CI_Controller {
 		} else {
 			$count = $this->model->CountWhereRecord('tbl_bottle_size',array('bottle_size'=>$bottle_size));
 			if($count == 1){
-				$response = ["status" => "error", 'bottle_size_error' => "Flavour Already Exist"];
+				$response = ["status" => "error", 'bottle_size_error' => "Bottle Size Already Exist"];
 			}else{
 				$data = array(
 					'bottle_size' => $bottle_size,
@@ -227,6 +227,97 @@ class Admin extends CI_Controller {
 			redirect(base_url('common/index'));
 		}else{	
 			$this->load->view('inventory_manager/add_bottle_type');
+		}
+	}
+	public function fetch_bottle_type() {
+		$response=$this->model->selectWhereData('tbl_bottle_type',array('is_delete'=>1),"*",false,array('id',"DESC")); 
+		echo json_encode($response);
+    }
+
+	public function save_bottle_type() {
+		$bottle_type = $this->input->post('bottle_type');
+		$this->form_validation->set_rules('bottle_type', 'Bottle Type', 'required|trim');
+	
+		if ($this->form_validation->run() == FALSE) {
+			// Return validation errors as JSON (No page reload)
+			$response = [
+				'status' => 'error',
+				'bottle_type_error' => form_error('bottle_type'),
+			];
+		} else {
+			$count = $this->model->CountWhereRecord('tbl_bottle_type',array('bottle_type'=>$bottle_type));
+			if($count == 1){
+				$response = ["status" => "error", 'bottle_type_error' => "Bottle Type Already Exist"];
+			}else{
+				$data = array(
+					'bottle_type' => $bottle_type,
+				);
+		
+				$this->model->insertData('tbl_bottle_type', $data);
+				$response = ["status" => "success", "message" => "Bottle Type added successfully"];
+			}
+			
+		}
+	
+		echo json_encode($response); // Return response as JSON
+	}
+	public function get_bottle_type_details() {
+		$id = $this->input->post('id'); // Retrieve Bottle SIze ID from POST request
+		
+		if (!$id) {
+			echo json_encode(["status" => "error", "message" => "Invalid request"]);
+			return;
+		}
+	
+		$bottle_type = $this->model->selectWhereData('tbl_bottle_type', array('id' => $id, 'is_delete' => 1));
+	
+		if ($bottle_type) {
+			echo json_encode(["status" => "success", "bottle_type" => $bottle_type]);
+		} else {
+			echo json_encode(["status" => "error", "message" => "Bottle Type not found"]);
+		}
+	}
+
+	public function update_bottle_type() {
+		$bottle_type_id = $this->input->post('edit_bottle_type_id');
+		$bottle_type = $this->input->post('edit_bottle_type');
+	
+		$this->form_validation->set_rules('edit_bottle_type', 'Bottle Size', 'required|trim');
+	
+		if ($this->form_validation->run() == FALSE) {
+			$response = [
+				'status' => 'error',
+				'edit_bottle_type_error' => form_error('edit_bottle_type'),
+			];
+		} else {
+			$count = $this->model->CountWhereRecord('tbl_bottle_type',array('bottle_type'=>$bottle_type,'id !=' =>$bottle_type_id));
+			if($count == 1){
+				$response = ["status" => "error", 'bottle_type_error' => "Bottle Type Already Exist"];
+			}else{
+				$update_data = ['bottle_type' => $bottle_type];
+		
+				$this->model->updateData('tbl_bottle_type', $update_data, ['id' => $bottle_type_id]);
+		
+				$response = ["status" => "success", "message" => "Bottle Type updated successfully"];
+			}
+		}
+	
+		echo json_encode($response);
+	}
+	public function delete_bottle_type() {
+		$id = $this->input->post('id'); // Get the flavour ID from AJAX
+	
+		if (!$id) {
+			echo json_encode(['status' => 'error', 'message' => 'Invalid flavour ID']);
+			return;
+		}
+	
+		$result = $this->model->updateData('tbl_bottle_type', ['is_delete' => '0'], ['id' => $id]); // Soft delete
+	
+		if ($result) {
+			echo json_encode(['status' => 'success', 'message' => 'Bottle Type deleted successfully']);
+		} else {
+			echo json_encode(['status' => 'error', 'message' => 'Failed to delete Bottle Type']);
 		}
 	}
 	public function add_sale_channel(){

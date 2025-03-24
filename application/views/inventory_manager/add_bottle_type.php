@@ -68,7 +68,7 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-body">
-                                <form>
+                                <form id="bottleTypeForm">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
@@ -77,6 +77,8 @@
                                                 </label>
                                                 <input type="text" class="form-control" id="bottle_type"
                                                     name="bottle_type" placeholder="Enter Bottle Type ">
+                                                    <small class="text-danger" id="bottle_type_error"></small>
+                                                    <!-- Error message here -->
                                             </div>
                                         </div>
 
@@ -87,50 +89,35 @@
                                         </div>
                                     </div>
                                 </form>
-                                </div>
+                            </div>
                         </div>
                     </div>
 
 
                 </div>
             </div>
-                                <!-- Row for DataTable -->
-                                <div class="container-fluid">
-                                    <div class="row justify-content-center">
-                                        <div class="col-lg-12">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <h5>Bottle Type List</h5>
-                                                    <table id="bottleSizeTable" class="display">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Bottle Type</th>
-                                                                <th>Action</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <!-- Example Row -->
-                                                            <tr>
-                                                                <td>Jar</td>
-                                                                <td>
-                                                                    <button class="btn btn-warning btn-sm edit-btn"
-                                                                        data-toggle="modal"
-                                                                        data-target="#edit_flavour_modal"
-                                                                        data-id="1">Edit</button>
-                                                                    <button class="btn btn-danger btn-sm delete-btn"
-                                                                        data-toggle="modal" data-target="#deleteModal"
-                                                                        data-id="1">Delete</button>
-                                                                </td>
-                                                            </tr>
-                                                            <!-- More rows will be dynamically generated -->
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                           
+            <!-- Row for DataTable -->
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>Bottle Type List</h5>
+                                <table id="bottleSizeTable" class="display">
+                                    <thead>
+                                        <tr>
+                                            <th>Bottle Type</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
     <!-- #/ container -->
@@ -138,19 +125,41 @@
     <!--**********************************
          Content body end
          ***********************************-->
+    <!-- Flavour Details Modal -->
+    <div class="modal fade" id="BottleTypeModal" tabindex="-1" role="dialog" aria-labelledby="flavourModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="flavourModalLabel">Bottle Type Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="bottle_typeContent">
+                    <!-- Flavour details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Edit Product Modal -->
-    <div class="modal fade" id="edit_flavour_modal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal fade" id="edit_bottle_type_modal" tabindex="-1" aria-labelledby="editModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editModalLabel">Edit Bottle Type</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <form id="edit-product-form">
+                <form id="edit_bottle_type_form">
+                    <div class="modal-body">
+
                         <div class="row">
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
+                                <input type="hidden" class="form-control" id="edit_bottle_type_id"
+                                name="edit_bottle_type_id">
                                     <label class="col-form-label" for="edit_bottle_type">Bottle Type <span
                                             class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="edit_bottle_type"
@@ -158,12 +167,13 @@
                                 </div>
                             </div>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" form="edit-product-form" class="btn btn-primary">Save Changes</button>
-                </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -188,12 +198,7 @@
     <!--**********************************
          Footer start
          ***********************************-->
-    <div class="footer">
-        <div class="copyright">
-            <p>Copyright &copy; Designed & Developed by <a href="https://themeforest.net/user/quixlab">Quixlab</a> 2018
-            </p>
-        </div>
-    </div>
+         <?php include('common/footer.php')?>
     <!--**********************************
          Footer end
          ***********************************-->
@@ -205,30 +210,7 @@
          Scripts
          ***********************************-->
     <?php include('common/js_files.php')?>
-    <script>
-    $(document).ready(function() {
-        $('#bottleSizeTable').DataTable();
-
-        // Edit button click event
-        $('.edit-btn').on('click', function() {
-            var id = $(this).data('id');
-            // Populate the edit modal fields using AJAX or dummy data
-            $('#edit_flavour_name').val('Neem');
-
-        });
-
-        // Delete button click event
-        $('.delete-btn').on('click', function() {
-            var id = $(this).data('id');
-            $('#confirmDelete').on('click', function() {
-                // Call delete API or perform delete action
-                console.log('Deleting staff with ID: ' + id);
-                // Close modal
-                $('#deleteModal').modal('hide');
-            });
-        });
-    });
-    </script>
+    <script src="<?= base_url()?>assets/view_js/bottle_type.js"></script>
 </body>
 
 </html>
