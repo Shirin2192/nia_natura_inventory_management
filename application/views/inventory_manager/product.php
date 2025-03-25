@@ -46,7 +46,7 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-body">
-                                <form>
+                                <form id="ProductForm" enctype="multipart/form-data">
                                     <div class="form-validation">
                                         <!-- Product Information -->
                                         <div class="row">
@@ -56,6 +56,7 @@
                                                             class="text-danger">*</span></label>
                                                     <input type="text" class="form-control" id="product_name"
                                                         name="product_name" placeholder="Enter Product Name">
+                                                    <div class="text-danger"><?= form_error('product_name'); ?></div>
                                                 </div>
                                             </div>
                                             <!-- Product ID/SKU -->
@@ -65,58 +66,69 @@
                                                         Code <span class="text-danger">*</span></label>
                                                     <input type="text" class="form-control" id="product_sku_code"
                                                         name="product_sku_code" placeholder="Enter Product SKU Code">
+                                                    <div class="text-danger"><?= form_error('product_sku_code'); ?>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <!-- Batch No -->
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
-                                                    <label class="col-form-label" for="batch_no">Batch No <span
-                                                            class="text-danger">*</span></label>
+                                                    <label class="col-form-label" for="batch_no">Batch No </label>
                                                     <input type="text" class="form-control" id="batch_no"
                                                         name="batch_no" placeholder="Enter Batch No">
+                                                    <div class="text-danger"><?= form_error('batch_no'); ?></div>
                                                 </div>
                                             </div>
                                             <!-- Flavor -->
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
-                                                    <label class="col-form-label" for="flavor">Flavor <span
+                                                    <label class="col-form-label" for="fk_flavour_id">Flavor <span
                                                             class="text-danger">*</span></label>
-                                                    <select class="chosen-select form-control" id="flavor"
-                                                        name="flavor">
-                                                        <option value="Neem">Neem</option>
-                                                        <option value="Tulsi">Tulsi</option>
-                                                        <option value="Himalaya">Himalaya</option>
-                                                        <option value="Jamun">Jamun</option>
+                                                    <select class="chosen-select form-control" id="fk_flavour_id"
+                                                        name="fk_flavour_id">
+                                                        <option value=""></option>
+                                                        <?php foreach($flavour as $flavour_key => $flavour_row) {?>
+                                                        <option value="<?= $flavour_row['id']?>">
+                                                            <?= $flavour_row['flavour_name']?></option>
+                                                        <?php } ?>
                                                     </select>
+                                                    <div class="text-danger"><?= form_error('fk_flavour_id'); ?></div>
                                                 </div>
                                             </div>
                                             <!-- Bottle Size -->
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
-                                                    <label class="col-form-label" for="bottle_size">Bottle Size <span
-                                                            class="text-danger">*</span></label>
-                                                    <select class="chosen-select form-control" id="bottle_size"
-                                                        name="bottle_size">
-                                                        <option value="250ml">250ml</option>
-                                                        <option value="500ml">500ml</option>
-                                                        <option value="1L">1L</option>
-                                                        <option value="2L">2L</option>
+                                                    <label class="col-form-label" for="fk_bottle_size_id">Bottle Size
+                                                        <span class="text-danger">*</span></label>
+                                                    <select class="chosen-select form-control" id="fk_bottle_size_id"
+                                                        name="fk_bottle_size_id">
+                                                        <option value=""></option>
+                                                        <?php foreach($bottle_size as $bottle_size_key => $bottle_size_row) {?>
+                                                        <option value="<?= $bottle_size_row['id']?>">
+                                                            <?= $bottle_size_row['bottle_size']?></option>
+                                                        <?php } ?>
                                                     </select>
+                                                    <div class="text-danger"><?= form_error('fk_bottle_size_id'); ?>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <!-- Bottle Type -->
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
-                                                    <label class="col-form-label" for="bottle_type">Bottle Type</label>
+                                                    <label class="col-form-label" for="fk_bottle_type_id">Bottle Type
+                                                        <span class="text-danger">*</span></label>
                                                     <div><select class="chosen-select form-control"
-                                                            data-placeholder="Select an option..." id="bottle_type"
-                                                            name="bottle_type">
+                                                            data-placeholder="Select an option..."
+                                                            id="fk_bottle_type_id" name="fk_bottle_type_id">
                                                             <option value=""></option>
-                                                            <!-- Empty option for deselect -->
-                                                            <option value="1">Option 1</option>
-                                                            <option value="2">Option 2</option>
-                                                            <option value="3">Option 3</option>
+
+                                                            <?php foreach($bottle_type as $bottle_type_key => $bottle_type_row) {?>
+                                                            <option value="<?= $bottle_type_row['id']?>">
+                                                                <?= $bottle_type_row['bottle_type']?></option>
+                                                            <?php } ?>
                                                         </select></div>
+                                                    <div class="text-danger"><?= form_error('fk_bottle_type_id'); ?>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <!-- Barcode -->
@@ -130,19 +142,20 @@
                                             <!-- Product Description -->
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
-                                                    <label class="col-form-label" for="product_description">Product
-                                                        Description</label>
-                                                    <textarea class="form-control" id="product_description"
-                                                        name="product_description"
+                                                    <label class="col-form-label" for="description">Product
+                                                        Description <span class="text-danger">*</span></label>
+                                                    <textarea class="form-control" id="description" name="description"
                                                         placeholder="Enter Product Description"></textarea>
+                                                    <div class="text-danger"><?= form_error('description'); ?></div>
                                                 </div>
                                             </div>
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
                                                     <label class="col-form-label" for="product_image">Product
-                                                        Image</label>
+                                                        Image <span class="text-danger">*</span></label>
                                                     <input type="file" class="form-control" id="product_image"
-                                                        name="product_image">
+                                                        name="product_image[]" multiple>
+                                                    <small class="text-muted">You can upload multiple images</small>
                                                 </div>
                                             </div>
                                         </div>
@@ -151,32 +164,37 @@
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
                                                     <label class="col-form-label" for="purchase_price">Purchase
-                                                        Price</label>
+                                                        Price <span class="text-danger">*</span></label>
                                                     <input type="number" class="form-control" id="purchase_price"
                                                         name="purchase_price" placeholder="Enter Purchase Price">
+                                                    <div class="text-danger"><?= form_error('purchase_price'); ?></div>
                                                 </div>
                                             </div>
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
-                                                    <label class="col-form-label" for="mrp">MRP</label>
+                                                    <label class="col-form-label" for="mrp">MRP <span
+                                                            class="text-danger">*</span></label>
                                                     <input type="number" class="form-control" id="mrp" name="mrp"
                                                         placeholder="Enter MRP">
+                                                    <div class="text-danger"><?= form_error('mrp'); ?></div>
                                                 </div>
                                             </div>
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
                                                     <label class="col-form-label" for="selling_price">Selling
-                                                        Price</label>
+                                                        Price <span class="text-danger">*</span></label>
                                                     <input type="number" class="form-control" id="selling_price"
                                                         name="selling_price" placeholder="Enter Selling Price">
+                                                    <div class="text-danger"><?= form_error('selling_price'); ?></div>
                                                 </div>
                                             </div>
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
-                                                    <label class="col-form-label" for="stock_quantity">Stock
-                                                        Quantity</label>
-                                                    <input type="number" class="form-control" id="stock_quantity"
-                                                        name="stock_quantity" placeholder="Enter Stock Quantity">
+                                                    <label class="col-form-label" for="add_quantity">Stock
+                                                        Quantity <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" id="add_quantity"
+                                                        name="add_quantity" placeholder="Enter Stock Quantity">
+                                                    <div class="text-danger"><?= form_error('add_quantity'); ?></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -184,26 +202,35 @@
                                         <div class="row">
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
-                                                    <label class="col-form-label" for="availability_status">Availability
-                                                        Status</label>
-                                                    <select class="chosen-select form-control" id="availability_status"
-                                                        name="availability_status">
-                                                        <option value="in_stock">In Stock</option>
-                                                        <option value="out_of_stock">Out of Stock</option>
-                                                        <option value="backordered">Backordered</option>
+                                                    <label class="col-form-label" for="stock_availability">Availability
+                                                        Status <span class="text-danger">*</span></label>
+                                                    <select class="chosen-select form-control" id="stock_availability"
+                                                        name="stock_availability">
+
+                                                        <option value=""></option>
+                                                        <?php foreach($stock_availability as $stock_availability_key => $stock_availability_row) {?>
+                                                        <option value="<?= $stock_availability_row['id']?>">
+                                                            <?= $stock_availability_row['stock_availability']?></option>
+                                                        <?php } ?>
                                                     </select>
+                                                    <div class="text-danger"><?= form_error('stock_availability'); ?>
+                                                    </div>
+
                                                 </div>
                                             </div>
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
-                                                    <label class="col-form-label" for="sales_channels">Sales
-                                                        Channels</label>
-                                                    <select class="chosen-select form-control" id="sales_channels"
-                                                        name="sales_channels">
-                                                        <option value="online">Online</option>
-                                                        <option value="in_store">Offline</option>
-                                                        <option value="both">Both</option>
+                                                    <label class="col-form-label" for="sale_channel">Sales
+                                                        Channels <span class="text-danger">*</span></label>
+                                                    <select class="chosen-select form-control" id="sale_channel"
+                                                        name="sale_channel">
+                                                        <option value=""></option>
+                                                        <?php foreach($sale_channel as $sale_channel_key => $sale_channel_row) {?>
+                                                        <option value="<?= $sale_channel_row['id']?>">
+                                                            <?= $sale_channel_row['sale_channel']?></option>
+                                                        <?php } ?>
                                                     </select>
+                                                    <div class="text-danger"><?= form_error('sale_channel'); ?></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -221,64 +248,85 @@
                 </div>
             </div>
             <!-- Table to show added products -->
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title">Product List</h4>
-                            <div class="table-responsive">
-                                <table id="product_table" class="display" style="width:100%">
-                                    <thead>
-                                        <tr>
-                                            <th>Product Name</th>
-                                            <th>Flavor</th>
-                                            <th>Bottle Size</th>
-                                            <th>Price</th>
-                                            <th>Stock</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Example of product data -->
-                                        <tr>
-                                            <td>Wildflower Honey</td>
-                                            <td>Wildflower</td>
-                                            <td>500ml</td>
-                                            <td>$10.99</td>
-                                            <td>50</td>
-                                            <td>
-                                                <button class="btn btn-warning btn-sm edit-btn" data-toggle="modal"
-                                                    data-target="#editModal" data-id="1">Edit</button>
-                                                <button class="btn btn-danger btn-sm delete-btn" data-toggle="modal"
-                                                    data-target="#deleteModal" data-id="1">Delete</button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Acacia Honey</td>
-                                            <td>Acacia</td>
-                                            <td>1L</td>
-                                            <td>$15.99</td>
-                                            <td>30</td>
-                                            <td>
-                                                <button class="btn btn-warning btn-sm edit-btn" data-toggle="modal"
-                                                    data-target="#editModal" data-id="2">Edit</button>
-                                                <button class="btn btn-danger btn-sm delete-btn" data-toggle="modal"
-                                                    data-target="#deleteModal" data-id="2">Delete</button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-body">
+
+                                <h4 class="card-title">Product List</h4>
+                                <div class="table-responsive">
+                                    <table id="product_table" class="display" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th>Product Name</th>
+                                                <th>Flavor</th>
+                                                <th>Bottle Size</th>
+                                                <th>Price</th>
+                                                <th>Stock</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+
+                                    </table>
+
+
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+
             </div>
-
-
         </div>
     </div>
-    </div>
     <!-- Content body end -->
+    <!-- View Product Modal -->
+    <div class="modal fade" id="viewProductModal" tabindex="-1" role="dialog" aria-labelledby="viewProductLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewProductLabel">Product Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <!-- Left Column -->
+                        <div class="col-md-6">
+                            <p><strong>Product Name:</strong> <span id="view_product_name"></span></p>
+                            <p><strong>Product SKU Code:</strong> <span id="view_product_sku_code"></span></p>
+                            <p><strong>Batch No:</strong> <span id="view_batch_no"></span></p>
+                            <p><strong>Flavour Name:</strong> <span id="view_flavour_name"></span></p>
+                            <p><strong>Bottle Size:</strong> <span id="view_bottle_size"></span></p>
+                            <p><strong>Bottle Type:</strong> <span id="view_bottle_type"></span></p>
+                            <p><strong>Barcode:</strong> <span id="view_barcode"></span></p>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="col-md-6">
+                            <p><strong>Product Description:</strong> <span id="view_description"></span></p>
+                            
+                            <p><strong>Purchase Price:</strong> <span id="view_purchase_price"></span></p>
+                            <p><strong>MRP:</strong> <span id="view_mrp"></span></p>
+                            <p><strong>Selling Price:</strong> <span id="view_selling_price"></span></p>
+                            <p><strong>Stock Quantity:</strong> <span id="view_total_quantity"></span></p>
+                            <p><strong>Availability Status:</strong> <span id="view_availability_status"></span></p>
+                            <p><strong>Sales Channels:</strong> <span id="view_sale_channel"></span></p>
+                        </div>
+                        <div class="col-md-12">
+                        <p><strong>Images:</strong> <span id="view_images"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
     <!-- Edit Product Modal -->
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -462,58 +510,7 @@
     <!-- Main wrapper end -->
     <!-- Scripts -->
     <?php include('common/js_files.php')?>
-    <script>
-    $(document).ready(function() {
-        $(".chosen-select").chosen({
-            allow_single_deselect: true,
-            heigth: '100%'
-        });
-        // Initialize DataTable
-        $('#product_table').DataTable();
-
-        // Edit button functionality
-        $('.edit-btn').on('click', function() {
-            var productId = $(this).data('id');
-            // You can fetch data from the server or use a predefined dataset for the modal
-            // Example: Fill modal fields dynamically based on productId
-            $('#edit_product_name').val("Sample Product " + productId);
-            $('#edit_flavor').val("Sample Flavor");
-            $('#edit_bottle_size').val("500ml");
-            $('#edit_bottle_type').val("Glass");
-            $('#edit_product_id').val(productId);
-        });
-
-        // Save changes button functionality
-        $('#save-changes-btn').on('click', function() {
-            var formData = $('#edit-product-form').serialize();
-            // Perform AJAX request to save changes
-            $.ajax({
-                url: 'your-server-endpoint-url', // Replace with your server endpoint
-                method: 'POST',
-                data: formData,
-                success: function(response) {
-                    alert('Changes saved successfully!');
-                    $('#editModal').modal('hide');
-                    // Optionally, refresh the product list or update the table
-                },
-                error: function(error) {
-                    alert('An error occurred while saving changes.');
-                }
-            });
-        });
-
-        // Delete button functionality
-        $('.delete-btn').on('click', function() {
-            var productId = $(this).data('id');
-            $('#confirm-delete').on('click', function() {
-                // Perform delete operation (send to server)
-                alert("Product " + productId + " deleted.");
-                // Close the modal
-                $('#deleteModal').modal('hide');
-            });
-        });
-    });
-    </script>
+    <script src="<?= base_url()?>assets/view_js/product.js"></script>
 </body>
 
 </html>

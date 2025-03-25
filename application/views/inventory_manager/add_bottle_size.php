@@ -174,6 +174,8 @@
                                             class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="edit_bottle_size"
                                         name="edit_bottle_size" placeholder="Enter Bottle Size">
+                                        <small class="text-danger" id="edit_bottle_size_error"></small>
+                                        <!-- Error message here -->
                                 </div>
                             </div>
                         </div>
@@ -193,11 +195,11 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Delete Product</h5>
+                    <h5 class="modal-title" id="deleteModalLabel">Delete Bottle Size</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to delete this product?
+                    Are you sure you want to delete this Bottle Size?
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="close btn btn-secondary" data-bs-dismiss="modal"

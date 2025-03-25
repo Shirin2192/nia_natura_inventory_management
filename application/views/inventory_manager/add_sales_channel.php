@@ -68,7 +68,7 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-body">
-                                <form>
+                                <form id="SaleChannelForm">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
@@ -77,6 +77,8 @@
                                                 </label>
                                                 <input type="text" class="form-control" id="sale_channel"
                                                     name="sale_channel" placeholder="Enter Sale Channel">
+                                                <small class="text-danger" id="sale_channel_error"></small>
+                                                <!-- Error message here -->
                                             </div>
                                         </div>
 
@@ -91,10 +93,7 @@
                         </div>
                     </div>
                 </div>
-
-
             </div>
-
             <!-- Row for DataTable -->
             <div class="container-fluid">
                 <div class="row justify-content-center">
@@ -102,26 +101,13 @@
                         <div class="card">
                             <div class="card-body">
                                 <h5>Sale Channel List</h5>
-                                <table id="salechannelTable" class="display">
+                                <table id="SalechannelTable" class="display">
                                     <thead>
                                         <tr>
                                             <th>Sale Channel</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        <!-- Example Row -->
-                                        <tr>
-                                            <td>John</td>
-                                            <td>
-                                                <button class="btn btn-warning btn-sm edit-btn" data-toggle="modal"
-                                                    data-target="#edit_flavour_modal" data-id="1">Edit</button>
-                                                <button class="btn btn-danger btn-sm delete-btn" data-toggle="modal"
-                                                    data-target="#deleteModal" data-id="1">Delete</button>
-                                            </td>
-                                        </tr>
-                                        <!-- More rows will be dynamically generated -->
-                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -136,32 +122,54 @@
     <!--**********************************
          Content body end
          ***********************************-->
-    <!-- Edit Product Modal -->
-    <div class="modal fade" id="edit_flavour_modal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <!-- View Sale Channel Details Modal -->
+    <div class="modal fade" id="sale_channelModal" tabindex="-1" role="dialog" aria-labelledby="sale_channelModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sale_channelModalLabel">Sale Channel Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="sale_channelContent">
+                    <!-- Flavour details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Edit Sale Channel Modal -->
+    <div class="modal fade" id="edit_sale_channel_modal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editModalLabel">Edit Sale Channel</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <form id="edit-product-form">
+                <form id="edit_sale_channel_form">
+                    <div class="modal-body">
+
                         <div class="row">
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
+                                    <input type="hidden" name="edit_sale_channel_id" id="edit_sale_channel_id">
                                     <label class="col-form-label" for="edit_sale_channel">Sale Channel <span
                                             class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="edit_sale_channel"
-                                        name="edit_sale_channel" placeholder="Enter Product Name">
+                                        name="edit_sale_channel" placeholder="Enter Sale Channel">
+                                    <small class="text-danger" id="edit_sale_channel_error"></small>
+                                    <!-- Error message here -->
                                 </div>
                             </div>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" form="edit-product-form" class="btn btn-primary">Save Changes</button>
-                </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -170,11 +178,11 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Delete Product</h5>
+                    <h5 class="modal-title" id="deleteModalLabel">Delete Sale Channel</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to delete this product?
+                    Are you sure you want to delete this Sale Channel?
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -198,30 +206,7 @@
          Scripts
          ***********************************-->
     <?php include('common/js_files.php')?>
-    <script>
-    $(document).ready(function() {
-        $('#salechannelTable').DataTable();
-
-        // Edit button click event
-        $('.edit-btn').on('click', function() {
-            var id = $(this).data('id');
-            // Populate the edit modal fields using AJAX or dummy data
-            $('#edit_flavour_name').val('Neem');
-
-        });
-
-        // Delete button click event
-        $('.delete-btn').on('click', function() {
-            var id = $(this).data('id');
-            $('#confirmDelete').on('click', function() {
-                // Call delete API or perform delete action
-                console.log('Deleting staff with ID: ' + id);
-                // Close modal
-                $('#deleteModal').modal('hide');
-            });
-        });
-    });
-    </script>
+    <script src="<?= base_url()?>assets/view_js/sale_channel.js"></script>
 </body>
 
 </html>
