@@ -69,7 +69,7 @@ $(document).ready(function () {
                         <button class="btn btn-primary btn-sm view-product" data-id="${row.id}" data-toggle="modal" data-target="#viewProductModal">
                             <i class="icon-eye menu-icon"></i>
                         </button>
-                        <button class="btn btn-warning btn-sm edit-btn" data-id="${row.id}" data-toggle="modal" data-target="#editProductModal">
+                        <button class="btn btn-warning btn-sm update-product" data-id="${row.id}" data-toggle="modal" data-target="#editProductModal">
                             <i class="icon-pencil menu-icon"></i>
                         </button>
                         <button class="btn btn-danger btn-sm delete-btn" data-id="${row.id}">
@@ -84,9 +84,7 @@ $(document).ready(function () {
 });
 
 $(document).on("click", ".view-product", function() {
-    var product_id = $(this).data("id");
-    console.log(product_id);
-    
+    var product_id = $(this).data("id");    
     $.ajax({
         url: frontend + "admin/view_product",
         type: "POST",
@@ -129,3 +127,183 @@ $(document).on("click", ".view-product", function() {
         }
     });
 });
+
+$(document).on("click", ".update-product", function () {
+    var product_id = $(this).data("id");
+    console.log(product_id);
+
+    $.ajax({
+        url: frontend + "admin/view_product",
+        type: "POST",
+        data: { product_id: product_id }, // Sending data as POST
+        dataType: "json",
+        success: function (response) {
+            $("#update_product_id").val(product_id);
+            $("#update_product_name").val(response.product.product_name);
+            $("#update_product_sku_code").val(response.product.product_sku_code);
+            $("#update_batch_no").val(response.product.batch_no);
+            $("#update_purchase_price").val(response.product.purchase_price);
+            $("#update_mrp").val(response.product.MRP);
+            $("#update_selling_price").val(response.product.selling_price);
+            $("#update_total_quantity").val(response.product.total_quantity);
+            $("#update_description").val(response.product.description);
+            $("#update_barcode").val(response.product.barcode);
+            $("#update_old_images").val(response.product.images); // Store old images
+            $("#fk_product_category_id").val(response.product.fk_product_category_id);
+            $("#fk_product_type_id").val(response.product.fk_product_type_id);
+            $("#fk_product_price_id").val(response.product.fk_product_price_id);
+            $("#update_product_image").val(response.product.images);
+          
+
+
+            // Populate Select Options
+            populateFlavourSelect("#update_flavour_name", response.flavour, response.product.flavour_id);
+            populateBottleSizeSelect("#update_bottle_size", response.bottle_size, response.product.bottle_size_id);
+            populateBottleTypeSelect("#update_bottle_type", response.bottle_type, response.product.bottle_type_id);
+            populateAvailabilityStatusSelect("#update_availability_status", response.stock_availability, response.product.stock_availability_id);
+            populateSaleChannelSelect("#update_sale_channel", response.sale_channel, response.product.sale_channel_id);
+
+            // Reinitialize Chosen Select
+            $(".chosen-select").chosen('destroy').chosen({
+                allow_single_deselect: true,
+                width: "100%"
+            });
+
+            // Handle multiple images
+            var imagesContainer = $("#update_images");
+            imagesContainer.empty(); // Clear previous images
+
+            if (response.product.images) {
+                var imageArray = response.product.images.split(","); // Convert string to array
+                imageArray.forEach(function (image) {
+                    var imageTag = `<img src="${frontend + 'uploads/products/' + image.trim()}" class="img-fluid m-2" width="100" height="100" alt="Product Image">`;
+                    imagesContainer.append(imageTag);
+                });
+            } else {
+                imagesContainer.append("<p>No images available</p>");
+            }
+
+            $("#updateProductModal").modal("show"); // Open the Bootstrap modal
+        },
+        error: function (xhr, status, error) {
+            console.error("Error fetching product details:", error);
+        }
+    });
+});
+
+// Function to Populate Select Dropdowns
+function populateFlavourSelect(selector, dataArray, selectedValue) {
+    var selectElement = $(selector);
+    selectElement.empty(); // Clear existing options
+    selectElement.append(`<option value="">Select Flavour</option>`); // Default option
+
+    $.each(dataArray, function (index, item) {
+        var selected = item.id == selectedValue ? "selected" : "";
+        selectElement.append(`<option value="${item.id}" ${selected}>${item.flavour_name}</option>`);
+    });
+
+    selectElement.trigger("chosen:updated"); // Update Chosen Select
+}
+
+function populateBottleSizeSelect(selector, dataArray, selectedValue) {
+    var selectElement = $(selector);
+    selectElement.empty(); // Clear existing options
+    selectElement.append(`<option value="">Select Bottle Size</option>`); // Default option
+
+    $.each(dataArray, function (index, item) {
+        var selected = item.id == selectedValue ? "selected" : "";
+        selectElement.append(`<option value="${item.id}" ${selected}>${item.bottle_size}</option>`);
+    });
+
+    selectElement.trigger("chosen:updated"); // Update Chosen Select
+}
+
+function populateBottleTypeSelect(selector, dataArray, selectedValue) {
+    var selectElement = $(selector);
+    selectElement.empty(); // Clear existing options
+    selectElement.append(`<option value="">Select Bottle Type</option>`); // Default option
+
+    $.each(dataArray, function (index, item) {
+        var selected = item.id == selectedValue ? "selected" : "";
+        selectElement.append(`<option value="${item.id}" ${selected}>${item.bottle_type}</option>`);
+    });
+
+    selectElement.trigger("chosen:updated"); // Update Chosen Select
+}
+
+function populateAvailabilityStatusSelect(selector, dataArray, selectedValue) {
+    var selectElement = $(selector);
+    selectElement.empty(); // Clear existing options
+    selectElement.append(`<option value="">Select Availability Status</option>`); // Default option
+
+    $.each(dataArray, function (index, item) {
+        var selected = item.id == selectedValue ? "selected" : "";
+        selectElement.append(`<option value="${item.id}" ${selected}>${item.stock_availability}</option>`);
+    });
+
+    selectElement.trigger("chosen:updated"); // Update Chosen Select
+}
+
+function populateSaleChannelSelect(selector, dataArray, selectedValue) {
+    var selectElement = $(selector);
+    selectElement.empty(); // Clear existing options
+    selectElement.append(`<option value="">Select Sale Channel</option>`); // Default option
+
+    $.each(dataArray, function (index, item) {
+        var selected = item.id == selectedValue ? "selected" : "";
+        selectElement.append(`<option value="${item.id}" ${selected}>${item.sale_channel}</option>`);
+    });
+
+    selectElement.trigger("chosen:updated"); // Update Chosen Select
+
+    // $(".chosen-select").chosen({
+    //     allow_single_deselect: true,
+    //     width: "100%"
+    // });
+}
+
+$("#UpdateProductForm").on("submit", function (e) {
+    e.preventDefault();
+
+    var formData = new FormData(this);
+    $("#save-changes-btn").prop("disabled", true).text("Saving...");
+
+    $.ajax({
+        url: frontend + "admin/update_product",
+        type: "POST",
+        data: formData,
+        dataType: "json",
+        contentType: false,
+        processData: false,
+        success: function (response) {
+            $("#save-changes-btn").prop("disabled", false).text("Save Changes");
+
+            if (response.status === "success") {
+                swal({
+                    icon: "success",
+                    title: "Updated!",
+                    text: response.message,
+                    showConfirmButton: false,
+                    timer: 2000
+                });     
+                $("#updateProductModal").modal("hide");
+                location.reload(); // Refresh to update product list
+            } else {
+                toastr.error(response.message);
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error("Error updating product:", error);
+            $("#save-changes-btn").prop("disabled", false).text("Save Changes");
+            swal({
+                icon: "error",
+                title: "Error!",
+                text: response.message,
+                showConfirmButton: false,
+                timer: 2000
+            });     
+        }
+    });
+});
+
+

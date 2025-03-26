@@ -16,6 +16,7 @@ class Product_model extends CI_Model {
         $this->db->join('tbl_product_price','tbl_product_price.fk_product_id=tbl_product.id','left');
         $this->db->join('tbl_product_inventory','tbl_product_inventory.fk_product_id=tbl_product.id','left');
         $this->db->where('tbl_product.is_delete',1);
+        $this->db->where('tbl_product_inventory.used_status',1);
         $this->db->order_by('tbl_product.id','DESC');
         $query = $this->db->get(); // Execute the query
         return $query->result_array(); // Return the result as an array
@@ -24,9 +25,9 @@ class Product_model extends CI_Model {
         $this->db->select('
             p.id AS product_id,
             p.product_name,
-            pc.*,
+            pc.*, pc.fk_flavour_id as flavour_id,
             f.flavour_name,
-            pt.*,
+            pt.*, pt.fk_bottle_size_id as bottle_size_id, pt.fk_bottle_type_id as bottle_type_id, pt.fk_sale_channel_id as sale_channel_id, pt.fk_stock_availability_id as stock_availability_id,
             bs.bottle_size,
             bt.bottle_type,
             sc.sale_channel,
@@ -47,6 +48,7 @@ class Product_model extends CI_Model {
 
         $this->db->where('p.id', $product_id);
         $this->db->where('p.is_delete', '1'); // Exclude deleted products
+        $this->db->where('pi.used_status', '1'); // Exclude used products
 
         $query = $this->db->get();
         return $query->row_array(); // Return a single product row

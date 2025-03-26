@@ -585,8 +585,146 @@ class Admin extends CI_Controller {
 	public function view_product() {
 		$id = $this->input->post('product_id');
         $data['product'] = $this->Product_model->get_product_by_id($id);
-		// print_r($data);die;
+		$data['flavour']=$this->model->selectWhereData('tbl_flavour',array('is_delete'=>1),"*",false,array('id',"DESC")); 
+			$data['bottle_size']=$this->model->selectWhereData('tbl_bottle_size',array('is_delete'=>1),"*",false,array('id',"DESC")); 
+			$data['bottle_type']=$this->model->selectWhereData('tbl_bottle_type',array('is_delete'=>1),"*",false,array('id',"DESC")); 
+			$data['sale_channel']=$this->model->selectWhereData('tbl_sale_channel',array('is_delete'=>1),"*",false,array('id',"DESC")); 
+			$data['stock_availability']=$this->model->selectWhereData('tbl_stock_availability',array('is_delete'=>1),"*",false,array('id',"DESC")); 
         echo json_encode($data);
     }
 
+	public function update_product() {
+		$this->load->library('form_validation');
+
+		// Set validation rules
+		$this->form_validation->set_rules('update_product_name', 'Product Name', 'required');
+		$this->form_validation->set_rules('update_product_sku_code', 'Product SKU Code', 'required');
+		$this->form_validation->set_rules('update_flavour_name', 'Flavor', 'required');
+		$this->form_validation->set_rules('update_description', 'Description', 'required');
+		$this->form_validation->set_rules('update_bottle_size', 'Bottle Size', 'required');
+		$this->form_validation->set_rules('update_bottle_type', 'Bottle Type', 'required');
+		$this->form_validation->set_rules('update_availability_status', 'Availability Status', 'required');
+		$this->form_validation->set_rules('update_sale_channel', 'Sales Channel', 'required');
+		$this->form_validation->set_rules('update_purchase_price', 'Purchase Price', 'required|numeric');
+		$this->form_validation->set_rules('update_mrp', 'MRP', 'required|numeric');
+		$this->form_validation->set_rules('update_selling_price', 'Selling Price', 'required|numeric');
+		$this->form_validation->set_rules('update_total_quantity', 'Stock Quantity', 'required|numeric');
+
+		if ($this->form_validation->run() == FALSE) {
+			$response = ['status' => 'error', 'errors' => []];
+			foreach ($this->input->post() as $key => $value) {
+				if (form_error($key)) {
+					$response['errors'][$key] = form_error($key);
+				}
+			}
+			echo json_encode($response);
+			return;
+		}
+
+		$product_id = $this->input->post('update_product_id');
+		$fk_product_category_id = $this->input->post('fk_product_category_id');
+		$fk_product_type_id = $this->input->post('fk_product_type_id');
+		$fk_product_price_id = $this->input->post('fk_product_price_id');
+
+		// Handling image upload
+		$existing_images = $this->input->post('update_product_image');
+		$images = explode(',', $existing_images);
+
+		if (!empty($_FILES['update_product_images']['name'][0])) {
+			$config['upload_path'] = './uploads/products/';
+			$config['allowed_types'] = 'jpg|jpeg|png';
+			$config['max_size'] = 2048;
+
+			$this->load->library('upload', $config);
+
+			foreach ($_FILES['update_product_images']['name'] as $key => $image) {
+				$_FILES['file']['name'] = $_FILES['update_product_images']['name'][$key];
+				$_FILES['file']['type'] = $_FILES['update_product_images']['type'][$key];
+				$_FILES['file']['tmp_name'] = $_FILES['update_product_images']['tmp_name'][$key];
+				$_FILES['file']['error'] = $_FILES['update_product_images']['error'][$key];
+				$_FILES['file']['size'] = $_FILES['update_product_images']['size'][$key];
+
+				$this->upload->initialize($config);
+				if ($this->upload->do_upload('file')) {
+					$images[] = $this->upload->data('file_name');
+				}
+			}
+		}
+
+		if (!empty($images)) {
+			$imagess = implode(',', $images);
+		}
+
+		$update_product = array(
+			'product_name' => $this->input->post('update_product_name'),
+		);
+		$this->model->updateData('tbl_product', $update_product, ['id' => $product_id]);
+
+		$update_product_category = array(
+			'fk_flavour_id' => $this->input->post('update_flavour_name'),
+			'description' => $this->input->post('update_description'),
+		);
+		$this->model->updateData('tbl_product_category', $update_product_category, ['fk_product_id' => $product_id]);
+
+		$update_product_type = array(
+			'product_sku_code' => $this->input->post('update_product_sku_code'),
+			'fk_bottle_size_id' => $this->input->post('update_bottle_size'),
+			'fk_bottle_type_id' => $this->input->post('update_bottle_type'),
+			'fk_sale_channel_id' => $this->input->post('update_sale_channel'),
+			'fk_stock_availability_id' => $this->input->post('update_availability_status'),
+			'barcode' => $this->input->post('update_barcode'),
+			'batch_no' => $this->input->post('update_batch_no'),
+			'images' => $imagess,
+		);
+		$this->model->updateData('tbl_product_type', $update_product_type, ['fk_product_id' => $product_id]);
+
+		$update_product_price = array(
+			'purchase_price' => $this->input->post('update_purchase_price'),
+			'MRP' => $this->input->post('update_mrp'),
+			'selling_price' => $this->input->post('update_selling_price'),
+		);
+		$this->model->updateData('tbl_product_price', $update_product_price, ['fk_product_id' => $product_id]);
+
+		$total_quantity = $this->input->post('update_total_quantity');
+		$add_new_quantity = $this->input->post('add_new_quantity');
+
+		if (!empty($add_new_quantity)) {
+			$update_product_inventory_status = array(
+				'used_status' => 0,
+				'is_delete' => '0'
+			);
+			$this->model->updateData('tbl_product_inventory', $update_product_inventory_status, ['fk_product_id' => $product_id]);
+
+			$new_total_quantity = $total_quantity + $add_new_quantity;
+
+			$update_product_inventory = array(
+				'fk_product_id' => $product_id,
+				'fk_product_category_id' => $fk_product_category_id,
+				'fk_product_type_id' => $fk_product_type_id,
+				'fk_product_price_id' => $fk_product_price_id,
+				'add_quantity' => $add_new_quantity,
+				'total_quantity' => $new_total_quantity,
+				'used_status' => 1
+			);
+
+			$this->model->insertData('tbl_product_inventory', $update_product_inventory);
+		} else {
+				$get_last_quantity = $this->model->selectWhereData('tbl_product_inventory', ['fk_product_id' => $product_id, 'used_status' => 1], array('add_quantity','total_quantity'), true);
+				$last_quantity = $get_last_quantity['total_quantity'];
+				if($last_quantity == $total_quantity){
+					$update_product_inventory = array(
+						'add_quantity' => $get_last_quantity['add_quantity'],
+						'total_quantity' => $total_quantity,
+					);
+				}else{
+					$update_product_inventory = array(
+						'add_quantity' => $total_quantity,
+						'total_quantity' => $total_quantity,
+					);
+				}
+				$this->model->updateData('tbl_product_inventory', $update_product_inventory, ['fk_product_id' => $product_id,'used_status' => 1]);
+		}
+		echo json_encode(['status' => 'success', 'message' => 'Product updated successfully']);
+	}
+	
 }

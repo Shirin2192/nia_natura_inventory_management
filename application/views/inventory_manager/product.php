@@ -283,170 +283,183 @@
     </div>
     <!-- Content body end -->
     <!-- View Product Modal -->
-    <div class="modal fade" id="viewProductModal" tabindex="-1" role="dialog" aria-labelledby="viewProductLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="viewProductLabel">Product Details</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="container-fluid">
-                    <div class="row">
-                        <!-- Left Column -->
-                        <div class="col-md-6">
-                            <p><strong>Product Name:</strong> <span id="view_product_name"></span></p>
-                            <p><strong>Product SKU Code:</strong> <span id="view_product_sku_code"></span></p>
-                            <p><strong>Batch No:</strong> <span id="view_batch_no"></span></p>
-                            <p><strong>Flavour Name:</strong> <span id="view_flavour_name"></span></p>
-                            <p><strong>Bottle Size:</strong> <span id="view_bottle_size"></span></p>
-                            <p><strong>Bottle Type:</strong> <span id="view_bottle_type"></span></p>
-                            <p><strong>Barcode:</strong> <span id="view_barcode"></span></p>
-                        </div>
+    <div class="modal fade" id="viewProductModal" tabindex="-1" role="dialog" aria-labelledby="viewProductLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewProductLabel">Product Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <!-- Left Column -->
+                            <div class="col-md-6">
+                                <p><strong>Product Name:</strong> <span id="view_product_name"></span></p>
+                                <p><strong>Product SKU Code:</strong> <span id="view_product_sku_code"></span></p>
+                                <p><strong>Batch No:</strong> <span id="view_batch_no"></span></p>
+                                <p><strong>Flavour Name:</strong> <span id="view_flavour_name"></span></p>
+                                <p><strong>Bottle Size:</strong> <span id="view_bottle_size"></span></p>
+                                <p><strong>Bottle Type:</strong> <span id="view_bottle_type"></span></p>
+                                <p><strong>Barcode:</strong> <span id="view_barcode"></span></p>
+                            </div>
 
-                        <!-- Right Column -->
-                        <div class="col-md-6">
-                            <p><strong>Product Description:</strong> <span id="view_description"></span></p>
-                            
-                            <p><strong>Purchase Price:</strong> <span id="view_purchase_price"></span></p>
-                            <p><strong>MRP:</strong> <span id="view_mrp"></span></p>
-                            <p><strong>Selling Price:</strong> <span id="view_selling_price"></span></p>
-                            <p><strong>Stock Quantity:</strong> <span id="view_total_quantity"></span></p>
-                            <p><strong>Availability Status:</strong> <span id="view_availability_status"></span></p>
-                            <p><strong>Sales Channels:</strong> <span id="view_sale_channel"></span></p>
-                        </div>
-                        <div class="col-md-12">
-                        <p><strong>Images:</strong> <span id="view_images"></span></p>
+                            <!-- Right Column -->
+                            <div class="col-md-6">
+                                <p><strong>Product Description:</strong> <span id="view_description"></span></p>
+
+                                <p><strong>Purchase Price:</strong> <span id="view_purchase_price"></span></p>
+                                <p><strong>MRP:</strong> <span id="view_mrp"></span></p>
+                                <p><strong>Selling Price:</strong> <span id="view_selling_price"></span></p>
+                                <p><strong>Stock Quantity:</strong> <span id="view_total_quantity"></span></p>
+                                <p><strong>Availability Status:</strong> <span id="view_availability_status"></span></p>
+                                <p><strong>Sales Channels:</strong> <span id="view_sale_channel"></span></p>
+                            </div>
+                            <div class="col-md-12">
+                                <p><strong>Images:</strong> <span id="view_images"></span></p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- Edit Product Modal -->
-    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal fade" id="updateProductModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editModalLabel">Edit Product</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <form id="edit-product-form">
+                <form id="UpdateProductForm" enctype="multipart/form-data">
+                    <input type="hidden" id="update_product_id" name="update_product_id">
+                    <input type="hidden" id="fk_product_category_id" name="fk_product_category_id">
+                    <input type="hidden" id="fk_product_type_id" name="fk_product_type_id">
+                    <input type="hidden" id="fk_product_price_id" name="fk_product_price_id">
+                    <input type="hidden" id="update_product_image" name="update_product_image">
+                    <div class="modal-body">
+
                         <div class="row">
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_product_name">Product Name <span
+                                    <label class="col-form-label" for="update_product_name">Product Name <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="edit_product_name" name="product_name"
-                                        placeholder="Enter Product Name">
+                                    <input type="text" class="form-control" id="update_product_name"
+                                        name="update_product_name" placeholder="Enter Product Name">
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_product_sku_code">Product SKU Code <span
+                                    <label class="col-form-label" for="update_product_sku_code">Product SKU Code <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="edit_product_sku_code"
-                                        name="product_sku_code" placeholder="Enter Product SKU Code">
+                                    <input type="text" class="form-control" id="update_product_sku_code"
+                                        name="update_product_sku_code" placeholder="Enter Product SKU Code">
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_batch_no">Batch No <span
+                                    <label class="col-form-label" for="update_batch_no">Batch No <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="edit_batch_no" name="batch_no"
+                                    <input type="text" class="form-control" id="update_batch_no" name="update_batch_no"
                                         placeholder="Enter Batch No">
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_flavor">Flavor <span
+                                    <label class="col-form-label" for="update_flavour_name">Flavor <span
                                             class="text-danger">*</span></label>
-                                    <select class="form-control" id="edit_flavor" name="flavor">
-                                        <option value="Neem">Neem</option>
-                                        <option value="Tulsi">Tulsi</option>
-                                        <option value="Himalaya">Himalaya</option>
-                                        <option value="Jamun">Jamun</option>
-                                    </select>
+                                    <div><select class=" chosen-select form-control" id="update_flavour_name"
+                                            name="update_flavour_name">
+
+                                        </select></div>
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_bottle_size">Bottle Size <span
+                                    <label class="col-form-label" for="update_bottle_size">Bottle Size <span
                                             class="text-danger">*</span></label>
-                                    <select class="form-control" id="edit_bottle_size" name="bottle_size">
-                                        <option value="250ml">250ml</option>
-                                        <option value="500ml">500ml</option>
-                                        <option value="1L">1L</option>
-                                        <option value="2L">2L</option>
-                                    </select>
+                                    <div><select class=" chosen-select form-control" id="update_bottle_size"
+                                            name="update_bottle_size">
+
+                                        </select></div>
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_bottle_type">Bottle Type</label>
-                                    <select class="form-control" id="edit_bottle_type" name="bottle_type">
-                                        <option value="glass">Glass</option>
-                                        <option value="plastic">Plastic</option>
-                                        <option value="jar">Jar</option>
-                                    </select>
+                                    <label class="col-form-label" for="update_bottle_type">Bottle Type</label>
+                                    <div><select class=" chosen-select form-control" id="update_bottle_type"
+                                            name="update_bottle_type">
+
+                                        </select></div>
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_barcode">Barcode</label>
-                                    <input type="text" class="form-control" id="edit_barcode" name="barcode"
+                                    <label class="col-form-label" for="update_barcode">Barcode</label>
+                                    <input type="text" class="form-control" id="update_barcode" name="update_barcode"
                                         placeholder="Enter Barcode">
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_product_description">Product
+                                    <label class="col-form-label" for="update_description">Product
                                         Description</label>
-                                    <textarea class="form-control" id="edit_product_description"
-                                        name="product_description" placeholder="Enter Product Description"></textarea>
+                                    <textarea class="form-control" id="update_description" name="update_description"
+                                        placeholder="Enter Product Description"></textarea>
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_product_image">Product Image</label>
-                                    <input type="file" class="form-control" id="edit_product_image"
-                                        name="product_image">
+                                    <label class="col-form-label" for="update_product_images">Product Image</label>
+                                    <input type="file" class="form-control" id="update_product_images"
+                                        name="update_product_images[]" multiple>
                                 </div>
+
+                            </div>
+                            <div class="col-lg-12">
+                                <div id="update_images"></div>
                             </div>
                         </div>
                         <!-- Pricing and Cost Information -->
                         <div class="row">
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_purchase_price">Purchase Price</label>
-                                    <input type="number" class="form-control" id="edit_purchase_price"
-                                        name="purchase_price" placeholder="Enter Purchase Price">
+                                    <label class="col-form-label" for="update_purchase_price">Purchase Price</label>
+                                    <input type="number" class="form-control" id="update_purchase_price"
+                                        name="update_purchase_price" placeholder="Enter Purchase Price">
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_mrp">MRP</label>
-                                    <input type="number" class="form-control" id="edit_mrp" name="mrp"
+                                    <label class="col-form-label" for="update_mrp">MRP</label>
+                                    <input type="number" class="form-control" id="update_mrp" name="update_mrp"
                                         placeholder="Enter MRP">
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_selling_price">Selling Price</label>
-                                    <input type="number" class="form-control" id="edit_selling_price"
-                                        name="selling_price" placeholder="Enter Selling Price">
+                                    <label class="col-form-label" for="update_selling_price">Selling Price</label>
+                                    <input type="number" class="form-control" id="update_selling_price"
+                                        name="update_selling_price" placeholder="Enter Selling Price">
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_stock_quantity">Stock Quantity</label>
-                                    <input type="number" class="form-control" id="edit_stock_quantity"
-                                        name="stock_quantity" placeholder="Enter Stock Quantity">
+                                    <label class="col-form-label" for="update_total_quantity">Current Stock Quantity</label>
+                                        <input type="number" class="form-control" id="update_total_quantity"
+                                            name="update_total_quantity" placeholder="Enter Stock Quantity">                                   
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="add_new_quantity">Add New Stock Quantity</label>
+                                        <input type="number" class="form-control" id="add_new_quantity"
+                                            name="add_new_quantity" placeholder="Enter Add New Stock Quantity">                                   
                                 </div>
                             </div>
                         </div>
@@ -454,33 +467,31 @@
                         <div class="row">
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_availability_status">Availability
+                                    <label class="col-form-label" for="update_availability_status">Availability
                                         Status</label>
-                                    <select class="form-control" id="edit_availability_status"
-                                        name="availability_status">
-                                        <option value="in_stock">In Stock</option>
-                                        <option value="out_of_stock">Out of Stock</option>
-                                        <option value="backordered">Backordered</option>
-                                    </select>
+                                    <div><select class=" chosen-select form-control" id="update_availability_status"
+                                            name="update_availability_status">
+
+                                        </select></div>
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_sales_channels">Sales Channels</label>
-                                    <select class="form-control" id="edit_sales_channels" name="sales_channels">
-                                        <option value="online">Online</option>
-                                        <option value="in_store">Offline</option>
-                                        <option value="both">Both</option>
-                                    </select>
+                                    <label class="col-form-label" for="update_sale_channel">Sales Channels</label>
+                                    <div><select class=" chosen-select form-control" id="update_sale_channel"
+                                            name="update_sale_channel">
+
+                                        </select></div>
                                 </div>
                             </div>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" id="save-changes-btn" class="btn btn-primary">Save Changes</button>
-                </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" id="save-changes-btn" class="btn btn-primary">Update</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
