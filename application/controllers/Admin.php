@@ -65,9 +65,8 @@ class Admin extends CI_Controller {
 					'name' => $first_name." ".$last_name,
 					'email' => $email,
 					'password' => decy_ency('encrypt',$password), // Encrypt password
-					'role_id' => $role,
+					'fk_role_id' => $role,
 				);
-
 				$insert_status = $this->model->insertData('tbl_user',$add_staff);
 
 				if ($insert_status) {

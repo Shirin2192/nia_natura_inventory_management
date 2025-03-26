@@ -36,9 +36,7 @@ $(document).ready(function () {
                      // Clear Chosen-select dropdowns
                      $(".chosen-select").val('').trigger('chosen:updated');
                     
-                    // setTimeout(() => {
-                    //     loadSaleChannel(); // Reload DataTable
-                    // }, 500);
+                     $('#product_table').DataTable().ajax.reload(); // Refresh DataTable
                 }
             },
             error: function () {

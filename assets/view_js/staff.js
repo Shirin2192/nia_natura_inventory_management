@@ -15,7 +15,7 @@ $("#userForm").on("submit", function (event) {
             $(".error-message").remove(); // Remove previous error messages
         },
         success: function (response) {
-            if (response.success) {
+            if (response.status ="success") {
                 swal({
                     icon: "success",
                     title: "Added!",
@@ -25,9 +25,7 @@ $("#userForm").on("submit", function (event) {
                 });
 
                 $("#userForm")[0].reset(); // Reset form
-                setTimeout(() => {
-                    // Reload DataTable or any other necessary actions
-                }, 500);
+                $('#userTable').DataTable().ajax.reload(); // Refresh DataTable
             } else {
                 // Display validation errors
                 $.each(response.errors, function (key, message) {

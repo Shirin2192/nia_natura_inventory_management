@@ -113,7 +113,7 @@
                                             <div class="form-group">
                                                 <label class="col-form-label" for="role">Role <span
                                                         class="text-danger">*</span></label>
-                                                <select class="chosen-select form-control chosen-select" id="role"
+                                                <select class="form-control chosen-select" id="role"
                                                     name="role">
                                                     <option value=""></option>
                                                     <?php foreach ($role as $role_key => $role_row) { ?>
