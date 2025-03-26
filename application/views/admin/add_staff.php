@@ -67,7 +67,7 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-body">
-                                <form>
+                                <form id="userForm">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
@@ -76,6 +76,8 @@
                                                 </label>
                                                 <input type="text" class="form-control" id="first_name"
                                                     name="first_name" placeholder="Enter First Name">
+                                                    <small class="text-danger" id="first_name_error"></small>
+                                                    <!-- Error message here -->
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
@@ -85,6 +87,8 @@
                                                 </label>
                                                 <input type="text" class="form-control" id="last_name" name="last_name"
                                                     placeholder="Enter Last Name">
+                                                    <small class="text-danger" id="last_name_error"></small>
+                                                    <!-- Error message here -->
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
@@ -92,8 +96,10 @@
                                                 <label class="col-form-label" for="email">Email <span
                                                         class="text-danger">*</span>
                                                 </label>
-                                                <input type="text" class="form-control" id="email" name="email"
+                                                <input type="email" class="form-control" id="email" name="email"
                                                     placeholder="Enter Email">
+                                                    <small class="text-danger" id="email_error"></small>
+                                                    <!-- Error message here -->
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
@@ -101,45 +107,25 @@
                                                 <label class="col-form-label" for="password">Password <span
                                                         class="text-danger">*</span>
                                                 </label>
-                                                <input type="text" class="form-control" id="password" name="password"
+                                                <input type="password" class="form-control" id="password" name="password"
                                                     placeholder="Enter Password">
+                                                    <small class="text-danger" id="password_error"></small>
+                                                    <!-- Error message here -->
                                             </div>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <div class="form-group">
-                                                <label class="col-form-label" for="phone">Phone Number <span
+                                                <label class="col-form-label" for="role">Role <span
                                                         class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" id="phone" name="phone"
-                                                    placeholder="Enter Phone Number">
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-6 mb-3">
-                                            <div class="form-group">
-                                                <label class="col-form-label" for="profile_picture">Profile
-                                                    Picture</label>
-                                                <input type="file" class="form-control" id="profile_picture"
-                                                    name="profile_picture">
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-6 mb-3">
-                                            <div class="form-group">
-                                                <label class="col-form-label" for="role">Role/Designation <span
-                                                        class="text-danger">*</span></label>
-                                                <select class="form-control chosen-select" id="val-skill"
-                                                    name="val-skill">
-                                                    <option value="">Please select</option>
-                                                    <option value="html">HTML</option>
-                                                    <option value="css">CSS</option>
-                                                    <option value="javascript">JavaScript</option>
-                                                    <option value="angular">Angular</option>
-                                                    <option value="angular">React</option>
-                                                    <option value="vuejs">Vue.js</option>
-                                                    <option value="ruby">Ruby</option>
-                                                    <option value="php">PHP</option>
-                                                    <option value="asp">ASP.NET</option>
-                                                    <option value="python">Python</option>
-                                                    <option value="mysql">MySQL</option>
+                                                <select class="form-control chosen-select" id="role"
+                                                    name="role">
+                                                    <option value=""></option>
+                                                    <?php foreach ($role as $role_key => $role_row) { ?>
+                                                            <option value="<?=$role_row['id']?>"><?=$role_row['role_name']?></option>
+                                                  <?php  }?>
                                                 </select>
+                                                <small class="text-danger" id="role_error"></small>
+                                                <!-- Error message here -->
                                             </div>
                                         </div>
                                     </div>
@@ -149,56 +135,36 @@
                                         </div>
                                     </div>
                                 </form>
-                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-                                <!-- Row for DataTable -->
-                                <div class="container-fluid">
-                                    <div class="row justify-content-center">
-                                        <div class="col-lg-12">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <h5>Staff List</h5>
-                                                    <table id="staffTable" class="display">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>First Name</th>
-                                                                <th>Last Name</th>
-                                                                <th>Email</th>
-                                                                <th>Role</th>
-                                                                <th>Action</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <!-- Example Row -->
-                                                            <tr>
-                                                                <td>John</td>
-                                                                <td>Doe</td>
-                                                                <td>john.doe@example.com</td>
-                                                                <td>Admin</td>
-                                                                <td>
-                                                                    <!-- <button class="btn btn-primary btn-sm edit-btn" data-id="1" data-bs-toggle="modal" data-bs-target="#edit_staff_modal">Edit</button>
-                                    <button class="btn btn-danger btn-sm delete-btn" data-id="1" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</button> -->
-                                                                    <button class="btn btn-warning btn-sm edit-btn"
-                                                                        data-toggle="modal"
-                                                                        data-target="#edit_Staff_modal"
-                                                                        data-id="1">Edit</button>
-                                                                    <button class="btn btn-danger btn-sm delete-btn"
-                                                                        data-toggle="modal" data-target="#deleteModal"
-                                                                        data-id="1">Delete</button>
-                                                                </td>
-                                                            </tr>
-                                                            <!-- More rows will be dynamically generated -->
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            
+            <!-- Row for DataTable -->
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>Staff List</h5>
+                                <table id="staffTable" class="display">
+                                    <thead>
+                                        <tr>
+                                            <th>First Name</th>
+                                            <th>Last Name</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
     <!-- #/ container -->
@@ -302,12 +268,7 @@
     <!--**********************************
          Footer start
          ***********************************-->
-    <div class="footer">
-        <div class="copyright">
-            <p>Copyright &copy; Designed & Developed by <a href="https://themeforest.net/user/quixlab">Quixlab</a> 2018
-            </p>
-        </div>
-    </div>
+         <?php include('common/footer.php')?>
     <!--**********************************
          Footer end
          ***********************************-->
@@ -319,37 +280,8 @@
          Scripts
          ***********************************-->
     <?php include('common/js_files.php')?>
-    <script>
-    $(document).ready(function() {
-        $(".chosen-select").chosen({
-            allow_single_deselect: true,
-            heigth: '100%'
-        });
-        $('#staffTable').DataTable();
-
-        // Edit button click event
-        $('.edit-btn').on('click', function() {
-            var id = $(this).data('id');
-            // Populate the edit modal fields using AJAX or dummy data
-            $('#edit_first_name').val('John');
-            $('#edit_last_name').val('Doe');
-            $('#edit_email').val('john.doe@example.com');
-            $('#edit_phone').val('1234567890');
-            $('#edit_role').val('admin');
-        });
-
-        // Delete button click event
-        $('.delete-btn').on('click', function() {
-            var id = $(this).data('id');
-            $('#confirmDelete').on('click', function() {
-                // Call delete API or perform delete action
-                console.log('Deleting staff with ID: ' + id);
-                // Close modal
-                $('#deleteModal').modal('hide');
-            });
-        });
-    });
-    </script>
+    <script src="<?= base_url()?>assets/view_js/staff.js"></script>
+   
 </body>
 
 </html>

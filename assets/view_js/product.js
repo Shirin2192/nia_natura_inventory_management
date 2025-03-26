@@ -72,7 +72,7 @@ $(document).ready(function () {
                         <button class="btn btn-warning btn-sm update-product" data-id="${row.id}" data-toggle="modal" data-target="#editProductModal">
                             <i class="icon-pencil menu-icon"></i>
                         </button>
-                        <button class="btn btn-danger btn-sm delete-btn" data-id="${row.id}">
+                        <button class="btn btn-danger btn-sm delete-product" data-id="${row.id}">
                             <i class="icon-trash menu-icon"></i>
                         </button>
                     `;
@@ -287,14 +287,68 @@ $("#UpdateProductForm").on("submit", function (e) {
                     timer: 2000
                 });     
                 $("#updateProductModal").modal("hide");
-                location.reload(); // Refresh to update product list
+                $('#product_table').DataTable().ajax.reload(); // Refresh DataTable
             } else {
-                toastr.error(response.message);
+                swal({
+                    icon: "error",
+                    title: "Error!",
+                    text: response.message,
+                    showConfirmButton: false,
+                    timer: 2000
+                });     
             }
         },
         error: function (xhr, status, error) {
             console.error("Error updating product:", error);
             $("#save-changes-btn").prop("disabled", false).text("Save Changes");
+            swal({
+                icon: "error",
+                title: "Error!",
+                text: response.message,
+                showConfirmButton: false,
+                timer: 2000
+            });     
+        }
+    });
+});
+$(document).on("click", ".delete-product", function() {
+    var product_id = $(this).data("id"); // Get product ID from button
+    $("#confirm-delete").data("id", product_id); // Store ID in delete button
+    $("#deleteModal").modal("show"); // Show the delete confirmation modal
+});
+
+// Handle delete confirmation
+$("#confirm-delete").on("click", function() {
+    var product_id = $(this).data("id");
+
+    $.ajax({
+        url: frontend + "admin/delete_product", // Your API endpoint
+        type: "POST",
+        data: { product_id: product_id },
+        dataType: "json",
+        success: function(response) {
+            if (response.success) {
+                swal({
+                    icon: "success",
+                    title: "Deleted!",
+                    text: response.message,
+                    showConfirmButton: false,
+                    timer: 2000
+                });     
+                $("#deleteModal").modal("hide"); // Hide modal after delete
+                $('#product_table').DataTable().ajax.reload(); // Refresh DataTable
+            } else {
+                swal({
+                    icon: "error",
+                    title: "Error!",
+                    text: response.message,
+                    showConfirmButton: false,
+                    timer: 2000
+                });   
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error deleting product:", error);
             swal({
                 icon: "error",
                 title: "Error!",

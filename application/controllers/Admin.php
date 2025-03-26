@@ -23,10 +23,62 @@ class Admin extends CI_Controller {
 		if (!$admin_session) {
 			redirect(base_url('common/index'));
 		}else{
-			$this->load->view('admin/add_staff');
+			$response['role']=$this->model->selectWhereData('tbl_role',array('is_delete'=>1),"*",false,array('id',"DESC")); 
+
+			$this->load->view('admin/add_staff',$response);
 		}
 	}
-	
+	public function save_user()
+	{
+		$first_name = $this->input->post('first_name');
+		$last_name = $this->input->post('last_name');
+		$email = $this->input->post('email');
+		$password = $this->input->post('password');
+		$role = $this->input->post('role');
+
+		// Set validation rules
+		$this->form_validation->set_rules('first_name', 'First Name', 'trim|required|min_length[2]|alpha');
+		$this->form_validation->set_rules('last_name', 'Last Name', 'trim|required|min_length[2]|alpha');
+		$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email|is_unique[tbl_user.email]');
+		$this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[6]');
+		$this->form_validation->set_rules('role', 'Role', 'required');
+
+		if ($this->form_validation->run() == FALSE) {
+			// Validation failed, return error messages
+			$response = [
+				'status' => 'error',
+				'first_name_error' => form_error('first_name'),
+				'last_name_error' => form_error('last_name'),
+				'email_error' => form_error('email'),
+				'password_error' => form_error('password'),
+				'role_error' => form_error('role'),
+			];
+		} else {
+			$count = $this->model->CountWhereRecord('tbl_user',array('email'=>$email));
+			if($count == 1){
+				$response =["status" => "error", 'email_error' => "Email Already Exist"];
+			}else{
+				$add_staff = array(
+					'first_name' => $first_name,
+					'last_name' => $last_name,
+					'email' => $email,
+					'password' => decy_ency('encrypt',$password), // Encrypt password
+					'role_id' => $role,
+				);
+
+				$insert_status = $this->model->insertData('tbl_user',$add_staff);
+
+				if ($insert_status) {
+					$response = ["success" => true, "message" => "User added successfully."];
+				} else {
+					$response = ["success" => false, "message" => "Failed to add user."];
+				}
+			}
+		}
+		echo json_encode($response);
+	}
+
+
 	public function add_flavour(){
 		$admin_session = $this->session->userdata('admin_session');
 		if (!$admin_session) {
@@ -726,5 +778,29 @@ class Admin extends CI_Controller {
 		}
 		echo json_encode(['status' => 'success', 'message' => 'Product updated successfully']);
 	}
+
+	public function delete_product()
+{
+    $this->load->model('Product_model'); // Load the model
+
+    $product_id = $this->input->post('product_id'); // Get product ID from AJAX request
+
+    if (!empty($product_id)) {
+		$update_product_status = $this->model->updateData('tbl_product', ['is_delete' => '0'], ['id' => $product_id]); // Soft delete
+        $update_product_category_status = $this->model->updateData('tbl_product_category', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
+		$update_product_type_status = $this->model->updateData('tbl_product_type', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
+		$update_product_price_status = $this->model->updateData('tbl_product_price', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
+		$update_product_inventory_status = $this->model->updateData('tbl_product_inventory', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
+
+        if ($update_product_status) {
+            echo json_encode(["success" => true, "message" => "Product deleted successfully."]);
+        } else {
+            echo json_encode(["success" => false, "message" => "Failed to delete product."]);
+        }
+    } else {
+        echo json_encode(["success" => false, "message" => "Invalid product ID."]);
+    }
+}
+
 	
 }
