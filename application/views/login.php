@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html class="h-100" lang="en">
 
@@ -9,7 +8,6 @@
     <title>NIA NATURA INVENTORY MANAGEMENT</title>
     <!-- Favicon icon -->
     <?php include('common/css_files.php')?>
-    
 </head>
 
 <body class="h-100">
@@ -34,6 +32,9 @@
                     <div class="form-input-content">
                         <div class="card login-form mb-0">
                             <div class="card-body pt-5">
+                                <div class="logo-container">
+                                    <img src="<?= base_url()?>assets/images/Nia-logo-Approved-TM-2.png" alt="NIA Natura Logo">
+                                </div>
                                 <a class="text-center" href="<?= base_url();?>"> <h4>Login</h4></a>
         
                                 <form class="mt-5 mb-5 login-input" id="loginForm">
@@ -66,8 +67,3 @@
     <script src="<?= base_url()?>assets/view_js/login.js"></script>
 </body>
 </html>
-
-
-
-
-

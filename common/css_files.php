@@ -8,3 +8,5 @@
     <link href="<?=base_url()?>assets/css/style.css" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css">
 	<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+  
+    <link href="<?=base_url()?>assets/css/my_style.css" rel="stylesheet">

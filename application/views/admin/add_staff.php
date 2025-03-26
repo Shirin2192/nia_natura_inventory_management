@@ -76,8 +76,7 @@
                                                 </label>
                                                 <input type="text" class="form-control" id="first_name"
                                                     name="first_name" placeholder="Enter First Name">
-                                                    <small class="text-danger" id="first_name_error"></small>
-                                                    <!-- Error message here -->
+                                                <small class="text-danger" id="first_name_error"></small>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
@@ -87,8 +86,7 @@
                                                 </label>
                                                 <input type="text" class="form-control" id="last_name" name="last_name"
                                                     placeholder="Enter Last Name">
-                                                    <small class="text-danger" id="last_name_error"></small>
-                                                    <!-- Error message here -->
+                                                <small class="text-danger" id="last_name_error"></small>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
@@ -98,8 +96,7 @@
                                                 </label>
                                                 <input type="email" class="form-control" id="email" name="email"
                                                     placeholder="Enter Email">
-                                                    <small class="text-danger" id="email_error"></small>
-                                                    <!-- Error message here -->
+                                                <small class="text-danger" id="email_error"></small>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
@@ -109,15 +106,14 @@
                                                 </label>
                                                 <input type="password" class="form-control" id="password" name="password"
                                                     placeholder="Enter Password">
-                                                    <small class="text-danger" id="password_error"></small>
-                                                    <!-- Error message here -->
+                                                <small class="text-danger" id="password_error"></small>
                                             </div>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <div class="form-group">
                                                 <label class="col-form-label" for="role">Role <span
                                                         class="text-danger">*</span></label>
-                                                <select class="form-control chosen-select" id="role"
+                                                <select class="chosen-select form-control chosen-select" id="role"
                                                     name="role">
                                                     <option value=""></option>
                                                     <?php foreach ($role as $role_key => $role_row) { ?>
@@ -125,7 +121,6 @@
                                                   <?php  }?>
                                                 </select>
                                                 <small class="text-danger" id="role_error"></small>
-                                                <!-- Error message here -->
                                             </div>
                                         </div>
                                     </div>
@@ -147,17 +142,16 @@
                         <div class="card">
                             <div class="card-body">
                                 <h5>Staff List</h5>
-                                <table id="staffTable" class="display">
+                                <table id="userTable" class="display">
                                     <thead>
                                         <tr>
-                                            <th>First Name</th>
-                                            <th>Last Name</th>
-                                            <th>Email</th>
-                                            <th>Role</th>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Email</th>                                            
+                                            <th>Role</th>                                            
                                             <th>Action</th>
                                         </tr>
                                     </thead>
-
                                 </table>
                             </div>
                         </div>

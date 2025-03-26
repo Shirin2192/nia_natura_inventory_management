@@ -7,6 +7,7 @@ class Admin extends CI_Controller {
     {
         parent::__construct();
         $this->load->model('Product_model'); // Load the Product_model
+        $this->load->model('user_model'); // Load the Product_model
     }
 	public function index()
 	{
@@ -47,20 +48,21 @@ class Admin extends CI_Controller {
 			// Validation failed, return error messages
 			$response = [
 				'status' => 'error',
-				'first_name_error' => form_error('first_name'),
-				'last_name_error' => form_error('last_name'),
-				'email_error' => form_error('email'),
-				'password_error' => form_error('password'),
-				'role_error' => form_error('role'),
+				'errors' => [
+					'first_name' => form_error('first_name'),
+					'last_name' => form_error('last_name'),
+					'email' => form_error('email'),
+					'password' => form_error('password'),
+					'role' => form_error('role'),
+				]
 			];
 		} else {
 			$count = $this->model->CountWhereRecord('tbl_user',array('email'=>$email));
 			if($count == 1){
-				$response =["status" => "error", 'email_error' => "Email Already Exist"];
+				$response = ["status" => "error", 'errors' => ['email' => "Email Already Exist"]];
 			}else{
 				$add_staff = array(
-					'first_name' => $first_name,
-					'last_name' => $last_name,
+					'name' => $first_name." ".$last_name,
 					'email' => $email,
 					'password' => decy_ency('encrypt',$password), // Encrypt password
 					'role_id' => $role,
@@ -69,13 +71,44 @@ class Admin extends CI_Controller {
 				$insert_status = $this->model->insertData('tbl_user',$add_staff);
 
 				if ($insert_status) {
-					$response = ["success" => true, "message" => "User added successfully."];
+					$response = ["status" => "success", "message" => "User added successfully."];
 				} else {
-					$response = ["success" => false, "message" => "Failed to add user."];
+					$response = ["status" => "error", "message" => "Failed to add user."];
 				}
 			}
 		}
 		echo json_encode($response);
+	}
+	public function get_users()
+	{
+		$this->load->model("User_model");
+
+		$draw = $this->input->post("draw");
+		$start = $this->input->post("start");
+		$length = $this->input->post("length");
+
+		// Fetch total count
+		$totalRecords = $this->user_model->get_total_users_count();
+
+		// Fetch paginated data
+		$users = $this->user_model->get_paginated_users($start, $length);
+
+		$data = [];
+		foreach ($users as $user) {
+			$data[] = [
+				"id" => $user['id'],
+				"name" => $user['name'],
+				"email" => $user['email'],
+				"role_name" => $user['role_name']
+			];
+		}
+
+		echo json_encode([
+			"draw" => intval($draw),
+			"recordsTotal" => $totalRecords,
+			"recordsFiltered" => $totalRecords,
+			"data" => $data
+		]);
 	}
 
 
