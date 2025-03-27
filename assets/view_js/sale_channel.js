@@ -137,8 +137,7 @@ $("#edit_sale_channel_form").on("submit", function (event) {
         success: function (response) {
             if (response.status === "error") {
                 $("#edit_sale_channel_error").html(response.sale_channel_error); // Show validation error
-            } else {
-               
+            } else {               
                 swal({
                     icon: "success",
                     title: "Updated!",
@@ -148,9 +147,10 @@ $("#edit_sale_channel_form").on("submit", function (event) {
                 });
                 $("#edit_sale_channel_modal").modal("hide"); // Close modal
                 $("#edit_sale_channel_form")[0].reset(); // Reset form
-                setTimeout(() => {
-                    loadSaleChannel(); // Reload DataTable
-                }, 500);
+                // setTimeout(() => {
+                //     loadSaleChannel(); // Reload DataTable
+                // }, 500);
+                location.reload();  
               
             }
         },
@@ -177,9 +177,10 @@ function deleteSaleChannel(id) {
                 success: function (response) {
                     if (response.status === "success") {
                         swal("Deleted!", response.message, "success");
-                        setTimeout(() => {
-                            loadSaleChannel(); // Reload DataTable
-                        }, 500);
+                        // setTimeout(() => {
+                        //     loadSaleChannel(); // Reload DataTable
+                        // }, 500);
+                        location.reload();
                     } else {
                         swal("Error!", response.message, "error");
                     }

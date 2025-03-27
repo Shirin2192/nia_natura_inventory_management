@@ -148,9 +148,10 @@ $("#edit_bottle_type_form").on("submit", function (event) {
                 });
                 $("#edit_bottle_type_modal").modal("hide"); // Close modal
                 $("#edit_bottle_type_form")[0].reset(); // Reset form
-                setTimeout(() => {
-                    loadBottleSize(); // Reload DataTable
-                }, 500);
+                // setTimeout(() => {
+                //     loadBottleSize(); // Reload DataTable
+                // }, 500);
+                location.reload();
               
             }
         },
@@ -177,9 +178,10 @@ function deleteBottleType(id) {
                 success: function (response) {
                     if (response.status === "success") {
                         swal("Deleted!", response.message, "success");
-                        setTimeout(() => {
-                            loadBottleSize(); // Reload DataTable
-                        }, 500);
+                        // setTimeout(() => {
+                        //     loadBottleSize(); // Reload DataTable
+                        // }, 500);
+                        location.reload();
                     } else {
                         swal("Error!", response.message, "error");
                     }

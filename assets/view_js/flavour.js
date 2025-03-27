@@ -56,6 +56,7 @@ $(document).ready(function () {
                     $("#flavourForm")[0].reset(); // Reset form
                     $("#flavour_name_error").text(""); // Clear error message
                     loadFlavours();
+                    // location.reload();
                 }
             }
         });
@@ -135,7 +136,8 @@ $("#edit_flavour_form").on("submit", function (event) {
                 });     
                 $("#editFlavourModal").modal("hide"); // Close modal
                 $("#edit_flavour_form")[0].reset(); // Reset form
-                loadFlavours(); // Refresh DataTable         
+                // loadFlavours(); // Refresh DataTable         
+                location.reload();  
               
             }
         },
@@ -162,7 +164,8 @@ function deleteFlavour(id) {
                 success: function (response) {
                     if (response.status === "success") {
                         swal("Deleted!", response.message, "success");
-                        loadFlavours(); // Reload DataTable
+                        // loadFlavours(); // Reload DataTable
+                        location.reload();
                     } else {
                         swal("Error!", response.message, "error");
                     }

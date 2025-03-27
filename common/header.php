@@ -17,14 +17,14 @@
                             <div class="drop-down dropdown-profile   dropdown-menu">
                                 <div class="dropdown-content-body">
                                     <ul>
-                                        <li>
+                                        <!-- <li>
                                             <a href="app-profile.html"><i class="icon-user"></i> <span>Profile</span></a>
-                                        </li>
+                                        </li> -->
                                         <!-- <li>
                                             <a href="email-inbox.html"><i class="icon-envelope-open"></i> <span>Inbox</span> <div class="badge gradient-3 badge-pill badge-primary">3</div></a>
                                         </li> -->
                                         
-                                        <hr class="my-2">
+                                        <!-- <hr class="my-2"> -->
                                         <!-- <li>
                                             <a href="page-lock.html"><i class="icon-lock"></i> <span>Lock Screen</span></a>
                                         </li> -->

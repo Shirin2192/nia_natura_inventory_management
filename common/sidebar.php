@@ -14,7 +14,7 @@
                     </li>
                     <li>
                         <a href="<?= base_url()?>admin/add_flavour" aria-expanded="false">
-                            <i class="icon-star menu-icon"></i> <span class="nav-text">Add Flavour</span>
+                            <i class="icon-star menu-icon"></i> <span class="nav-text">Add Category</span>
                         </a>
                     </li>
                     <li>
@@ -38,8 +38,8 @@
                         </a>
                     </li>
                     <li>
-                        <a href="<?= base_url()?>admin/add_product" aria-expanded="false">
-                            <i class="icon-star menu-icon"></i> <span class="nav-text">Add Product</span>
+                        <a href="<?= base_url()?>admin/order_details" aria-expanded="false">
+                            <i class="icon-star menu-icon"></i> <span class="nav-text">Order</span>
                         </a>
                     </li>
                     

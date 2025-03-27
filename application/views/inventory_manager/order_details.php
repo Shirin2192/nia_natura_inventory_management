@@ -57,8 +57,7 @@
                 <div class="col p-md-0">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="<?=base_url()?>admin">Dashboard</a></li>
-                        <li class="breadcrumb-item active"><a href="<?=base_url()?>admin/add_flavour">Add Category</a>
-                        </li>
+                        <li class="breadcrumb-item active"><a href="<?=base_url()?>admin/add_flavour">Order Details</a></li>
                     </ol>
                 </div>
             </div>
@@ -68,16 +67,21 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-body">
-                                <form id="flavourForm">
+                                <form id="OrderForm">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="col-form-label" for="flavour_name">Category Name <span
+                                                <label class="col-form-label" for="fk_product_id">Product Name <span
                                                         class="text-danger">*</span>
                                                 </label>
-                                                <input type="text" class="form-control" id="flavour_name"
-                                                    name="flavour_name" placeholder="Enter Category Name ">
-                                                <small class="text-danger" id="flavour_name_error"></small>
+                                                <select class="form-control" id="fk_product_id" name="fk_product_id">
+                                                    <option value="">Select Product</option>
+                                                    <?php foreach ($products as $product) { ?>
+                                                    <option value="<?= $product['id'] ?>"><?= $product['product_name'] ?>
+                                                    </option>
+                                                    <?php } ?>
+                                                </select>
+                                                <small class="text-danger" id="fk_product_id_error"></small>
                                                 <!-- Error message here -->
                                             </div>
                                         </div>
@@ -92,8 +96,6 @@
                             </div>
                         </div>
                     </div>
-
-
                 </div>
             </div>
             <!-- Row for DataTable -->
@@ -102,15 +104,14 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-body">
-                                <h5>Category List</h5>
-                                <table id="flavourTable" class="display">
+                                <h5>Sale Channel List</h5>
+                                <table id="OrderTable" class="display">
                                     <thead>
                                         <tr>
-                                            <th>Category Name</th>
+                                            <th>Order Details</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
-
                                 </table>
                             </div>
                         </div>
@@ -125,57 +126,51 @@
     <!--**********************************
          Content body end
          ***********************************-->
-    <!-- View Modal -->
-    <!-- Bootstrap Modal -->
-    <!-- Flavour Details Modal -->
-    <div class="modal fade" id="flavourModal" tabindex="-1" role="dialog" aria-labelledby="flavourModalLabel"
+    <!-- View Sale Channel Details Modal -->
+    <div class="modal fade" id="sale_channelModal" tabindex="-1" role="dialog" aria-labelledby="sale_channelModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="flavourModalLabel">Flavour Details</h5>
+                    <h5 class="modal-title" id="sale_channelModalLabel">Sale Channel Details</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body" id="flavourContent">
+                <div class="modal-body" id="sale_channelContent">
                     <!-- Flavour details will be loaded here -->
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Edit Product Modal -->
-    <div class="modal fade" id="editFlavourModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <!-- Edit Sale Channel Modal -->
+    <div class="modal fade" id="edit_sale_channel_modal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">Edit Category</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 class="modal-title" id="editModalLabel">Edit Sale Channel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="edit_flavour_form">
+                <form id="edit_sale_channel_form">
                     <div class="modal-body">
 
                         <div class="row">
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <input type="hidden" class="form-control" id="edit_flavour_id"
-                                        name="edit_flavour_id">
-                                    <label class="col-form-label" for="edit_flavour_name">Category Name <span
+                                    <input type="hidden" name="edit_sale_channel_id" id="edit_sale_channel_id">
+                                    <label class="col-form-label" for="edit_sale_channel">Sale Channel <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="edit_flavour_name"
-                                        name="edit_flavour_name" placeholder="Enter Product Name">
-                                    <span id="edit_flavour_name_error" class="text-danger"></span>
+                                    <input type="text" class="form-control" id="edit_sale_channel"
+                                        name="edit_sale_channel" placeholder="Enter Sale Channel">
+                                    <small class="text-danger" id="edit_sale_channel_error"></small>
+                                    <!-- Error message here -->
                                 </div>
                             </div>
                         </div>
 
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                            aria-label="Close">Close</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                     </div>
                 </form>
@@ -187,15 +182,14 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Delete Category</h5>
+                    <h5 class="modal-title" id="deleteModalLabel">Delete Sale Channel</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to delete this category?
+                    Are you sure you want to delete this Sale Channel?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class=" close btn btn-secondary" data-bs-dismiss="modal"
-                        aria-label="Close">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-danger" id="confirm-delete">Delete</button>
                 </div>
             </div>
@@ -204,7 +198,7 @@
     <!--**********************************
          Footer start
          ***********************************-->
-         <?php include('common/footer.php')?>
+    <?php include('common/footer.php')?>
     <!--**********************************
          Footer end
          ***********************************-->
@@ -216,8 +210,7 @@
          Scripts
          ***********************************-->
     <?php include('common/js_files.php')?>
-    <script src="<?= base_url()?>assets/view_js/flavour.js"></script>
-
+    <script src="<?= base_url()?>assets/view_js/order_details.js"></script>
 </body>
 
 </html>

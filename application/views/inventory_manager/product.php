@@ -82,7 +82,7 @@
                                             <!-- Flavor -->
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
-                                                    <label class="col-form-label" for="fk_flavour_id">Flavor <span
+                                                    <label class="col-form-label" for="fk_flavour_id">Category <span
                                                             class="text-danger">*</span></label>
                                                     <select class="chosen-select form-control" id="fk_flavour_id"
                                                         name="fk_flavour_id">
@@ -301,7 +301,7 @@
                                 <p><strong>Product Name:</strong> <span id="view_product_name"></span></p>
                                 <p><strong>Product SKU Code:</strong> <span id="view_product_sku_code"></span></p>
                                 <p><strong>Batch No:</strong> <span id="view_batch_no"></span></p>
-                                <p><strong>Flavour Name:</strong> <span id="view_flavour_name"></span></p>
+                                <p><strong>Category Name:</strong> <span id="view_flavour_name"></span></p>
                                 <p><strong>Bottle Size:</strong> <span id="view_bottle_size"></span></p>
                                 <p><strong>Bottle Type:</strong> <span id="view_bottle_type"></span></p>
                                 <p><strong>Barcode:</strong> <span id="view_barcode"></span></p>
@@ -371,7 +371,7 @@
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="update_flavour_name">Flavor <span
+                                    <label class="col-form-label" for="update_flavour_name">Category Name <span
                                             class="text-danger">*</span></label>
                                     <div><select class=" chosen-select form-control" id="update_flavour_name"
                                             name="update_flavour_name">

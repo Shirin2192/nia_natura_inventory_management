@@ -104,8 +104,8 @@
                                                 <label class="col-form-label" for="password">Password <span
                                                         class="text-danger">*</span>
                                                 </label>
-                                                <input type="password" class="form-control" id="password" name="password"
-                                                    placeholder="Enter Password">
+                                                <input type="password" class="form-control" id="password"
+                                                    name="password" placeholder="Enter Password">
                                                 <small class="text-danger" id="password_error"></small>
                                             </div>
                                         </div>
@@ -113,12 +113,12 @@
                                             <div class="form-group">
                                                 <label class="col-form-label" for="role">Role <span
                                                         class="text-danger">*</span></label>
-                                                <select class="form-control chosen-select" id="role"
-                                                    name="role">
+                                                <select class="form-control chosen-select" id="role" name="role">
                                                     <option value=""></option>
                                                     <?php foreach ($role as $role_key => $role_row) { ?>
-                                                            <option value="<?=$role_row['id']?>"><?=$role_row['role_name']?></option>
-                                                  <?php  }?>
+                                                    <option value="<?=$role_row['id']?>"><?=$role_row['role_name']?>
+                                                    </option>
+                                                    <?php  }?>
                                                 </select>
                                                 <small class="text-danger" id="role_error"></small>
                                             </div>
@@ -147,8 +147,8 @@
                                         <tr>
                                             <th>ID</th>
                                             <th>Name</th>
-                                            <th>Email</th>                                            
-                                            <th>Role</th>                                            
+                                            <th>Email</th>
+                                            <th>Role</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
@@ -166,6 +166,26 @@
     <!--**********************************
          Content body end
          ***********************************-->
+    <!-- View User Modal -->
+    <div class="modal fade" id="viewUserModal" tabindex="-1" aria-labelledby="viewUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewUserModalLabel">User Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Name:</strong> <span id="view_first_name"></span></p>
+                    <p><strong>Email:</strong> <span id="view_email"></span></p>
+                    <p><strong>Role:</strong> <span id="view_role"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Edit Modal -->
     <div class="modal fade" id="edit_Staff_modal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -174,70 +194,67 @@
                     <h5 class="modal-title" id="editModalLabel">Edit Staff</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <form id="edit-staff-form">
+                <form id="edit-staff-form">
+                    <div class="modal-body">
+
                         <div class="row">
                             <div class="col-lg-6">
                                 <div class="form-group">
+                                    <input type="hidden" id="staff_id" name="staff_id">
                                     <label class="col-form-label" for="edit_first_name">First Name <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="edit_first_name" name="first_name"
+                                    <input type="text" class="form-control" id="edit_first_name" name="edit_first_name"
                                         placeholder="Enter First Name">
+                                    <small class="text-danger" id="edit_first_name_error"></small>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group">
                                     <label class="col-form-label" for="edit_last_name">Last Name <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="edit_last_name" name="last_name"
+                                    <input type="text" class="form-control" id="edit_last_name" name="edit_last_name"
                                         placeholder="Enter Last Name">
+                                    <small class="text-danger" id="edit_last_name_error"></small>
                                 </div>
                             </div>
                             <div class="col-lg-6">
                                 <div class="form-group">
                                     <label class="col-form-label" for="edit_email">Email <span
                                             class="text-danger">*</span></label>
-                                    <input type="email" class="form-control" id="edit_email" name="email"
-                                        placeholder="Enter Email">
+                                    <input type="email" class="form-control" id="edit_email" name="edit_email"
+                                        placeholder="Enter Email" readonly>
+                                    <small class="text-danger" id="edit_email_error"></small>
                                 </div>
                             </div>
-                            <div class="col-lg-6">
+                            <!-- <div class="col-lg-6">
                                 <div class="form-group">
                                     <label class="col-form-label" for="edit_password">Password <span
                                             class="text-danger">*</span></label>
                                     <input type="password" class="form-control" id="edit_password" name="password"
                                         placeholder="Enter Password">
+                                    <small class="text-danger" id="edit_password_error"></small>
                                 </div>
-                            </div>
+                            </div> -->
                             <div class="col-lg-6">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_phone">Phone Number <span
+                                    <label class="col-form-label" for="edit_role">Role <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="edit_phone" name="phone"
-                                        placeholder="Enter Phone Number">
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="form-group">
-                                    <label class="col-form-label" for="edit_role">Role/Designation <span
-                                            class="text-danger">*</span></label>
-                                    <select class="form-control" id="edit_role" name="role">
-                                        <option value="admin">Admin</option>
-                                        <option value="manager">Manager</option>
-                                        <option value="staff">Staff</option>
+                                    <select class="chosen-select form-control" id="edit_role" name="edit_role">
                                     </select>
+                                    <small class="text-danger" id="edit_role_error"></small>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" form="edit-product-form" class="btn btn-primary">Save Changes</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+   
 
     <!-- Delete Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
@@ -262,7 +279,7 @@
     <!--**********************************
          Footer start
          ***********************************-->
-         <?php include('common/footer.php')?>
+    <?php include('common/footer.php')?>
     <!--**********************************
          Footer end
          ***********************************-->
@@ -275,7 +292,7 @@
          ***********************************-->
     <?php include('common/js_files.php')?>
     <script src="<?= base_url()?>assets/view_js/staff.js"></script>
-   
+
 </body>
 
 </html>
