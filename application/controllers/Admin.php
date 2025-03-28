@@ -1104,4 +1104,111 @@ class Admin extends CI_Controller
 		}
 	}
 
+	public function add_product_attributes_value(){
+		$response['product_attributes'] = $this->model->selectWhereData('tbl_product_attributes', array('is_delete' => 1), "*", false, array('id', "DESC"));
+		$this->load->view('inventory_manager/add_product_attributes_value',$response);
+	}
+	public function get_product_attributes_value_detail()
+	{
+		$response['data'] = $this->Product_attribute_model->get_product_attributes_value_detail(); // Correctly access the model
+		echo json_encode($response);
+	}
+	public function save_product_attributes_value()
+	{
+		$fk_product_attribute_id = $this->input->post('fk_product_attribute_id');
+		$attribute_value = $this->input->post('attribute_value');
+		$this->form_validation->set_rules('fk_product_attribute_id', 'Product Attribute', 'required|trim');
+		$this->form_validation->set_rules('attribute_value', 'Product Attribute Value', 'required|trim|regex_match[/^[a-zA-Z ]+$/]');
+		if ($this->form_validation->run() == FALSE) {
+			// Return validation errors as JSON (No page reload)
+			$response = [
+				'status' => 'error',
+				'fk_product_attribute_id_error' => form_error('fk_product_attribute_id'),
+				'attribute_value_error' => form_error('attribute_value'),
+			];
+		} else {
+			$count = $this->model->CountWhereRecord('tbl_product_attributes_values', array('attribute_value' => $attribute_value, 'is_delete' => 1));
+			if ($count == 1) {
+				$response = ["status" => "error", 'attribute_value_error' => "Product Attribute Value Already Exist"];
+			} else {
+				$data = array(
+					'fk_product_attribute_id' => $fk_product_attribute_id,
+					'attribute_value' => $attribute_value,
+				);
+				$this->model->insertData('tbl_product_attributes_values', $data);
+				$response = ["status" => "success", "message" => "Product Attribute Value added successfully"];
+			}
+		}
+		echo json_encode($response); // Return response as JSON
+	}
+	public function get_product_attributes_value_detail_id()
+	{
+		$id = $this->input->post('id'); 	
+		$product_attributes_values = $this->Product_attribute_model->get_product_attributes_value_detail_id($id);
+		if ($product_attributes_values) {
+			echo json_encode(["status" => "success", "data" => $product_attributes_values]);
+		} else {
+			echo json_encode(["status" => "error", "message" => "Product Attribute Value not found"]);
+		}
+	}
+	public function update_product_attributes_value()
+	{
+		// Set validation rules
+		$this->form_validation->set_rules('edit_attribute_value', 'Attribute Value', 'required|trim|min_length[2]|max_length[100]');
+		$this->form_validation->set_rules('edit_fk_product_attribute_id', 'Product Attribute', 'required|trim');
+
+		// Run validation
+		if ($this->form_validation->run() == FALSE) {
+			$response = [
+				"status" => "error",
+				"errors" => [
+					"edit_attribute_value" => form_error('edit_attribute_value'),
+					"edit_fk_product_attribute_id" => form_error('edit_fk_product_attribute_id'),
+				]
+			];
+			echo json_encode($response);
+			return;
+		}
+
+		// Get input data
+		$id = $this->input->post('edit_product_attribute_value_id');
+		$attribute_value = $this->input->post('edit_attribute_value');
+		
+		$count = $this->model->CountWhereRecord('tbl_product_attributes_values', array('attribute_value' => $attribute_value, 'id !=' => $id, 'is_delete' => 1));	
+		if ($count == 1) {
+			$response = ["status" => "error", 'attribute_type_error' => "Product Attribute Value Already Exist"];
+			echo json_encode($response);
+			return;
+		}else{
+			$updateData = [
+				'attribute_value' => $attribute_value,
+			];
+				
+			$updated = $this->model->updateData('tbl_product_attributes_values', $updateData, ['id' => $id]);
+			if ($updated) {
+				echo json_encode(["status" => "success", "message" => "Attribute Value updated successfully."]);
+			} else {
+				echo json_encode(["status" => "error", "message" => "Failed to update attribute value."]);
+			}
+			
+		}
+	}
+	public function delete_product_attributes_value()
+	{
+		$id = $this->input->post('id'); // Get the flavour ID from AJAX
+		if (!$id) {
+			echo json_encode(['status' => 'error', 'message' => 'Invalid product Attribute Value ID']);
+			return;
+		}
+
+		$result = $this->model->updateData('tbl_product_attributes_values', ['is_delete' => '0'], ['id' => $id]); // Soft delete
+
+		if ($result) {
+			echo json_encode(['status' => 'success', 'message' => 'Product Attribute Value deleted successfully']);
+		} else {
+			echo json_encode(['status' => 'error', 'message' => 'Failed to delete Product Attribute Value']);
+		}
+	}
+
+	
 }
