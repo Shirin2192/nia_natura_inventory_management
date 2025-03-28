@@ -9,6 +9,7 @@ class Admin extends CI_Controller
 		parent::__construct();
 		$this->load->model('Product_model'); // Load the Product_model
 		$this->load->model('user_model'); // Load the Product_model
+		$this->load->model('Product_attribute_model'); // Ensure the model is loaded
 	}
 	// Default method for the Admin controller
 	public function index()
@@ -993,7 +994,7 @@ class Admin extends CI_Controller
 	}
 	public function get_product_attribute_detail()
 	{
-		$this->load->model('Product_attribute_model'); // Ensure the model is loaded
+		
 		$response['data'] = $this->Product_attribute_model->get_product_attribute_detail(); // Correctly access the model
 		echo json_encode($response);
 	}
@@ -1030,18 +1031,77 @@ class Admin extends CI_Controller
 		}
 		echo json_encode($response); // Return response as JSON
 	}
-	// public function get_product_attributes_details()
-	// {
-	// 	$id = $this->input->post('id'); // Retrieve flavour ID from POST request		
-	// 	if (!$id) {
-	// 		echo json_encode(["status" => "error", "message" => "Invalid request"]);
-	// 		return;
-	// 	}
-	// 	$product_attributes = $this->model->selectWhereData('tbl_product_attributes', array('id' => $id, 'is_delete' => 1));
-	// 	if ($product_attributes) {
-	// 		echo json_encode(["status" => "success", "product_attributes" => $product_attributes]);
-	// 	} else {
-	// 		echo json_encode(["status" => "error", "message" => "Product Attribute not found"]);
-	// 	}
-	// }
+	public function get_product_attribute_detail_id()
+	{
+		$id = $this->input->post('id'); 	
+		$product_attributes = $this->Product_attribute_model->get_product_attribute_detail_id($id);
+		if ($product_attributes) {
+			echo json_encode(["status" => "success", "data" => $product_attributes]);
+		} else {
+			echo json_encode(["status" => "error", "message" => "Product Attribute not found"]);
+		}
+	}
+	public function update_product_attribute()
+	{
+		// Set validation rules
+		$this->form_validation->set_rules('edit_attribute_name', 'Attribute Name', 'required|trim|min_length[2]|max_length[100]');
+		$this->form_validation->set_rules('edit_attribute_type', 'Attribute Type', 'required|in_list[text,dropdown]');
+
+		// Run validation
+		if ($this->form_validation->run() == FALSE) {
+			$response = [
+				"status" => "error",
+				"errors" => [
+					"edit_attribute_name" => form_error('edit_attribute_name'),
+					"edit_attribute_type" => form_error('edit_attribute_type'),
+				]
+			];
+			echo json_encode($response);
+			return;
+		}
+
+		// Get input data
+		$id = $this->input->post('edit_attribute_id');
+		$attribute_name = $this->input->post('edit_attribute_name');
+		$attribute_type = $this->input->post('edit_attribute_type');
+		
+		$count = $this->model->CountWhereRecord('tbl_product_attributes', array('attribute_name' => $attribute_name, 'id !=' => $id, 'is_delete' => 1));	
+		if ($count == 1) {
+			$response = ["status" => "error", 'attribute_type_error' => "Product Attribute Already Exist"];
+			echo json_encode($response);
+			return;
+		}else{
+			$updateData = [
+				'attribute_name' => $attribute_name,
+				'attribute_type' => $attribute_type
+			];
+				
+			$updated = $this->model->updateData('tbl_product_attributes', $updateData, ['id' => $id]);
+			// Check if update was successful
+	
+			if ($updated) {
+				echo json_encode(["status" => "success", "message" => "Attribute updated successfully."]);
+			} else {
+				echo json_encode(["status" => "error", "message" => "Failed to update attribute."]);
+			}
+
+		}		
+	}
+	public function delete_product_attribute()
+	{
+		$id = $this->input->post('id'); // Get the flavour ID from AJAX
+		if (!$id) {
+			echo json_encode(['status' => 'error', 'message' => 'Invalid product Attribute  ID']);
+			return;
+		}
+
+		$result = $this->model->updateData('tbl_product_attributes', ['is_delete' => '0'], ['id' => $id]); // Soft delete
+
+		if ($result) {
+			echo json_encode(['status' => 'success', 'message' => 'Product Attribute deleted successfully']);
+		} else {
+			echo json_encode(['status' => 'error', 'message' => 'Failed to delete Product Attribute']);
+		}
+	}
+
 }

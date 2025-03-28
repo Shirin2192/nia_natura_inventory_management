@@ -104,70 +104,120 @@
             </div>
         </div>
 
-        <div class="modal fade" id="viewProductTypeModal" tabindex="-1" aria-labelledby="viewProductTypeLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="viewProductTypeLabel">View Product Type</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+        <div class="modal fade" id="viewProductAttributeModal" tabindex="-1" role="dialog" aria-labelledby="viewProductAttributeModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewProductAttributeModalLabel">View Attribute</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Product Type:</strong> <span id="view_product_type"></span></p>
+                <p><strong>Attribute Name:</strong> <span id="view_attribute_name"></span></p>
+                <p><strong>Attribute Type:</strong> <span id="view_attribute_type"></span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Product Attribute Modal -->
+<div class="modal fade" id="editProductAttributeModal" tabindex="-1" role="dialog" aria-labelledby="editProductAttributeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+        
+            <!-- Modal Header -->
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editProductAttributeModalLabel">
+                    <i class="icon-pencil"></i> Edit Attribute
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <form id="editAttributeForm">
+                    
+                    <!-- Hidden Input for Attribute ID -->
+                    <input type="hidden" id="edit_attribute_id" name="edit_attribute_id">
+
+                    <!-- Product Type (Readonly) -->
+                    <div class="form-group">
+                        <label for="edit_product_type">Product Type</label>
+                        <span class="form-control bg-light" id="edit_product_type" name="edit_product_type" readonly></span>
+                    </div>
+
+                    <!-- Attribute Name -->
+                    <div class="form-group">
+                        <label for="edit_attribute_name">Attribute Name</label>
+                        <input type="text" class="form-control" id="edit_attribute_name" name="edit_attribute_name" required>
+                    </div>
+
+                    <!-- Attribute Type -->
+                    <div class="form-group">
+                        <label for="edit_attribute_type">Attribute Type</label>
+                        <select class="chosen-select form-control" id="edit_attribute_type" name="edit_attribute_type">
+                            <option value="text">Text</option>
+                            <option value="dropdown">Dropdown</option>
+                        </select>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-primary">
+                             Save Changes
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="icon-close"></i> Cancel
                         </button>
                     </div>
-                    <div class="modal-body">
-                        <p><strong>Product Type Name:</strong> <span id="view_product_type_name"></span></p>
-                    </div>
-                </div>
-            </div>
+                
+                </form>
+            </div>        
         </div>
+    </div>
+</div>
+<div class="modal fade" id="deleteProductAttributeModal" tabindex="-1" role="dialog" aria-labelledby="deleteProductAttributeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+        
+            <!-- Modal Header -->
+            <div class="modal-header ">
+                <h5 class="modal-title" id="deleteProductAttributeModalLabel">
+                     Confirm Delete
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
 
-        <div class="modal fade" id="editProductTypeModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editModalLabel">Edit Product Type</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <form id="editProductTypeForm">
-                        <div class="modal-body">
-                            <div class="row">
-                                <div class="col-lg-6 mb-3">
-                                    <div class="form-group">
-                                        <input type="hidden" class="form-control" id="edit_id" name="edit_id">
-                                        <label class="col-form-label" for="edit_product_type_name">Product Type <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="edit_product_type_name" name="edit_product_type_name" placeholder="Enter Product Type Name">
-                                        <span id="edit_product_type_name_error" class="text-danger"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Close</button>
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                        </div>
-                    </form>
-                </div>
+            <!-- Modal Body -->
+            <div class="modal-body text-center">
+                <p class="font-weight-bold text-dark">
+                    Are you sure you want to delete this attribute type?
+                </p>
+                <input type="hidden" id="delete_attribute_id"> <!-- Hidden field for attribute ID -->
             </div>
-        </div>
 
-        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteModalLabel">Delete Product Type</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        Are you sure you want to delete this product type?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="close btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
-                        <button type="button" class="btn btn-danger" id="confirm-delete">Delete</button>
-                    </div>
-                </div>
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                
+                <button type="button" class="btn btn-primary" id="confirmDeleteAttribute">
+                   Delete
+                </button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                   Cancel
+                </button>
             </div>
+
         </div>
+    </div>
+</div>
+
+
 
         <?php include('common/footer.php') ?>
     </div>
