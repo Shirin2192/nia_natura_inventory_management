@@ -23,7 +23,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="<?= base_url()?>admin/add_product_attribute" aria-expanded="false">
+                        <a href="<?= base_url()?>admin/add_product_attributes" aria-expanded="false">
                             <i class="icon-star menu-icon"></i> <span class="nav-text"> Product Attribute</span>
                         </a>
                     </li>

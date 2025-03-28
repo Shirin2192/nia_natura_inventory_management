@@ -57,7 +57,7 @@
                 <div class="col p-md-0">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="<?=base_url()?>admin">Dashboard</a></li>
-                        <li class="breadcrumb-item active"><a href="<?=base_url()?>admin/add_product_type">Product Type</a>
+                        <li class="breadcrumb-item active"><a href="<?=base_url()?>admin/add_product_type_name">Product Type</a>
                         </li>
                     </ol>
                 </div>
@@ -68,16 +68,17 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-body">
-                                <form id="flavourForm">
+                                <form id="ProductTypeForm">
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="col-form-label" for="product_type">Product Type <span
+                                                <label class="col-form-label" for="product_type_name">Product Type <span
                                                         class="text-danger">*</span>
                                                 </label>
-                                                <input type="text" class="form-control" id="product_type"
-                                                    name="product_type" placeholder="Enter Product Type</th                                                <small class="text-danger" id="product_type_error"></small>
-                                                <!-- Error message here -->
+                                                <input type="text" class="form-control" id="product_type_name"
+                                                    name="product_type_name" placeholder="Enter Product Type">                                              <small class="text-danger" id="product_type_name_error"></small>
+                                                    <small class="text-danger" id="product_type_name_error"></small>
+                                                    <!-- Error message here -->
                                             </div>
                                         </div>
 
@@ -102,14 +103,14 @@
                         <div class="card">
                             <div class="card-body">
                                 <h5>Product Type List</h5>
-                                <table id="flavourTable" class="display">
+                                <table id="productTypeTable" class="display">
                                     <thead>
                                         <tr>
+                                            <th>ID</th>
                                             <th>Product Type</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
-
                                 </table>
                             </div>
                         </div>
@@ -126,26 +127,26 @@
          ***********************************-->
     <!-- View Modal -->
     <!-- Bootstrap Modal -->
-    <!-- Flavour Details Modal -->
-    <div class="modal fade" id="ProductTypeModal" tabindex="-1" role="dialog" aria-labelledby="ProductTypeModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="ProductTypeModalLabel">Product Type Details</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="ProductTypeContent">
-                    <!-- ProductType details will be loaded here -->
-                </div>
+    <!-- View Product Type Modal -->
+<div class="modal fade" id="viewProductTypeModal" tabindex="-1" aria-labelledby="viewProductTypeLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewProductTypeLabel">View Product Type</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- <p><strong>ID:</strong> <span id="view_id"></span></p> -->
+                <p><strong>Product Type Name:</strong> <span id="view_product_type_name"></span></p>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Edit Product Modal -->
-    <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal fade" id="editProductTypeModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -154,19 +155,19 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form id="edit_flavour_form">
+                <form id="editProductTypeForm">
                     <div class="modal-body">
 
                         <div class="row">
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <input type="hidden" class="form-control" id="edit_flavour_id"
-                                        name="edit_flavour_id">
-                                    <label class="col-form-label" for="edit_product_type">Product Type</than
+                                    <input type="hidden" class="form-control" id="edit_id"
+                                        name="edit_id">
+                                    <label class="col-form-label" for="edit_product_type_name">Product Type</than
                                             class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="edit_product_type"
-                                        name="edit_product_type" placeholder="Enter Product Name">
-                                    <span id="edit_product_type_error" class="text-danger"></span>
+                                    <input type="text" class="form-control" id="edit_product_type_name"
+                                        name="edit_product_type_name" placeholder="Enter Product Type Name">
+                                    <span id="edit_product_type_name_error" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>
@@ -215,7 +216,7 @@
          Scripts
          ***********************************-->
     <?php include('common/js_files.php')?>
-    <script src="<?= base_url()?>assets/view_js/product_type.js"></script>
+    <script src="<?= base_url()?>assets/view_js/product_types.js"></script>
 
 </body>
 

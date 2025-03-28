@@ -895,4 +895,153 @@ class Admin extends CI_Controller
 		$data['products'] = $this->model->selectWhereData('tbl_product', array('is_delete' => 1), "*", false, array('id', "DESC"));
 		$this->load->view('inventory_manager/order_details');
 	}
+
+	public function add_product_type()
+	{
+		$admin_session = $this->session->userdata('admin_session');
+		if (!$admin_session) {
+			redirect(base_url('common/index'));
+		} else {
+			$this->load->view('inventory_manager/add_product_type');
+		}
+	}
+	public function fetch_product_type()
+	{
+		$response = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
+		echo json_encode($response);
+	}
+	public function save_product_types()
+	{
+		$product_type_name = $this->input->post('product_type_name');
+		$this->form_validation->set_rules('product_type_name', 'Product Type Name', 'required|trim|regex_match[/^[a-zA-Z ]+$/]');
+		if ($this->form_validation->run() == FALSE) {
+			// Return validation errors as JSON (No page reload)
+			$response = [
+				'status' => 'error',
+				'product_type_name_error' => form_error('product_type_name'),
+			];
+		} else {
+			$count = $this->model->CountWhereRecord('tbl_product_types', array('product_type_name' => $product_type_name, 'is_delete' => 1));
+			if ($count == 1) {
+				$response = ["status" => "error", 'product_type_name_error' => "Product Type Already Exist"];
+			} else {
+				$data = array(
+					'product_type_name' => $product_type_name,
+				);
+				$this->model->insertData('tbl_product_types', $data);
+				$response = ["status" => "success", "message" => "Product Type added successfully"];
+			}
+		}
+		echo json_encode($response); // Return response as JSON
+	}
+	public function get_product_types_details()
+	{
+		$id = $this->input->post('id'); // Retrieve flavour ID from POST request		
+		if (!$id) {
+			echo json_encode(["status" => "error", "message" => "Invalid request"]);
+			return;
+		}
+		$product_types = $this->model->selectWhereData('tbl_product_types', array('id' => $id, 'is_delete' => 1));
+		if ($product_types) {
+			echo json_encode(["status" => "success", "product_type" => $product_types]);
+		} else {
+			echo json_encode(["status" => "error", "message" => "Flavour not found"]);
+		}
+	}
+	public function update_product_types()
+	{
+		$flavour_id = $this->input->post('edit_id');
+		$product_type_name = $this->input->post('edit_product_type_name');
+		$this->form_validation->set_rules('edit_product_type_name', 'Product Type Name', 'required|trim|regex_match[/^[a-zA-Z ]+$/]');
+		if ($this->form_validation->run() == FALSE) {
+			$response = [
+				'status' => 'error',
+				'edit_product_type_name_error' => form_error('edit_product_type_name'),
+			];
+		} else {
+			$count = $this->model->CountWhereRecord('tbl_product_types', array('product_type_name' => $product_type_name, 'id !=' => $flavour_id));
+			if ($count == 1) {
+				$response = ["status" => "error", 'product_type_name_error' => "Product Type Already Exist"];
+			} else {
+				$update_data = ['product_type_name' => $product_type_name];
+
+				$this->model->updateData('tbl_product_types', $update_data, ['id' => $flavour_id]);
+
+				$response = ["status" => "success", "message" => "Product Type updated successfully"];
+			}
+		}
+		echo json_encode($response);
+	}
+	public function delete_product_type()
+	{
+		$id = $this->input->post('id'); 
+		if (!$id) {
+			echo json_encode(['status' => 'error', 'message' => 'Invalid product type ID']);
+			return;
+		}
+		$result = $this->model->updateData('tbl_product_types', ['is_delete' => '0'], ['id' => $id]); // Soft delete	
+		if ($result) {
+			echo json_encode(['status' => 'success', 'message' => 'Product Type deleted successfully']);
+		} else {
+			echo json_encode(['status' => 'error', 'message' => 'Failed to delete Product Type']);
+		}
+	}
+
+	public function add_product_attributes(){
+		$response['product_types'] = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
+		$this->load->view('inventory_manager/add_product_attributes',$response);
+	}
+	public function get_product_attribute_detail()
+	{
+		$this->load->model('Product_attribute_model'); // Ensure the model is loaded
+		$response['data'] = $this->Product_attribute_model->get_product_attribute_detail(); // Correctly access the model
+		echo json_encode($response);
+	}
+	public function save_product_attributes()
+	{
+		$fk_product_type_id = $this->input->post('fk_product_type_id');
+		$attribute_name = $this->input->post('attribute_name');
+		$attribute_type = $this->input->post('attribute_type');
+
+		$this->form_validation->set_rules('attribute_type', 'Product Attribute Type', 'required|trim');
+		$this->form_validation->set_rules('fk_product_type_id', 'Product Type', 'required|trim');
+		$this->form_validation->set_rules('attribute_name', 'Product Attribute Name', 'required|trim|regex_match[/^[a-zA-Z ]+$/]');
+		if ($this->form_validation->run() == FALSE) {
+			// Return validation errors as JSON (No page reload)
+			$response = [
+				'status' => 'error',
+				'fk_product_type_id_error' => form_error('fk_product_type_id'),
+				'attribute_name_error' => form_error('attribute_name'),
+				'attribute_type_error' => form_error('attribute_type'),
+			];
+		} else {
+			$count = $this->model->CountWhereRecord('tbl_product_attributes', array('attribute_name' => $attribute_name, 'attribute_type' => $attribute_type, 'is_delete' => 1));
+			if ($count == 1) {
+				$response = ["status" => "error", 'attribute_type_error' => "Product Attribute Already Exist"];
+			} else {
+				$data = array(
+					'fk_product_type_id' => $fk_product_type_id,
+					'attribute_name' => $attribute_name,
+					'attribute_type' => $attribute_type,
+				);
+				$this->model->insertData('tbl_product_attributes', $data);
+				$response = ["status" => "success", "message" => "Product Attribute added successfully"];
+			}
+		}
+		echo json_encode($response); // Return response as JSON
+	}
+	// public function get_product_attributes_details()
+	// {
+	// 	$id = $this->input->post('id'); // Retrieve flavour ID from POST request		
+	// 	if (!$id) {
+	// 		echo json_encode(["status" => "error", "message" => "Invalid request"]);
+	// 		return;
+	// 	}
+	// 	$product_attributes = $this->model->selectWhereData('tbl_product_attributes', array('id' => $id, 'is_delete' => 1));
+	// 	if ($product_attributes) {
+	// 		echo json_encode(["status" => "success", "product_attributes" => $product_attributes]);
+	// 	} else {
+	// 		echo json_encode(["status" => "error", "message" => "Product Attribute not found"]);
+	// 	}
+	// }
 }
