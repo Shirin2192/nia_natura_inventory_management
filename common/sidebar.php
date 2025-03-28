@@ -12,11 +12,11 @@
                             <i class="icon-user menu-icon"></i> <span class="nav-text"> Staff</span>
                         </a>
                     </li>
-                    <li>
+                    <!-- <li>
                         <a href="<?= base_url()?>admin/add_flavour" aria-expanded="false">
                             <i class="icon-star menu-icon"></i> <span class="nav-text"> Category</span>
                         </a>
-                    </li>
+                    </li> -->
                     <li>
                         <a href="<?= base_url()?>admin/add_product_type" aria-expanded="false">
                             <i class="icon-star menu-icon"></i> <span class="nav-text"> Product Type</span>
@@ -32,7 +32,7 @@
                             <i class="icon-star menu-icon"></i> <span class="nav-text"> Product Attribute Value</span>
                         </a>
                     </li>
-                    <li>
+                    <!-- <li>
                         <a href="<?= base_url()?>admin/add_bottle_size" aria-expanded="false">
                             <i class="icon-star menu-icon"></i> <span class="nav-text"> Bottle Size</span>
                         </a>
@@ -41,7 +41,7 @@
                         <a href="<?= base_url()?>admin/add_bottle_type" aria-expanded="false">
                             <i class="icon-star menu-icon"></i> <span class="nav-text"> Bottle Type</span>
                         </a>
-                    </li>
+                    </li> -->
 					<li>
                         <a href="<?= base_url()?>admin/add_sale_channel" aria-expanded="false">
                             <i class="icon-star menu-icon"></i> <span class="nav-text"> Sale Channel</span>
