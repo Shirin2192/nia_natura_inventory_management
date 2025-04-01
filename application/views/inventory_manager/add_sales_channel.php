@@ -70,6 +70,21 @@
                             <div class="card-body">
                                 <form id="SaleChannelForm">
                                     <div class="row">
+                                    <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="sale_channel">Channel Type<span
+                                                        class="text-danger">*</span>
+                                                </label>
+                                               <select class="chosen-select form-control" id="channel_type" name="channel_type">
+                                                    <option value=""></option>
+                                                    <option value="Online">Online</option>
+                                                    <option value="Offline">Offline</option>
+                                               </select>
+                                                <small class="text-danger" id="channel_type_error"></small>
+                                                <!-- Error message here -->
+                                            </div>
+                                        </div>
+
                                         <div class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="col-form-label" for="sale_channel">Sale Channel <span
@@ -104,6 +119,7 @@
                                 <table id="SalechannelTable" class="display">
                                     <thead>
                                         <tr>
+                                            <th>Channel Type</th>
                                             <th>Sale Channel</th>
                                             <th>Action</th>
                                         </tr>
@@ -151,9 +167,20 @@
                     <div class="modal-body">
 
                         <div class="row">
-                            <div class="col-lg-6 mb-3">
+                        <div class="col-lg-6 mb-3">
                                 <div class="form-group">
                                     <input type="hidden" name="edit_sale_channel_id" id="edit_sale_channel_id">
+                                    <label class="col-form-label" for="edit_channel_type">Channel Type<span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="edit_channel_type"
+                                        name="edit_channel_type" placeholder="Enter Channel Type" readonly>
+                                    <small class="text-danger" id="edit_channel_type_error"></small>
+                                    <!-- Error message here -->
+                                </div>
+                            </div>    
+                        <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                   
                                     <label class="col-form-label" for="edit_sale_channel">Sale Channel <span
                                             class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="edit_sale_channel"
@@ -162,6 +189,7 @@
                                     <!-- Error message here -->
                                 </div>
                             </div>
+
                         </div>
 
                     </div>

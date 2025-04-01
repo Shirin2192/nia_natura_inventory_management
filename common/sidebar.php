@@ -28,7 +28,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="<?= base_url()?>admin/add_product_attribute_value" aria-expanded="false">
+                        <a href="<?= base_url()?>admin/add_product_attributes_value" aria-expanded="false">
                             <i class="icon-star menu-icon"></i> <span class="nav-text"> Product Attribute Value</span>
                         </a>
                     </li>

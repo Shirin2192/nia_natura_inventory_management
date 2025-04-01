@@ -1,3 +1,7 @@
+$(".chosen-select").chosen({
+    allow_single_deselect: true,
+    heigth: '100%'
+});
 $(document).ready(function () {
     loadSaleChannel();
 
@@ -16,15 +20,16 @@ $(document).ready(function () {
                     destroy: true, // Ensure it gets reinitialized
                     data: data,
                     columns: [
+                        { data: "channel_type" },
                         { data: "sale_channel" },
                         {
                             data: "id",
                             render: function (data) {
                                 return `
-                                    <button class="btn btn-info btn-sm" onclick="viewSaleChannel(${data})">
+                                    <button class="btn btn-info btn-sm view-sale-channel"data-id="${data}" data-target="#sale_channelModal">
                                         <i class="icon-eye menu-icon"></i>
                                     </button>
-                                    <button class="btn btn-warning btn-sm" onclick="editSaleChannel(${data})">
+                                    <button class="btn btn-warning btn-sm edit-sale-channel" data-id="${data}" data-target="#edit_sale_channel_modal">
                                         <i class="icon-pencil menu-icon"></i>
                                     </button>
                                     <button class="btn btn-danger btn-sm" onclick="deleteSaleChannel(${data})">
@@ -73,56 +78,60 @@ $(document).ready(function () {
     });
 });
 
-function viewSaleChannel(id) {
-    $.ajax({
-        url: frontend + "admin/get_sale_channel_details", // Ensure this function exists in the controller
-        type: "POST",
-        data: { id: id }, // Sending ID as POST data
-        dataType: "json",
-        success: function (data) {
-            console.log(data);
-            
-            if (data.status === "success") {
-                $("#sale_channelContent").html("<strong>Sale Channel:</strong> " + data.sale_channel.sale_channel);
-                $("#sale_channelModal").modal("show"); // Open the modal
-            } else {
-                swal({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Error fetching Sale Channel details!",
-                });
-            }
-        },
-        error: function () {
-            console.error("Failed to fetch Sale Channel details.");
-        }
-    });
-}
+$(document).on("click", ".view-sale-channel", function () {
+    var channelId = $(this).data("id");
 
-function editSaleChannel(id) {
     $.ajax({
-        url: frontend + "admin/get_sale_channel_details", // Backend route to get details
+        url: frontend + "admin/get_sale_channel_details", // Backend URL
         type: "POST",
-        data: { id: id },
+        data: { id: channelId },
         dataType: "json",
-        success: function (data) {
-            if (data.status === "success") {
-                $("#edit_sale_channel_id").val(data.sale_channel.id); // Set hidden input for ID
-                $("#edit_sale_channel").val(data.sale_channel.sale_channel); // Set input field
-                $("#edit_sale_channel_modal").modal("show"); // Open the modal
+        success: function (response) {
+            if (response.status == "success") {
+                // Populate modal content
+                var modalContent = `
+                    <p><strong>Channel Type:</strong> ${response.sale_channel.channel_type}</p>
+                    <p><strong>Sale Channel:</strong> ${response.sale_channel.sale_channel}</p>
+                  
+                `;
+
+                $("#sale_channelContent").html(modalContent);
+                $("#sale_channelModal").modal("show"); // Show modal
             } else {
-                swal({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Error fetching Sale Channel details!",
-                });               
+                alert("Error: Unable to fetch sale channel details.");
             }
         },
         error: function () {
-            console.error("Failed to fetch Sale Channel details.");
+            alert("Error: Could not retrieve data.");
         }
     });
-}
+});
+
+$(document).on("click", ".edit-sale-channel", function () {
+    var channelId = $(this).data("id");
+
+    $.ajax({
+        url: frontend + "admin/get_sale_channel_details", // Backend URL
+        type: "POST",
+        data: { id: channelId },
+        dataType: "json",
+        success: function (response) {
+            if (response.status == "success") {
+                // Populate fields in the modal
+                $("#edit_sale_channel_id").val(response.sale_channel.id);
+                $("#edit_sale_channel").val(response.sale_channel.sale_channel);
+                $("#edit_channel_type").val(response.sale_channel.channel_type); // Select appropriate type
+                $("#edit_sale_channel_modal").modal("show"); // Show modal
+            } else {
+                alert("Error: Unable to fetch details.");
+            }
+        },
+        error: function () {
+            alert("Error: Could not retrieve data.");
+        }
+    });
+});
+
 
 
 // Save updated Sale Channel

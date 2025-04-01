@@ -81,6 +81,221 @@ $(document).ready(function () {
     
 });
 
+$(document).ready(function () {
+    // Initialize chosen-select
+    $(".chosen-select").chosen({ width: "100%" });
+
+    // Unbind any existing change event to prevent duplicate bindings
+    $("#fk_product_types_id").off("change").on("change", function () {
+        var productTypeId = $(this).val(); // Get selected Product Type ID
+
+        if (productTypeId) {
+            $.ajax({
+                url: frontend + "admin/get_attribute_on_product_types_id", // API to get attributes
+                type: "POST",
+                data: { fk_product_types_id: productTypeId },
+                dataType: "json",
+                success: function (response) {
+                    var options = '<option value="" disabled selected>Select Attribute</option>';
+
+                    if (response.data.length === 0) {
+                        options += '<option value="" disabled selected>No attributes available</option>';
+                    }
+
+                    $.each(response.data, function (index, item) {
+                        options += `<option value="${item.id}" data-type="${item.attribute_type}">${item.attribute_name}</option>`;
+                    });
+
+                    $(".fk_product_attribute_id").html(options).trigger("chosen:updated");
+                    $("#attribute_fields_container").empty(); // Clear fields when product type changes
+                },
+                error: function () {
+                    alert("Failed to fetch attributes. Try again.");
+                }
+            });
+        } else {
+            $(".fk_product_attribute_id").html('<option value="">Select Attribute</option>').trigger("chosen:updated");
+            $("#attribute_fields_container").empty();
+        }
+    });
+
+    // Unbind and rebind change event for attribute selection
+    $(".fk_product_attribute_id").off("change").on("change", function () {
+        var selectedType = $(".fk_product_attribute_id option:selected").data("type");
+        var attributeName = $(".fk_product_attribute_id option:selected").text();
+        var attributeId = $(this).val();
+
+        if (!attributeId) {
+            $("#attribute_fields_container").empty();
+            return;
+        }
+
+        // Fetch additional data related to selected attribute type dynamically
+        $.ajax({
+            url: frontend + "admin/get_attribute_values_on_product_attributes_id", // API to get additional values
+            type: "POST",
+            data: { attribute_id: attributeId },
+            dataType: "json",
+            success: function (response) {
+                var fieldHtml = `<div class="form-group"><label>${attributeName}</label>`;
+                if (selectedType === "text") {
+                    fieldHtml += `<input type="text" name="attributes_value[]" id="attributes_value_${attributeId}" class="form-control" placeholder="Enter ${attributeName}">`;
+                } else if (selectedType === "dropdown") {
+                    fieldHtml += `<select name="attributes_value[]" id="attributes_value_${attributeId}" class="chosen-select form-control" style="width: 100%;">                                    
+                    <option value="" disabled selected>Select ${attributeName}</option>`;
+                    $.each(response.data, function (index, item) {
+                        fieldHtml += `<option value="${item.id}">${item.attribute_value}</option>`;
+                    });
+                    fieldHtml += `</select>`;
+                } else if (selectedType === "checkbox") {
+                    $.each(response.data, function (index, item) {
+                        fieldHtml += `<div>
+                                        <input type="checkbox" name="attributes_value[]" id="attributes_value_${attributeId}" value="${item.attribute_value}"> ${item.label}
+                                      </div>`;
+                    });
+                }
+                fieldHtml += `</div>`;
+                $("#attribute_fields_container").html(fieldHtml);
+                // Reinitialize Chosen Select for newly added dropdowns
+                $(".chosen-select").chosen({ width: "100%" }).trigger("chosen:updated");
+            },
+            error: function () {
+                alert("Failed to fetch attribute type values.");
+            }
+        });
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    $(".chosen-select").chosen({ width: "100%" });
+    let attributeIndex = 2; // Track new attribute indexes
+
+    document.getElementById('add_more_attributes').addEventListener('click', function () {
+        // Get the attributes container
+        let attributesContainer = document.getElementById('attributes_container');
+
+        // Create a new div for the attribute
+        let newAttributeDiv = document.createElement('div');
+        newAttributeDiv.classList.add('col-lg-6', 'mb-3');
+        newAttributeDiv.setAttribute('data-index', attributeIndex); // Add a data-index for tracking
+
+        // Create a form group for the attribute
+        let formGroupDiv = document.createElement('div');
+        formGroupDiv.classList.add('form-group');
+
+        // Create label for the select dropdown
+        let label = document.createElement('label');
+        label.classList.add('col-form-label');
+        label.setAttribute('for', 'fk_product_attribute_id_' + attributeIndex);
+        label.innerHTML = 'Attribute <span class="text-danger">*</span>';
+
+        // Create new attribute select dropdown
+        let select = document.createElement('select');
+        select.classList.add('chosen-select', 'form-control', 'fk_product_attribute_id');
+        select.setAttribute('id', 'fk_product_attribute_id_' + attributeIndex);
+        select.setAttribute('name', 'fk_product_attribute_id[]');
+        select.setAttribute('style', 'width: 100%;'); // Set width to 100% for Chosen select
+
+        // Copy existing options from the first dropdown
+        let firstDropdown = document.querySelector('.fk_product_attribute_id');
+        if (firstDropdown) {
+            select.innerHTML = firstDropdown.innerHTML;
+        }
+
+        // Create remove button
+        let removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.classList.add('btn', 'btn-danger', 'mt-2', 'remove-attribute');
+        removeButton.textContent = 'Remove';
+
+        // Append elements
+        formGroupDiv.appendChild(label);
+        formGroupDiv.appendChild(select);
+        formGroupDiv.appendChild(removeButton);
+        newAttributeDiv.appendChild(formGroupDiv);
+        attributesContainer.appendChild(newAttributeDiv);
+
+        // Initialize Chosen plugin for the new select
+        $(".chosen-select").chosen({ width: "100%" });
+
+        // Increment index for the next attribute
+        attributeIndex++;
+    });
+
+    // Remove attribute field when "Remove" button is clicked
+    document.getElementById('attributes_container').addEventListener('click', function (e) {
+        if (e.target.classList.contains('remove-attribute')) {
+            // Get the parent div (the attribute div)
+            let attributeDiv = e.target.closest('.col-lg-6');
+            let attributeIndex = attributeDiv.getAttribute('data-index'); // Get the index of the attribute
+
+            // Remove the corresponding attribute value row
+            document.querySelectorAll(`#attribute_fields_container [data-index="${attributeIndex}"]`).forEach(el => el.remove());
+
+            // Remove the attribute div itself
+            attributeDiv.remove();
+        }
+    });
+
+    // When an attribute is selected, append corresponding input field dynamically
+    $(document).on("change", ".fk_product_attribute_id", function () {
+        var selectedType = $(this).find("option:selected").data("type");
+        var attributeName = $(this).find("option:selected").text();
+        var attributeId = $(this).val();
+        var attributeDiv = $(this).closest('.col-lg-6');
+        var attributeIndex = attributeDiv.attr('data-index'); // Get the index for this attribute
+
+        if (!attributeId) {
+            $("#attribute_fields_container").find(`[data-index="${attributeIndex}"]`).remove();
+            return;
+        }
+
+        // Fetch additional data related to selected attribute type dynamically
+        $.ajax({
+            url: frontend + "admin/get_attribute_values_on_product_attributes_id", // API to get additional values
+            type: "POST",
+            data: { attribute_id: attributeId },
+            dataType: "json",
+            success: function (response) {
+                var fieldHtml = `<div class="form-group" data-index="${attributeIndex}"><label>${attributeName}</label>`;
+                if (selectedType === "text") {
+                    fieldHtml += `<input type="text" name="attributes_value[]" id="attributes_value_${attributeIndex}" class="form-control" placeholder="Enter ${attributeName}">`;
+                } else if (selectedType === "dropdown") {
+                    fieldHtml += `<select name="attributes_value[]" id="attributes_value_${attributeIndex}" class="chosen-select form-control" style="width: 100%;">                                    
+                    <option value="" disabled selected>Select ${attributeName}</option>`;
+                    $.each(response.data, function (index, item) {
+                        fieldHtml += `<option value="${item.id}">${item.attribute_value}</option>`;
+                    });
+                    fieldHtml += `</select>`;
+                } else if (selectedType === "checkbox") {
+                    $.each(response.data, function (index, item) {
+                        fieldHtml += `<div>
+                                        <input type="checkbox" name="attributes_value[]" id="attributes_value_${attributeIndex}" value="${item.attribute_value}"> ${item.label}
+                                      </div>`;
+                    });
+                }
+                fieldHtml += `</div>`;
+
+                // Append or update the attribute fields container
+                var existingField = $("#attribute_fields_container").find(`[data-index="${attributeIndex}"]`);
+                if (existingField.length > 0) {
+                    existingField.replaceWith(fieldHtml);
+                } else {
+                    $("#attribute_fields_container").append(fieldHtml);
+                }
+
+                // Reinitialize Chosen Select for newly added dropdowns
+                $(".chosen-select").chosen({ width: "100%" }).trigger("chosen:updated");
+            },
+            error: function () {
+                alert("Failed to fetch attribute type values.");
+            }
+        });
+    });
+});
+
+
+
 $(document).on("click", ".view-product", function() {
     var product_id = $(this).data("id");    
     $.ajax({

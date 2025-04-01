@@ -10,6 +10,9 @@ class Admin extends CI_Controller
 		$this->load->model('Product_model'); // Load the Product_model
 		$this->load->model('user_model'); // Load the Product_model
 		$this->load->model('Product_attribute_model'); // Ensure the model is loaded
+		$this->load->model('model'); // Load the generic model for database operations
+		$this->load->library('form_validation'); // Load form validation library
+		
 	}
 	// Default method for the Admin controller
 	public function index()
@@ -579,9 +582,9 @@ class Admin extends CI_Controller
 		if (!$admin_session) {
 			redirect(base_url('common/index'));
 		} else {
-			$response['flavour'] = $this->model->selectWhereData('tbl_flavour', array('is_delete' => 1), "*", false, array('id', "DESC"));
-			$response['bottle_size'] = $this->model->selectWhereData('tbl_bottle_size', array('is_delete' => 1), "*", false, array('id', "DESC"));
-			$response['bottle_type'] = $this->model->selectWhereData('tbl_bottle_type', array('is_delete' => 1), "*", false, array('id', "DESC"));
+			$response['product_types'] = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
+			// $response['attributes'] = $this->model->selectWhereData('tbl_attribute_master', array('is_delete' => 1), "*", false, array('id', "DESC"));
+			// $response['attribute_values'] = $this->model->selectWhereData('tbl_attribute_values', array('is_delete' => 1), "*", false, array('id', "DESC"));
 			$response['sale_channel'] = $this->model->selectWhereData('tbl_sale_channel', array('is_delete' => 1), "*", false, array('id', "DESC"));
 			$response['stock_availability'] = $this->model->selectWhereData('tbl_stock_availability', array('is_delete' => 1), "*", false, array('id', "DESC"));
 
@@ -589,18 +592,32 @@ class Admin extends CI_Controller
 		}
 	}
 
+	public function get_attribute_on_product_types_id()
+	{
+		$fk_product_types_id = $this->input->post('fk_product_types_id'); // Get the product type ID from POST request
+		$response['data'] = $this->model->selectWhereData('tbl_attribute_master', array("fk_product_type_id" => $fk_product_types_id,'is_delete' => 1), "*", false, array('id', "DESC"));
+		echo json_encode($response);
+	}
+
+	public function get_attribute_values_on_product_attributes_id()
+	{
+		$fk_product_attributes_id = $this->input->post('attribute_id'); // Get the product attribute ID from POST request
+		$response['data'] = $this->model->selectWhereData('tbl_attribute_values', array("fk_attribute_id" => $fk_product_attributes_id,'is_delete' => 1), "*", false, array('id', "DESC"));
+		echo json_encode($response);
+	}
+
 	public function save_product()
 	{
 		if ($this->input->server('REQUEST_METHOD') === 'POST') {
 			$response = ['status' => 'error', 'errors' => []];
-
+			
 			// Get input values
 			$product_name = $this->input->post('product_name');
 			$product_sku_code = $this->input->post('product_sku_code');
 			$batch_no = $this->input->post('batch_no');
-			$fk_flavour_id = $this->input->post('fk_flavour_id');
-			$fk_bottle_size_id = $this->input->post('fk_bottle_size_id');
-			$fk_bottle_type_id = $this->input->post('fk_bottle_type_id');
+			// $fk_flavour_id = $this->input->post('fk_flavour_id');
+			// $fk_bottle_size_id = $this->input->post('fk_bottle_size_id');
+			// $fk_bottle_type_id = $this->input->post('fk_bottle_type_id');
 			$barcode = $this->input->post('barcode');
 			$description = $this->input->post('description');
 			$purchase_price = $this->input->post('purchase_price');
@@ -608,21 +625,25 @@ class Admin extends CI_Controller
 			$selling_price = $this->input->post('selling_price');
 			$add_quantity = $this->input->post('add_quantity');
 			$stock_availability = $this->input->post('stock_availability');
-			$sale_channel = $this->input->post('sale_channel');
+			// $sale_channel = $this->input->post('sale_channel');
+
+			$fk_product_attribute_id = $this->input->post('fk_product_attribute_id'); // Example: [3, 2, 1]
+			$attributes_value = $this->input->post('attributes_value'); // Example: [19, 16, 1]
+			$fk_product_types_id = $this->input->post('fk_product_types_id');
 
 			// Validation Rules
 			$this->form_validation->set_rules('product_name', 'Product Name', 'required|trim');
 			$this->form_validation->set_rules('product_sku_code', 'Product SKU Code', 'required|trim|is_unique[tbl_product_type.product_sku_code]');
-			$this->form_validation->set_rules('fk_flavour_id', 'Flavor', 'required|trim');
-			$this->form_validation->set_rules('fk_bottle_size_id', 'Bottle Size', 'required|trim');
-			$this->form_validation->set_rules('fk_bottle_type_id', 'Bottle Type', 'required|trim');
+			// $this->form_validation->set_rules('fk_flavour_id', 'Flavor', 'required|trim');
+			// $this->form_validation->set_rules('fk_bottle_size_id', 'Bottle Size', 'required|trim');
+			// $this->form_validation->set_rules('fk_bottle_type_id', 'Bottle Type', 'required|trim');
 			$this->form_validation->set_rules('description', 'Description', 'required|trim');
 			$this->form_validation->set_rules('purchase_price', 'Purchase Price', 'required|trim');
 			$this->form_validation->set_rules('mrp', 'MRP', 'required|trim');
 			$this->form_validation->set_rules('selling_price', 'Selling Price', 'required|trim');
 			$this->form_validation->set_rules('add_quantity', 'Stock Quantity', 'required|trim');
 			$this->form_validation->set_rules('stock_availability', 'Stock Availability', 'required|trim');
-			$this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim');
+			// $this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim');
 
 			// Check validation
 			if ($this->form_validation->run() == FALSE) {
@@ -660,54 +681,73 @@ class Admin extends CI_Controller
 					}
 				}
 			}
-			$count = $this->model->CountWhereRecord('tbl_product', array('product_name' => $product_name, 'is_delete' => 1));
+			$count = $this->model->CountWhereRecord('tbl_product_master', array('product_name' => $product_name, 'is_delete' => 1));
 			if ($count == 1) {
-				$response = ["status" => "error", 'product_name_error' => "Sale Channel Already Exist"];
+				$response = ["status" => "error", 'product_name_error' => "Already Exist"];
 			} else {
 				// Insert product data
-				$product_data = ['product_name' => $product_name];
-				$product_insert_id = $this->model->insertData('tbl_product', $product_data);
+				
+				
+				// $product_category = [
+				// 	'fk_product_id' => $product_insert_id,
+				// 	'fk_flavour_id' => $fk_flavour_id,
+					
+				// ];
+				// $product_category_insert_id = $this->model->insertData('tbl_product_category', $product_category);
 
-				$product_category = [
-					'fk_product_id' => $product_insert_id,
-					'fk_flavour_id' => $fk_flavour_id,
-					'description' => $description,
-				];
-				$product_category_insert_id = $this->model->insertData('tbl_product_category', $product_category);
-
-				$product_type = [
-					'fk_product_id' => $product_insert_id,
-					'fk_product_category_id' => $product_category_insert_id,
+				$product_data = [
+					'product_name' => $product_name,				
+					// 'fk_product_category_id' => $product_category_insert_id,
 					'product_sku_code' => $product_sku_code,
-					'fk_bottle_size_id' => $fk_bottle_size_id,
-					'fk_bottle_type_id' => $fk_bottle_type_id,
-					'fk_sale_channel_id' => $sale_channel,
+					// 'fk_bottle_size_id' => $fk_bottle_size_id,
+					// 'fk_bottle_type_id' => $fk_bottle_type_id,
+					// 'fk_sale_channel_id' => $sale_channel,
 					'fk_stock_availability_id' => $stock_availability,
 					'barcode' => $barcode,
 					'batch_no' => $batch_no,
 					'images' => implode(",", $product_images), // Store multiple images as JSON
-				];
-				$product_type_insert_id = $this->model->insertData('tbl_product_type', $product_type);
-
-				$product_price = [
-					'fk_product_id' => $product_insert_id,
-					'fk_product_category_id' => $product_category_insert_id,
-					'fk_product_type_id' => $product_type_insert_id,
+					'description' => $description,
 					'purchase_price' => $purchase_price,
 					'MRP' => $mrp,
 					'selling_price' => $selling_price,
 				];
-				$product_price_insert_id = $this->model->insertData('tbl_product_price', $product_price);
+				//  print_r($product_data);
+				$product_insert_id = $this->model->insertData('tbl_product_master', $product_data);
 
+				
+
+				foreach ($fk_product_attribute_id as $key => $attribute_id) {
+					$product_attribute = [
+						'fk_product_id' => $product_insert_id,
+						'fk_product_types_id' => $fk_product_types_id,
+						'fk_attribute_id' => $attribute_id,
+						'fk_attribute_value_id' => $attributes_value[$key],
+					];
+					$this->model->insertData('tbl_product_attributes', $product_attribute);
+				}
+				// print_r($product_attributes);
+				// Insert product attributes into the database
+				
+				$product_price = [
+					'fk_product_id' => $product_insert_id,
+					// 'fk_product_category_id' => $product_category_insert_id,
+					// 'fk_product_type_id' => $product_type_insert_id,
+					'purchase_price' => $purchase_price,
+					'MRP' => $mrp,
+					'selling_price' => $selling_price,
+				];
+				$this->model->insertData('tbl_product_price', $product_price);
+				// print_r($product_price);
 				$product_inventory = [
 					'fk_product_id' => $product_insert_id,
-					'fk_product_category_id' => $product_category_insert_id,
-					'fk_product_type_id' => $product_type_insert_id,
-					'fk_product_price_id' => $product_price_insert_id,
+					// 'fk_product_category_id' => $product_category_insert_id,
+					// 'fk_product_type_id' => $product_type_insert_id,
+					// 'fk_product_price_id' => $product_price_insert_id,
 					'add_quantity' => $add_quantity,
 					'total_quantity' => $add_quantity,
 					'used_status' => 1
 				];
+				// print_r($product_inventory);
 				$product_inventory_insert_id = $this->model->insertData('tbl_product_inventory', $product_inventory);
 			}
 			if ($product_inventory_insert_id) {
@@ -1016,7 +1056,7 @@ class Admin extends CI_Controller
 				'attribute_type_error' => form_error('attribute_type'),
 			];
 		} else {
-			$count = $this->model->CountWhereRecord('tbl_product_attributes', array('attribute_name' => $attribute_name, 'attribute_type' => $attribute_type, 'is_delete' => 1));
+			$count = $this->model->CountWhereRecord('tbl_attribute_master', array('attribute_name' => $attribute_name, 'attribute_type' => $attribute_type, 'is_delete' => 1));
 			if ($count == 1) {
 				$response = ["status" => "error", 'attribute_type_error' => "Product Attribute Already Exist"];
 			} else {
@@ -1025,7 +1065,7 @@ class Admin extends CI_Controller
 					'attribute_name' => $attribute_name,
 					'attribute_type' => $attribute_type,
 				);
-				$this->model->insertData('tbl_product_attributes', $data);
+				$this->model->insertData('tbl_attribute_master', $data);
 				$response = ["status" => "success", "message" => "Product Attribute added successfully"];
 			}
 		}
@@ -1065,7 +1105,7 @@ class Admin extends CI_Controller
 		$attribute_name = $this->input->post('edit_attribute_name');
 		$attribute_type = $this->input->post('edit_attribute_type');
 		
-		$count = $this->model->CountWhereRecord('tbl_product_attributes', array('attribute_name' => $attribute_name, 'id !=' => $id, 'is_delete' => 1));	
+		$count = $this->model->CountWhereRecord('tbl_attribute_master', array('attribute_name' => $attribute_name, 'id !=' => $id, 'is_delete' => 1));	
 		if ($count == 1) {
 			$response = ["status" => "error", 'attribute_type_error' => "Product Attribute Already Exist"];
 			echo json_encode($response);
@@ -1076,7 +1116,7 @@ class Admin extends CI_Controller
 				'attribute_type' => $attribute_type
 			];
 				
-			$updated = $this->model->updateData('tbl_product_attributes', $updateData, ['id' => $id]);
+			$updated = $this->model->updateData('tbl_attribute_master', $updateData, ['id' => $id]);
 			// Check if update was successful
 	
 			if ($updated) {
@@ -1095,7 +1135,7 @@ class Admin extends CI_Controller
 			return;
 		}
 
-		$result = $this->model->updateData('tbl_product_attributes', ['is_delete' => '0'], ['id' => $id]); // Soft delete
+		$result = $this->model->updateData('tbl_attribute_master', ['is_delete' => '0'], ['id' => $id]); // Soft delete
 
 		if ($result) {
 			echo json_encode(['status' => 'success', 'message' => 'Product Attribute deleted successfully']);
@@ -1105,7 +1145,8 @@ class Admin extends CI_Controller
 	}
 
 	public function add_product_attributes_value(){
-		$response['product_attributes'] = $this->model->selectWhereData('tbl_product_attributes', array('is_delete' => 1), "*", false, array('id', "DESC"));
+		$response['product_attributes'] = $this->model->selectWhereData('tbl_attribute_master', array('is_delete' => 1), "*", false, array('id', "DESC"));
+		// print_r($response['product_attributes']);die;
 		$this->load->view('inventory_manager/add_product_attributes_value',$response);
 	}
 	public function get_product_attributes_value_detail()
@@ -1115,27 +1156,27 @@ class Admin extends CI_Controller
 	}
 	public function save_product_attributes_value()
 	{
-		$fk_product_attribute_id = $this->input->post('fk_product_attribute_id');
+		$fk_attribute_id = $this->input->post('fk_attribute_id');
 		$attribute_value = $this->input->post('attribute_value');
-		$this->form_validation->set_rules('fk_product_attribute_id', 'Product Attribute', 'required|trim');
-		$this->form_validation->set_rules('attribute_value', 'Product Attribute Value', 'required|trim|regex_match[/^[a-zA-Z ]+$/]');
+		$this->form_validation->set_rules('fk_attribute_id', 'Product Attribute', 'required|trim');
+		$this->form_validation->set_rules('attribute_value', 'Product Attribute Value', 'required|trim');
 		if ($this->form_validation->run() == FALSE) {
 			// Return validation errors as JSON (No page reload)
 			$response = [
 				'status' => 'error',
-				'fk_product_attribute_id_error' => form_error('fk_product_attribute_id'),
+				'fk_attribute_id_error' => form_error('fk_attribute_id'),
 				'attribute_value_error' => form_error('attribute_value'),
 			];
 		} else {
-			$count = $this->model->CountWhereRecord('tbl_product_attributes_values', array('attribute_value' => $attribute_value, 'is_delete' => 1));
+			$count = $this->model->CountWhereRecord('tbl_attribute_values', array('attribute_value' => $attribute_value, 'is_delete' => 1));
 			if ($count == 1) {
 				$response = ["status" => "error", 'attribute_value_error' => "Product Attribute Value Already Exist"];
 			} else {
 				$data = array(
-					'fk_product_attribute_id' => $fk_product_attribute_id,
+					'fk_attribute_id' => $fk_attribute_id,
 					'attribute_value' => $attribute_value,
 				);
-				$this->model->insertData('tbl_product_attributes_values', $data);
+				$this->model->insertData('tbl_attribute_values', $data);
 				$response = ["status" => "success", "message" => "Product Attribute Value added successfully"];
 			}
 		}
@@ -1155,15 +1196,12 @@ class Admin extends CI_Controller
 	{
 		// Set validation rules
 		$this->form_validation->set_rules('edit_attribute_value', 'Attribute Value', 'required|trim|min_length[2]|max_length[100]');
-		$this->form_validation->set_rules('edit_fk_product_attribute_id', 'Product Attribute', 'required|trim');
-
 		// Run validation
 		if ($this->form_validation->run() == FALSE) {
 			$response = [
 				"status" => "error",
 				"errors" => [
 					"edit_attribute_value" => form_error('edit_attribute_value'),
-					"edit_fk_product_attribute_id" => form_error('edit_fk_product_attribute_id'),
 				]
 			];
 			echo json_encode($response);
@@ -1171,10 +1209,10 @@ class Admin extends CI_Controller
 		}
 
 		// Get input data
-		$id = $this->input->post('edit_product_attribute_value_id');
+		$id = $this->input->post('edit_attribute_value_id');
 		$attribute_value = $this->input->post('edit_attribute_value');
 		
-		$count = $this->model->CountWhereRecord('tbl_product_attributes_values', array('attribute_value' => $attribute_value, 'id !=' => $id, 'is_delete' => 1));	
+		$count = $this->model->CountWhereRecord('tbl_attribute_values', array('attribute_value' => $attribute_value, 'id !=' => $id, 'is_delete' => 1));	
 		if ($count == 1) {
 			$response = ["status" => "error", 'attribute_type_error' => "Product Attribute Value Already Exist"];
 			echo json_encode($response);
@@ -1184,7 +1222,7 @@ class Admin extends CI_Controller
 				'attribute_value' => $attribute_value,
 			];
 				
-			$updated = $this->model->updateData('tbl_product_attributes_values', $updateData, ['id' => $id]);
+			$updated = $this->model->updateData('tbl_attribute_values', $updateData, ['id' => $id]);
 			if ($updated) {
 				echo json_encode(["status" => "success", "message" => "Attribute Value updated successfully."]);
 			} else {
@@ -1201,7 +1239,7 @@ class Admin extends CI_Controller
 			return;
 		}
 
-		$result = $this->model->updateData('tbl_product_attributes_values', ['is_delete' => '0'], ['id' => $id]); // Soft delete
+		$result = $this->model->updateData('tbl_attribute_values', ['is_delete' => '0'], ['id' => $id]); // Soft delete
 
 		if ($result) {
 			echo json_encode(['status' => 'success', 'message' => 'Product Attribute Value deleted successfully']);
