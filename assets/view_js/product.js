@@ -148,7 +148,7 @@ $(document).ready(function () {
             tr.addClass('shown');
             button.text('-').removeClass('btn-info').addClass('btn-danger'); // Change to minus sign
         }
-    });
+    });  
 });
 $(document).ready(function () {
     // Initialize chosen-select
@@ -373,20 +373,20 @@ $(document).on("click", ".view-product", function() {
         data: { product_id: product_id }, // Sending data as POST
         dataType: "json",
         success: function(response) {
-            $("#view_product_name").text(response.product.product_name);
-            $("#view_product_sku_code").text(response.product.product_sku_code);
-            $("#view_batch_no").text(response.product.batch_no);
-            $("#view_flavour_name").text(response.product.flavour_name);
-            $("#view_bottle_size").text(response.product.bottle_size);
-            $("#view_bottle_type").text(response.product.bottle_type);
-            $("#view_purchase_price").text(response.product.purchase_price);
-            $("#view_mrp").text(response.product.MRP);
-            $("#view_selling_price").text(response.product.selling_price);
-            $("#view_total_quantity").text(response.product.total_quantity);
-            $("#view_description").text(response.product.description);           
-            $("#view_availability_status").text(response.product.stock_availability);           
-            $("#view_sale_channel").text(response.product.sale_channel);          
-            $("#view_barcode").text(response.product.barcode);
+                    $('#view_product_name').text(response.product.product_name);
+                    $('#view_product_sku').text(response.product.product_sku_code);
+                    $('#view_product_type').text([...new Set(response.product.product_type_name.split(','))].join(', '));
+                    let attributes = response.product.attribute_name.split(',').map((name, index) => {
+                        return `<p><strong>${name.trim()}:</strong> ${response.product.attribute_value.split(',')[index].trim()}</p>`;
+                    }).join('');
+                    $('#view_product_attributes').html(attributes);
+                    $('#view_barcode').text(response.product.barcode);
+                    $('#view_batch_no').text(response.product.batch_no);
+                    $('#view_mrp').text(response.product.MRP);
+                    $('#view_product_price').text(response.product.purchase_price);
+                    $('#view_selling_price').text(response.product.selling_price);
+                    $('#view_product_quantity').text(response.product.total_quantity);
+                    $('#view_description').text(response.product.description.replace(/\r\n/g, '<br>'));
 
             // Handle multiple images
             var imagesContainer = $("#view_images");

@@ -792,11 +792,6 @@ class Admin extends CI_Controller
 	{
 		$id = $this->input->post('product_id');
 		$data['product'] = $this->Product_model->get_product_by_id($id);
-		$data['flavour'] = $this->model->selectWhereData('tbl_flavour', array('is_delete' => 1), "*", false, array('id', "DESC"));
-		$data['bottle_size'] = $this->model->selectWhereData('tbl_bottle_size', array('is_delete' => 1), "*", false, array('id', "DESC"));
-		$data['bottle_type'] = $this->model->selectWhereData('tbl_bottle_type', array('is_delete' => 1), "*", false, array('id', "DESC"));
-		$data['sale_channel'] = $this->model->selectWhereData('tbl_sale_channel', array('is_delete' => 1), "*", false, array('id', "DESC"));
-		$data['stock_availability'] = $this->model->selectWhereData('tbl_stock_availability', array('is_delete' => 1), "*", false, array('id', "DESC"));
 		echo json_encode($data);
 	}
 

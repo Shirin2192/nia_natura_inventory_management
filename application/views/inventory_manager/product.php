@@ -136,32 +136,34 @@
                                                 <button type="button" class="btn btn-success w-100"
                                                     id="add_more_attributes">Add More</button>
                                             </div>
-                                        </div>
-                                        <!-- Barcode -->
-                                        <div class="col-lg-6 mb-3">
-                                            <div class="form-group">
-                                                <label class="col-form-label" for="barcode">Barcode</label>
-                                                <input type="text" class="form-control" id="barcode" name="barcode"
-                                                    placeholder="Enter Barcode">
+
+                                            <!-- Barcode -->
+                                            <div class="col-lg-6 mb-3">
+                                                <div class="form-group">
+                                                    <label class="col-form-label" for="barcode">Barcode</label>
+                                                    <input type="text" class="form-control" id="barcode" name="barcode"
+                                                        placeholder="Enter Barcode">
+                                                </div>
                                             </div>
-                                        </div>
-                                        <!-- Product Description -->
-                                        <div class="col-lg-6 mb-3">
-                                            <div class="form-group">
-                                                <label class="col-form-label" for="description">Product
-                                                    Description <span class="text-danger">*</span></label>
-                                                <textarea class="form-control" id="description" name="description"
-                                                    placeholder="Enter Product Description"></textarea>
-                                                <div class="text-danger"><?= form_error('description'); ?></div>
+                                            <!-- Product Description -->
+                                            <div class="col-lg-6 mb-3">
+                                                <div class="form-group">
+                                                    <label class="col-form-label" for="description">Product
+                                                        Description <span class="text-danger">*</span></label>
+                                                    <textarea class="form-control" id="description" name="description"
+                                                        placeholder="Enter Product Description"></textarea>
+                                                    <div class="text-danger"><?= form_error('description'); ?></div>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-lg-6 mb-3">
-                                            <div class="form-group">
-                                                <label class="col-form-label" for="product_image">Product
-                                                    Image <span class="text-danger">*</span></label>
-                                                <input type="file" class="form-control" id="product_image"
-                                                    name="product_image[]" multiple>
-                                                <small class="text-muted">You can upload multiple images</small>
+
+                                            <div class="col-lg-6 mb-3">
+                                                <div class="form-group">
+                                                    <label class="col-form-label" for="product_image">Product
+                                                        Image <span class="text-danger">*</span></label>
+                                                    <input type="file" class="form-control" id="product_image"
+                                                        name="product_image[]" multiple>
+                                                    <small class="text-muted">You can upload multiple images</small>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -252,37 +254,37 @@
                     </div>
                 </div>
             </div>
-        <!-- Table to show added products -->
-        <div class="container-fluid">
-            <div class="row justify-content-center">
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-body">
+            <!-- Table to show added products -->
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-body">
 
-                            <h4 class="card-title">Product List</h4>
-                            <div class="table-responsive">
-                                <table id="product_table" class="display" style="width:100%">
-                                    <thead>
-                                        <tr>
-                                        <th></th> <!-- Expand/Collapse Button -->
-                                        <th>ID</th>
-                                        <th>Product Name</th>
-                                        <th>Purchase Price</th>
-                                        <th>Total Quantity</th>
-                                        <th>Product Types</th>
-                                        <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                </table>
+                                <h4 class="card-title">Product List</h4>
+                                <div class="table-responsive">
+                                    <table id="product_table" class="display" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th></th> <!-- Expand/Collapse Button -->
+                                                <th>ID</th>
+                                                <th>Product Name</th>
+                                                <th>Purchase Price</th>
+                                                <th>Total Quantity</th>
+                                                <th>Product Types</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+
             </div>
-
-
         </div>
-    </div>
     </div>
     <!-- Content body end -->
     <!-- View Product Modal -->
@@ -300,26 +302,34 @@
                     <div class="container-fluid">
                         <div class="row">
                             <!-- Left Column -->
-                            <div class="col-md-6">
-                                <p><strong>Product Name:</strong> <span id="view_product_name"></span></p>
-                                <p><strong>Product SKU Code:</strong> <span id="view_product_sku_code"></span></p>
-                                <p><strong>Batch No:</strong> <span id="view_batch_no"></span></p>
-                                <p><strong>Category Name:</strong> <span id="view_flavour_name"></span></p>
-                                <p><strong>Bottle Size:</strong> <span id="view_bottle_size"></span></p>
-                                <p><strong>Bottle Type:</strong> <span id="view_bottle_type"></span></p>
-                                <p><strong>Barcode:</strong> <span id="view_barcode"></span></p>
+                            <div class="col-md-12">
+                                <label><strong>Product Name:</strong></label>
+                                <p id="view_product_name"></p>
+                                <label><strong>Product SKU Code:</strong></label>
+                                <p id="view_product_sku"></p>
+                                <label><strong>Product Type:</strong></label>
+                                <p id="view_product_type"></p>
+                                <label><strong>Attributes:</strong></label>
+                                <p id="view_product_attributes"></p>
+                                <label><strong>Barcode:</strong></label>
+                                <p id="view_barcode"></p>
                             </div>
 
                             <!-- Right Column -->
-                            <div class="col-md-6">
-                                <p><strong>Product Description:</strong> <span id="view_description"></span></p>
-
-                                <p><strong>Purchase Price:</strong> <span id="view_purchase_price"></span></p>
-                                <p><strong>MRP:</strong> <span id="view_mrp"></span></p>
-                                <p><strong>Selling Price:</strong> <span id="view_selling_price"></span></p>
-                                <p><strong>Stock Quantity:</strong> <span id="view_total_quantity"></span></p>
-                                <p><strong>Availability Status:</strong> <span id="view_availability_status"></span></p>
-                                <p><strong>Sales Channels:</strong> <span id="view_sale_channel"></span></p>
+                            <div class="col-md-12">
+                                <p id="view_batch_no"></p>
+                                <label><strong>MRP:</strong></label>
+                                <p id="view_mrp"></p>
+                                <label><strong>Purchase Price:</strong></label>
+                                <p id="view_product_price"></p>
+                                <label><strong>Selling Price:</strong></label>
+                                <p id="view_selling_price"></p>
+                                <label><strong>Total Quantity:</strong></label>
+                                <p id="view_product_quantity"></p>
+                                <label><strong>Description:</strong></label>
+                                <p id="view_description"></p>
+                                <!-- <p><strong>Availability Status:</strong> <span id="view_availability_status"></span></p>
+                                <p><strong>Sales Channels:</strong> <span id="view_sale_channel"></span></p> -->
                             </div>
                             <div class="col-md-12">
                                 <p><strong>Images:</strong> <span id="view_images"></span></p>
