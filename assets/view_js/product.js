@@ -45,42 +45,6 @@ $(document).ready(function () {
         });
     });
 
-
-//     var table = $('#product_table').DataTable({
-//         "processing": true,
-//         "serverSide": false,
-//         "ajax": {
-//             "url": frontend + "admin/fetch_product_details",
-//             "type": "GET",
-//             "dataSrc": "products"
-//         },
-//         "columns": [
-//             { "data": "product_name" },
-//             { "data": "product_type_name" },
-//             { "data": "flavour_name" },
-//             { "data": "bottle_size" },
-//             { "data": "purchase_price" },
-//             { "data": "total_quantity" },
-//             { 
-//                 "data": null, 
-//                 "render": function(data, type, row) {
-//                     return `
-//                         <button class="btn btn-primary btn-sm view-product" data-id="${row.id}" data-toggle="modal" data-target="#viewProductModal">
-//                             <i class="icon-eye menu-icon"></i>
-//                         </button>
-//                         <button class="btn btn-warning btn-sm update-product" data-id="${row.id}" data-toggle="modal" data-target="#editProductModal">
-//                             <i class="icon-pencil menu-icon"></i>
-//                         </button>
-//                         <button class="btn btn-danger btn-sm delete-product" data-id="${row.id}">
-//                             <i class="icon-trash menu-icon"></i>
-//                         </button>
-//                     `;
-//                 }
-//             }
-//         ]
-//     });
-    
-// });
     function formatDetails(d) {
         let attributeTable = '<table style="border-collapse: collapse; margin-left: 50px; width: 80%;">' +
                      '<thead style="background-color: #f2f2f2; text-align: left;">' +
