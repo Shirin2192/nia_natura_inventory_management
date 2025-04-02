@@ -46,41 +46,110 @@ $(document).ready(function () {
     });
 
 
-    var table = $('#product_table').DataTable({
-        "processing": true,
-        "serverSide": false,
-        "ajax": {
-            "url": frontend + "admin/fetch_product_details",
-            "type": "GET",
-            "dataSrc": "products"
-        },
-        "columns": [
-            { "data": "product_name" },
-            { "data": "flavour_name" },
-            { "data": "bottle_size" },
-            { "data": "purchase_price" },
-            { "data": "total_quantity" },
+//     var table = $('#product_table').DataTable({
+//         "processing": true,
+//         "serverSide": false,
+//         "ajax": {
+//             "url": frontend + "admin/fetch_product_details",
+//             "type": "GET",
+//             "dataSrc": "products"
+//         },
+//         "columns": [
+//             { "data": "product_name" },
+//             { "data": "product_type_name" },
+//             { "data": "flavour_name" },
+//             { "data": "bottle_size" },
+//             { "data": "purchase_price" },
+//             { "data": "total_quantity" },
+//             { 
+//                 "data": null, 
+//                 "render": function(data, type, row) {
+//                     return `
+//                         <button class="btn btn-primary btn-sm view-product" data-id="${row.id}" data-toggle="modal" data-target="#viewProductModal">
+//                             <i class="icon-eye menu-icon"></i>
+//                         </button>
+//                         <button class="btn btn-warning btn-sm update-product" data-id="${row.id}" data-toggle="modal" data-target="#editProductModal">
+//                             <i class="icon-pencil menu-icon"></i>
+//                         </button>
+//                         <button class="btn btn-danger btn-sm delete-product" data-id="${row.id}">
+//                             <i class="icon-trash menu-icon"></i>
+//                         </button>
+//                     `;
+//                 }
+//             }
+//         ]
+//     });
+    
+// });
+    function formatDetails(d) {
+        let attributeTable = '<table border="1" cellpadding="5" cellspacing="0" style="margin-left:50px;">';
+        attributeTable += '<tr><th>Attribute</th><th>Value</th></tr>';
+        d.attributes.forEach(attr => {
+            attributeTable += `<tr><td>${attr.name}</td><td>${attr.value}</td></tr>`;
+        });
+        attributeTable += '</table>';
+
+        let productTypes = d.product_types.join(", ");
+
+        return `<b>Product Types:</b> ${productTypes}<br><br>` + attributeTable;
+    }
+
+    let table = $('#product_table').DataTable({
+        ajax: frontend + "admin/fetch_product_details", // Adjust the URL
+        columns: [
+            {
+                className: 'details-control',
+                orderable: false,
+                data: null,
+                defaultContent: '<button class="btn btn-sm btn-info toggle-details">+</button>'
+            },
+            { data: 'id' },
+            { data: 'product_name' },
+            { data: 'purchase_price' },
+            { data: 'total_quantity' },
             { 
-                "data": null, 
-                "render": function(data, type, row) {
+                data: 'product_types',
+                render: function(data) {
+                    return data.join(", ");
+                }
+            },
+            { 
+                data: 'id',
+                render: function(data) {
                     return `
-                        <button class="btn btn-primary btn-sm view-product" data-id="${row.id}" data-toggle="modal" data-target="#viewProductModal">
-                            <i class="icon-eye menu-icon"></i>
-                        </button>
-                        <button class="btn btn-warning btn-sm update-product" data-id="${row.id}" data-toggle="modal" data-target="#editProductModal">
-                            <i class="icon-pencil menu-icon"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm delete-product" data-id="${row.id}">
-                            <i class="icon-trash menu-icon"></i>
-                        </button>
-                    `;
+                         <button class="btn btn-primary btn-sm view-product" data-id="${data}" data-toggle="modal" data-target="#viewProductModal">
+                             <i class="icon-eye menu-icon"></i>
+                         </button>
+                         <button class="btn btn-warning btn-sm update-product" data-id="${data}" data-toggle="modal" data-target="#editProductModal">
+                             <i class="icon-pencil menu-icon"></i>
+                         </button>
+                         <button class="btn btn-danger btn-sm delete-product" data-id="${data}">
+                             <i class="icon-trash menu-icon"></i>
+                         </button>
+                     `;
                 }
             }
-        ]
+        ],
+        order: [[1, 'asc']]
     });
-    
-});
 
+    // Handle row expansion with plus/minus toggle
+    $('#product_table tbody').on('click', 'td.details-control .toggle-details', function() {
+        let tr = $(this).closest('tr');
+        let row = table.row(tr);
+        let button = $(this);
+
+        if (row.child.isShown()) {
+            row.child.hide();
+            tr.removeClass('shown');
+            button.text('+').removeClass('btn-danger').addClass('btn-info'); // Change to plus sign
+        } else {
+            row.child(formatDetails(row.data())).show();
+            tr.addClass('shown');
+            button.text('-').removeClass('btn-info').addClass('btn-danger'); // Change to minus sign
+        }
+    });
+});
 $(document).ready(function () {
     // Initialize chosen-select
     $(".chosen-select").chosen({ width: "100%" });

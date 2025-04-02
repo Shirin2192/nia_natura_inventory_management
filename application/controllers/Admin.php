@@ -759,8 +759,34 @@ class Admin extends CI_Controller
 	}
 	public function fetch_product_details()
 	{
-		$data['products'] = $this->Product_model->get_product_detail(); // Fetch product details
-		echo json_encode($data); // Return data as JSON response
+		$products = $this->Product_model->get_product_detail(); // Fetch product details
+		$structuredData = [];
+
+		foreach ($products as $product) {
+			$attributes = explode(',', $product['attribute_name']);
+			$values = explode(',', $product['attribute_value']);
+			$types = explode(',', $product['product_type_name']);
+
+			$productDetails = [
+				'id' => $product['id'],
+				'product_name' => $product['product_name'],
+				'purchase_price' => $product['purchase_price'],
+				'total_quantity' => $product['total_quantity'],
+				'product_types' => array_unique($types),
+				'attributes' => []
+			];
+
+			foreach ($attributes as $index => $attribute) {
+				$productDetails['attributes'][] = [
+					'name' => $attribute,
+					'value' => $values[$index] ?? ''
+				];
+			}
+
+			$structuredData[] = $productDetails;
+		}
+
+		echo json_encode(['data' => $structuredData]); // Send JSON response
 	}
 	public function view_product()
 	{
@@ -1247,6 +1273,7 @@ class Admin extends CI_Controller
 			echo json_encode(['status' => 'error', 'message' => 'Failed to delete Product Attribute Value']);
 		}
 	}
+
 
 	
 }

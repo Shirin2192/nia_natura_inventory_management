@@ -252,7 +252,6 @@
                     </div>
                 </div>
             </div>
-        </div>
         <!-- Table to show added products -->
         <div class="container-fluid">
             <div class="row justify-content-center">
@@ -265,18 +264,16 @@
                                 <table id="product_table" class="display" style="width:100%">
                                     <thead>
                                         <tr>
-                                            <th>Product Name</th>
-                                            <th>Flavor</th>
-                                            <th>Bottle Size</th>
-                                            <th>Price</th>
-                                            <th>Stock</th>
-                                            <th>Actions</th>
+                                        <th></th> <!-- Expand/Collapse Button -->
+                                        <th>ID</th>
+                                        <th>Product Name</th>
+                                        <th>Purchase Price</th>
+                                        <th>Total Quantity</th>
+                                        <th>Product Types</th>
+                                        <th>Action</th>
                                         </tr>
                                     </thead>
-
                                 </table>
-
-
                             </div>
                         </div>
                     </div>
