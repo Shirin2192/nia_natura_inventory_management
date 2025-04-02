@@ -302,37 +302,63 @@
                     <div class="container-fluid">
                         <div class="row">
                             <!-- Left Column -->
-                            <div class="col-md-12">
-                                <label><strong>Product Name:</strong></label>
-                                <p id="view_product_name"></p>
-                                <label><strong>Product SKU Code:</strong></label>
-                                <p id="view_product_sku"></p>
-                                <label><strong>Product Type:</strong></label>
-                                <p id="view_product_type"></p>
-                                <label><strong>Attributes:</strong></label>
-                                <p id="view_product_attributes"></p>
-                                <label><strong>Barcode:</strong></label>
-                                <p id="view_barcode"></p>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <h6><strong>Product Name:</strong></h6>
+                                    <p id="view_product_name" class="text-muted"></p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6><strong>Product SKU Code:</strong></h6>
+                                    <p id="view_product_sku" class="text-muted"></p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6><strong>Product Type:</strong></h6>
+                                    <p id="view_product_type" class="text-muted"></p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6><strong>Attributes:</strong></h6>
+                                    <p id="view_product_attributes" class="text-muted"></p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6><strong>Barcode:</strong></h6>
+                                    <p id="view_barcode" class="text-muted"></p>
+                                </div>
                             </div>
 
                             <!-- Right Column -->
-                            <div class="col-md-12">
-                                <p id="view_batch_no"></p>
-                                <label><strong>MRP:</strong></label>
-                                <p id="view_mrp"></p>
-                                <label><strong>Purchase Price:</strong></label>
-                                <p id="view_product_price"></p>
-                                <label><strong>Selling Price:</strong></label>
-                                <p id="view_selling_price"></p>
-                                <label><strong>Total Quantity:</strong></label>
-                                <p id="view_product_quantity"></p>
-                                <label><strong>Description:</strong></label>
-                                <p id="view_description"></p>
-                                <!-- <p><strong>Availability Status:</strong> <span id="view_availability_status"></span></p>
-                                <p><strong>Sales Channels:</strong> <span id="view_sale_channel"></span></p> -->
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <h6><strong>Batch No:</strong></h6>
+                                    <p id="view_batch_no" class="text-muted"></p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6><strong>MRP:</strong></h6>
+                                    <p id="view_mrp" class="text-muted"></p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6><strong>Purchase Price:</strong></h6>
+                                    <p id="view_product_price" class="text-muted"></p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6><strong>Selling Price:</strong></h6>
+                                    <p id="view_selling_price" class="text-muted"></p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6><strong>Total Quantity:</strong></h6>
+                                    <p id="view_product_quantity" class="text-muted"></p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6><strong>Description:</strong></h6>
+                                    <p id="view_description" class="text-muted"></p>
+                                </div>
                             </div>
+
+                            <!-- Images Section -->
                             <div class="col-md-12">
-                                <p><strong>Images:</strong> <span id="view_images"></span></p>
+                                <div class="mb-3">
+                                    <h6><strong>Images:</strong></h6>
+                                    <div id="view_images" class="d-flex flex-wrap gap-2"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
