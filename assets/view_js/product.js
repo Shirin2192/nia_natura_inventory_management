@@ -82,8 +82,15 @@ $(document).ready(function () {
     
 // });
     function formatDetails(d) {
-        let attributeTable = '<table border="1" cellpadding="5" cellspacing="0" style="margin-left:50px;">';
-        attributeTable += '<tr><th>Attribute</th><th>Value</th></tr>';
+        let attributeTable = '<table style="border-collapse: collapse; margin-left: 50px; width: 80%;">' +
+                     '<thead style="background-color: #f2f2f2; text-align: left;">' +
+                     '<tr>' +
+                     '<th style="padding: 10px; border: 1px solid #ddd;">Attribute</th>' +
+                     '<th style="padding: 10px; border: 1px solid #ddd;">Value</th>' +
+                     '</tr>' +
+                     '</thead>' +
+                     '<tbody>';
+        // attributeTable += '<tr><th>Attribute</th><th>Value</th></tr>';
         d.attributes.forEach(attr => {
             attributeTable += `<tr><td>${attr.name}</td><td>${attr.value}</td></tr>`;
         });

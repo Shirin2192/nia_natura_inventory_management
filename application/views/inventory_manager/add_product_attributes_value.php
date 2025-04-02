@@ -105,8 +105,8 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p><strong>Attribute Name:</strong> <span id="view_attribute_name"></span></p>
-                <p><strong>Attribute Type:</strong> <span id="view_attribute_value"></span></p>
+                <p><strong>Attribute Name:</strong> <span id="view_attribute_name" class="text-muted"></span></p>
+                <p><strong>Attribute Type:</strong> <span id="view_attribute_value" class="text-muted"></span></p>
             </div>
         </div>
     </div>

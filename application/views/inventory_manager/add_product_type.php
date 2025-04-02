@@ -138,8 +138,12 @@
                 </button>
             </div>
             <div class="modal-body">
-                <!-- <p><strong>ID:</strong> <span id="view_id"></span></p> -->
-                <p><strong>Product Type Name:</strong> <span id="view_product_type_name"></span></p>
+                <div class="d-flex flex-column">
+                    <p><strong>Product Type Name:</strong> <span id="view_product_type_name"></span></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

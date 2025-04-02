@@ -28,7 +28,8 @@
                 <div class="col p-md-0">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="<?= base_url() ?>admin">Dashboard</a></li>
-                        <li class="breadcrumb-item active"><a href="<?= base_url() ?>admin/add_product_type_name">Product Type</a></li>
+                        <li class="breadcrumb-item active"><a
+                                href="<?= base_url() ?>admin/add_product_type_name">Product Type</a></li>
                     </ol>
                 </div>
             </div>
@@ -42,11 +43,14 @@
                                     <div class="row">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="col-form-label" for="fk_product_type_id">Product Type <span class="text-danger">*</span></label>
-                                                <select class="chosen-select form-control" id="fk_product_type_id" name="fk_product_type_id" aria-placeholder="Select Product Type">
+                                                <label class="col-form-label" for="fk_product_type_id">Product Type
+                                                    <span class="text-danger">*</span></label>
+                                                <select class="chosen-select form-control" id="fk_product_type_id"
+                                                    name="fk_product_type_id" aria-placeholder="Select Product Type">
                                                     <option value=""></option>
                                                     <?php foreach ($product_types as $product_types_key => $product_type_row): ?>
-                                                        <option value="<?= $product_type_row['id'] ?>"><?= $product_type_row['product_type_name'] ?></option>
+                                                    <option value="<?= $product_type_row['id'] ?>">
+                                                        <?= $product_type_row['product_type_name'] ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                                 <small class="text-danger" id="fk_product_type_id_error"></small>
@@ -54,15 +58,19 @@
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="col-form-label" for="attribute_name">Attribute Name <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" id="attribute_name" name="attribute_name" placeholder="Enter Attribute Name">
+                                                <label class="col-form-label" for="attribute_name">Attribute Name <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="attribute_name"
+                                                    name="attribute_name" placeholder="Enter Attribute Name">
                                                 <small class="text-danger" id="attribute_name_error"></small>
                                             </div>
                                         </div>
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="col-form-label" for="product_type_name">Attribute Type <span class="text-danger">*</span></label>
-                                                <select class="chosen-select form-control" id="attribute_type" name="attribute_type">
+                                                <label class="col-form-label" for="product_type_name">Attribute Type
+                                                    <span class="text-danger">*</span></label>
+                                                <select class="chosen-select form-control" id="attribute_type"
+                                                    name="attribute_type">
                                                     <option value=""></option>
                                                     <option value="text">Text</option>
                                                     <option value="dropdown">Dropdown</option>
@@ -104,118 +112,124 @@
             </div>
         </div>
 
-        <div class="modal fade" id="viewProductAttributeModal" tabindex="-1" role="dialog" aria-labelledby="viewProductAttributeModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="viewProductAttributeModalLabel">View Attribute</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p><strong>Product Type:</strong> <span id="view_product_type"></span></p>
-                <p><strong>Attribute Name:</strong> <span id="view_attribute_name"></span></p>
-                <p><strong>Attribute Type:</strong> <span id="view_attribute_type"></span></p>
+        <div class="modal fade" id="viewProductAttributeModal" tabindex="-1" role="dialog"
+            aria-labelledby="viewProductAttributeModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="viewProductAttributeModalLabel">View Attribute</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p><strong>Product Type:</strong> <span id="view_product_type"></span></p>
+                        <p><strong>Attribute Name:</strong> <span id="view_attribute_name"></span></p>
+                        <p><strong>Attribute Type:</strong> <span id="view_attribute_type"></span></p>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Edit Product Attribute Modal -->
-<div class="modal fade" id="editProductAttributeModal" tabindex="-1" role="dialog" aria-labelledby="editProductAttributeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-        
-            <!-- Modal Header -->
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="editProductAttributeModalLabel">
-                    <i class="icon-pencil"></i> Edit Attribute
-                </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+        <!-- Edit Product Attribute Modal -->
+        <div class="modal fade" id="editProductAttributeModal" tabindex="-1" role="dialog"
+            aria-labelledby="editProductAttributeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+
+                    <!-- Modal Header -->
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="editProductAttributeModalLabel">
+                            <i class="icon-pencil"></i> Edit Attribute
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="modal-body">
+                        <form id="editAttributeForm">
+
+                            <!-- Hidden Input for Attribute ID -->
+                            <input type="hidden" id="edit_attribute_id" name="edit_attribute_id">
+
+                            <!-- Product Type (Readonly) -->
+                            <div class="form-group">
+                                <label for="edit_product_type">Product Type</label>
+                                <span class="form-control bg-light" id="edit_product_type" name="edit_product_type"
+                                    readonly></span>
+                            </div>
+
+                            <!-- Attribute Name -->
+                            <div class="form-group">
+                                <label for="edit_attribute_name">Attribute Name</label>
+                                <input type="text" class="form-control" id="edit_attribute_name"
+                                    name="edit_attribute_name" required>
+                            </div>
+
+                            <!-- Attribute Type -->
+                            <div class="form-group">
+                                <label for="edit_attribute_type">Attribute Type</label>
+                                <select class="chosen-select form-control" id="edit_attribute_type"
+                                    name="edit_attribute_type">
+                                    <option value="text">Text</option>
+                                    <option value="dropdown">Dropdown</option>
+                                </select>
+                            </div>
+
+                            <!-- Save Button -->
+                            <div class="text-right">
+                                <button type="submit" class="btn btn-primary">
+                                    Save Changes
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                    <i class="icon-close"></i> Cancel
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
             </div>
+        </div>
+        <div class="modal fade" id="deleteProductAttributeModal" tabindex="-1" role="dialog"
+            aria-labelledby="deleteProductAttributeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
 
-            <!-- Modal Body -->
-            <div class="modal-body">
-                <form id="editAttributeForm">
-                    
-                    <!-- Hidden Input for Attribute ID -->
-                    <input type="hidden" id="edit_attribute_id" name="edit_attribute_id">
-
-                    <!-- Product Type (Readonly) -->
-                    <div class="form-group">
-                        <label for="edit_product_type">Product Type</label>
-                        <span class="form-control bg-light" id="edit_product_type" name="edit_product_type" readonly></span>
+                    <!-- Modal Header -->
+                    <div class="modal-header ">
+                        <h5 class="modal-title" id="deleteProductAttributeModalLabel">
+                            Confirm Delete
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
 
-                    <!-- Attribute Name -->
-                    <div class="form-group">
-                        <label for="edit_attribute_name">Attribute Name</label>
-                        <input type="text" class="form-control" id="edit_attribute_name" name="edit_attribute_name" required>
+                    <!-- Modal Body -->
+                    <div class="modal-body text-center">
+                        <p class="font-weight-bold text-dark">
+                            Are you sure you want to delete this attribute type?
+                        </p>
+                        <input type="hidden" id="delete_attribute_id"> <!-- Hidden field for attribute ID -->
                     </div>
 
-                    <!-- Attribute Type -->
-                    <div class="form-group">
-                        <label for="edit_attribute_type">Attribute Type</label>
-                        <select class="chosen-select form-control" id="edit_attribute_type" name="edit_attribute_type">
-                            <option value="text">Text</option>
-                            <option value="dropdown">Dropdown</option>
-                        </select>
-                    </div>
+                    <!-- Modal Footer -->
+                    <div class="modal-footer">
 
-                    <!-- Save Button -->
-                    <div class="text-right">
-                        <button type="submit" class="btn btn-primary">
-                             Save Changes
+                        <button type="button" class="btn btn-primary" id="confirmDeleteAttribute">
+                            Delete
                         </button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                            <i class="icon-close"></i> Cancel
+                            Cancel
                         </button>
                     </div>
-                
-                </form>
-            </div>        
+
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-<div class="modal fade" id="deleteProductAttributeModal" tabindex="-1" role="dialog" aria-labelledby="deleteProductAttributeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-        
-            <!-- Modal Header -->
-            <div class="modal-header ">
-                <h5 class="modal-title" id="deleteProductAttributeModalLabel">
-                     Confirm Delete
-                </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="modal-body text-center">
-                <p class="font-weight-bold text-dark">
-                    Are you sure you want to delete this attribute type?
-                </p>
-                <input type="hidden" id="delete_attribute_id"> <!-- Hidden field for attribute ID -->
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="modal-footer">
-                
-                <button type="button" class="btn btn-primary" id="confirmDeleteAttribute">
-                   Delete
-                </button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                   Cancel
-                </button>
-            </div>
-
-        </div>
-    </div>
-</div>
 
 
 
