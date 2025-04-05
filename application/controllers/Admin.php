@@ -804,6 +804,7 @@ class Admin extends CI_Controller
 
 	public function update_product()
 	{	
+		
 		$this->load->library('form_validation');
 
 		// Set validation rules
@@ -849,6 +850,7 @@ class Admin extends CI_Controller
 		$add_new_fk_product_attribute_id = $this->input->post('add_new_fk_product_attribute_id'); // Example: [3, 2, 1]
 		$add_new_attributes_value = $this->input->post('add_new_attributes_value'); // Example: [19, 16, 1]
 		$update_fk_product_types_id = $this->input->post('update_fk_product_types_id');
+		$product_attribute_id = $this->input->post('attribute_id');
 
 		// Handling image upload
 		$existing_images = $this->input->post('update_product_image');
@@ -904,8 +906,15 @@ class Admin extends CI_Controller
 				$this->model->insertData('tbl_product_attributes', $product_attribute);
 			}
 		}
-		
-
+		if(!empty($edit_fk_product_attribute_id)){
+			foreach ($edit_fk_product_attribute_id as $edit_fk_product_attribute_id_key => $edit_fk_product_attribute_id_row) {
+				$update_product_attribute = [	
+					'fk_attribute_id' => $edit_fk_product_attribute_id_row,
+					'fk_attribute_value_id' => $edit_attributes_value[$edit_fk_product_attribute_id_key],
+				];		
+				 $this->model->updateData('tbl_product_attributes', $update_product_attribute, ['id'=>$product_attribute_id[$edit_fk_product_attribute_id_key],'fk_product_id' => $product_id,'fk_product_types_id' => $update_fk_product_types_id]);
+			}
+		}		
 		$update_product_price = array(
 			'purchase_price' => $purchase_price,
 			'MRP' => $MRP,

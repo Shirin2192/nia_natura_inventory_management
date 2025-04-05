@@ -38,6 +38,7 @@ class Product_model extends CI_Model {
             GROUP_CONCAT(tbl_product_attributes.fk_product_types_id) as fk_product_types_id,
             GROUP_CONCAT(tbl_product_attributes.fk_attribute_id) as fk_attribute_id,
             GROUP_CONCAT(tbl_product_attributes.fk_attribute_value_id) as fk_attribute_value_id,,
+            GROUP_CONCAT(tbl_attribute_master.id) as attribute_id,
             GROUP_CONCAT(tbl_attribute_master.attribute_name) as attribute_name,
             GROUP_CONCAT(tbl_product_types.product_type_name) as product_type_name,
             GROUP_CONCAT(tbl_attribute_values.attribute_value) as attribute_value,

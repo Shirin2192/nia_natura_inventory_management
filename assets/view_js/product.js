@@ -448,6 +448,8 @@ $(document).on("click", ".update-product", function () {
 			$("#update_product_image").val(product.images);
 			$("#update_availability_status").val(product.fk_stock_availability_id).trigger("chosen:updated");
 
+			$('#attribute_id').val(product.attribute_id);
+
 			// Populate image preview
 			var imageArray = product.images ? product.images.split(",") : [];
 			var imagePreview = imageArray.map(img =>
@@ -459,6 +461,7 @@ $(document).on("click", ".update-product", function () {
 			$("#attributes_container_edit").empty();
 			$("#attribute_fields_container_edit").empty();
 
+			let Productattribute_id = product.attribute_id.split(",");
 			let attributeIds = product.fk_attribute_id.split(",");
 			let attributeTypes = product.attribute_name.split(",");
 			let attributeValues = product.attribute_value.split(",");
@@ -472,9 +475,11 @@ $(document).on("click", ".update-product", function () {
 				let attributeName = attributeTypes[index];
 				let attributeValue = attributeValues[index];
 				let attributeValueId = valueIds[index];
+				let Productattribute_ids = Productattribute_id[index];
 				// Create attribute row
 				let attributeRow = `
 				<div class="row attribute-row mb-2" data-index="${attributeIndex}">
+				<input type="hidden" name="attribute_id[]" id="attribute_id${attributeIndex}" value="${Productattribute_ids}">
 						<div class="col-lg-6">
 							<div class="form-group">
 								<label for="fk_product_attribute_id_${attributeIndex}">
