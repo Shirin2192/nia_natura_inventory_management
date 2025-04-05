@@ -8,6 +8,12 @@
     <title>Nia Natura Inventory Management</title>
     <!-- Favicon icon -->
     <?php include('common/css_files.php')?>
+    <style>
+    .custom-modal-fullwidth {
+        max-width: 98%;
+        margin: 1rem auto;
+    }
+    </style>
 </head>
 
 <body>
@@ -129,7 +135,7 @@
                                                 </div>
                                             </div>
 
-                                            <div id="attribute_fields_container"></div>
+                                            <div id="_edit"></div>
                                             <!-- Add More Button -->
                                             <!-- Add More Button -->
                                             <div class="col-lg-2 mb-3 d-flex align-items-end">
@@ -224,6 +230,20 @@
                                                 <div class="text-danger"><?= form_error('stock_availability'); ?>
                                                 </div>
 
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="channel_type">Channel
+                                                    Type</label>
+                                                <div><select class=" chosen-select form-control"
+                                                        id="channel_type" name="channel_type">
+                                                        <option value=""></option>
+                                                        <option value="Online">Online</option>
+                                                        <option value="Offline">Offline</option>
+                                                    </select></div>
+													<div class="text-danger"><?= form_error('channel_type'); ?>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="col-lg-6 mb-3">
@@ -369,7 +389,8 @@
 
     <!-- Edit Product Modal -->
     <div class="modal fade" id="updateProductModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl custom-modal-fullwidth">
+
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editModalLabel">Edit Product</h5>
@@ -410,33 +431,39 @@
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="update_flavour_name">Category Name <span
+                                    <label class="col-form-label" for="update_fk_product_types_id">Product Type<span
                                             class="text-danger">*</span></label>
-                                    <div><select class=" chosen-select form-control" id="update_flavour_name"
-                                            name="update_flavour_name">
+                                    <select class=" chosen-select form-control" id="update_fk_product_types_id"
+                                        name="update_fk_product_types_id">
+                                        <option value=""></option>
+                                        <?php foreach($product_types as $product_types_key => $product_types_row) {?>
+                                        <option value="<?= $product_types_row['id']?>">
+                                            <?= $product_types_row['product_type_name']?></option>
+                                        <?php } ?>
+                                    </select>
 
-                                        </select></div>
+                                    <div class="text-danger"><?= form_error('update_fk_product_types_id'); ?></div>
                                 </div>
                             </div>
-                            <div class="col-lg-6 mb-3">
-                                <div class="form-group">
-                                    <label class="col-form-label" for="update_bottle_size">Bottle Size <span
-                                            class="text-danger">*</span></label>
-                                    <div><select class=" chosen-select form-control" id="update_bottle_size"
-                                            name="update_bottle_size">
+                        </div>
+                        <!-- Dynamic Attribute Fields -->
 
-                                        </select></div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <div class="form-group">
-                                    <label class="col-form-label" for="update_bottle_type">Bottle Type</label>
-                                    <div><select class=" chosen-select form-control" id="update_bottle_type"
-                                            name="update_bottle_type">
 
-                                        </select></div>
-                                </div>
+                        <div id="attribute_fields_container_edit"></div>
+
+
+
+                        <!-- Add More Attributes Button -->
+                        <div class="row mt-3">
+                            <div class="col-md-12 text-right">
+                                <button type="button" class="btn btn-success" id="add_more_attributes_edit">
+                                    + Add More Attributes
+                                </button>
                             </div>
+                        </div>
+                        <!-- Add More Attributes (dropdown + button) – move this BELOW -->
+                        <div id="attributes_container_edit"></div>
+                        <div class="row">
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
                                     <label class="col-form-label" for="update_barcode">Barcode</label>
@@ -497,7 +524,8 @@
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="add_new_quantity">Add New Stock Quantity</label>
+                                    <label class="col-form-label" for="add_new_quantity">Add New Stock
+                                        Quantity</label>
                                     <input type="number" class="form-control" id="add_new_quantity"
                                         name="add_new_quantity" placeholder="Enter Add New Stock Quantity">
                                 </div>
@@ -511,6 +539,22 @@
                                         Status</label>
                                     <div><select class=" chosen-select form-control" id="update_availability_status"
                                             name="update_availability_status">
+                                            <option value=""></option>
+                                            <?php foreach($stock_availability as $stock_availability_key => $stock_availability_row) {?>
+                                            <option value="<?= $stock_availability_row['id']?>">
+                                                <?= $stock_availability_row['stock_availability']?></option>
+                                            <?php } ?>
+                                        </select></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="update_channel_type">Channel Type</label>
+                                    <div><select class=" chosen-select form-control" id="update_channel_type"
+                                            name="update_channel_type">
+                                            <option value=""></option>
+                                            <option value="Online">Online</option>
+                                            <option value="Offline">Offline</option>
 
                                         </select></div>
                                 </div>

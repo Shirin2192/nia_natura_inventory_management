@@ -606,6 +606,13 @@ class Admin extends CI_Controller
 		echo json_encode($response);
 	}
 
+	public function get_sales_channel_on_channel_type()
+	{
+		$channel_type = $this->input->post('channel_type'); // Get the product attribute ID from POST request
+		$response['data'] = $this->model->selectWhereData('tbl_sale_channel', array("channel_type" => $channel_type,'is_delete' => 1), "*", false, array('id', "DESC"));
+		echo json_encode($response);
+	}
+
 	public function save_product()
 	{
 		if ($this->input->server('REQUEST_METHOD') === 'POST') {
