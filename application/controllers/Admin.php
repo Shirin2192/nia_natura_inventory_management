@@ -585,7 +585,7 @@ class Admin extends CI_Controller
 			$response['product_types'] = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
 			// $response['attributes'] = $this->model->selectWhereData('tbl_attribute_master', array('is_delete' => 1), "*", false, array('id', "DESC"));
 			// $response['attribute_values'] = $this->model->selectWhereData('tbl_attribute_values', array('is_delete' => 1), "*", false, array('id', "DESC"));
-			$response['sale_channel'] = $this->model->selectWhereData('tbl_sale_channel', array('is_delete' => 1), "*", false, array('id', "DESC"));
+			// $response['sale_channel'] = $this->model->selectWhereData('tbl_sale_channel', array('is_delete' => 1), "*", false, array('id', "DESC"));
 			$response['stock_availability'] = $this->model->selectWhereData('tbl_stock_availability', array('is_delete' => 1), "*", false, array('id', "DESC"));
 
 			$this->load->view('inventory_manager/product', $response);
@@ -803,16 +803,13 @@ class Admin extends CI_Controller
 	}
 
 	public function update_product()
-	{
+	{	
 		$this->load->library('form_validation');
 
 		// Set validation rules
 		$this->form_validation->set_rules('update_product_name', 'Product Name', 'required');
 		$this->form_validation->set_rules('update_product_sku_code', 'Product SKU Code', 'required');
-		$this->form_validation->set_rules('update_flavour_name', 'Flavor', 'required');
 		$this->form_validation->set_rules('update_description', 'Description', 'required');
-		$this->form_validation->set_rules('update_bottle_size', 'Bottle Size', 'required');
-		$this->form_validation->set_rules('update_bottle_type', 'Bottle Type', 'required');
 		$this->form_validation->set_rules('update_availability_status', 'Availability Status', 'required');
 		$this->form_validation->set_rules('update_sale_channel', 'Sales Channel', 'required');
 		$this->form_validation->set_rules('update_purchase_price', 'Purchase Price', 'required|numeric');
@@ -832,9 +829,26 @@ class Admin extends CI_Controller
 		}
 
 		$product_id = $this->input->post('update_product_id');
-		$fk_product_category_id = $this->input->post('fk_product_category_id');
-		$fk_product_type_id = $this->input->post('fk_product_type_id');
 		$fk_product_price_id = $this->input->post('fk_product_price_id');
+		$product_name = $this->input->post('update_product_name');
+		$description = $this->input->post('update_description');
+		$product_sku_code = $this->input->post('update_product_sku_code');
+		$channel_type = $this->input->post('update_channel_type');
+		$sale_channel = $this->input->post('update_sale_channel');
+		$availability_status = $this->input->post('update_availability_status');
+		$barcode = $this->input->post('update_barcode');
+		$batch_no = $this->input->post('update_batch_no');
+		$purchase_price =  $this->input->post('update_purchase_price');
+		$MRP = $this->input->post('update_mrp');
+		$selling_price = $this->input->post('update_selling_price');
+		$inventory_id = $this->input->post('update_inventory_id');
+
+
+		$edit_fk_product_attribute_id = $this->input->post('edit_fk_product_attribute_id'); // Example: [3, 2, 1]
+		$edit_attributes_value = $this->input->post('edit_attributes_value'); // Example: [19, 16, 1]
+		$add_new_fk_product_attribute_id = $this->input->post('add_new_fk_product_attribute_id'); // Example: [3, 2, 1]
+		$add_new_attributes_value = $this->input->post('add_new_attributes_value'); // Example: [19, 16, 1]
+		$update_fk_product_types_id = $this->input->post('update_fk_product_types_id');
 
 		// Handling image upload
 		$existing_images = $this->input->post('update_product_image');
@@ -866,32 +880,36 @@ class Admin extends CI_Controller
 		}
 
 		$update_product = array(
-			'product_name' => $this->input->post('update_product_name'),
-		);
-		$this->model->updateData('tbl_product', $update_product, ['id' => $product_id]);
-
-		$update_product_category = array(
-			'fk_flavour_id' => $this->input->post('update_flavour_name'),
-			'description' => $this->input->post('update_description'),
-		);
-		$this->model->updateData('tbl_product_category', $update_product_category, ['fk_product_id' => $product_id]);
-
-		$update_product_type = array(
-			'product_sku_code' => $this->input->post('update_product_sku_code'),
-			'fk_bottle_size_id' => $this->input->post('update_bottle_size'),
-			'fk_bottle_type_id' => $this->input->post('update_bottle_type'),
-			'fk_sale_channel_id' => $this->input->post('update_sale_channel'),
-			'fk_stock_availability_id' => $this->input->post('update_availability_status'),
-			'barcode' => $this->input->post('update_barcode'),
-			'batch_no' => $this->input->post('update_batch_no'),
+			'product_name' => $product_name,
+			'description' => $description,
+			'product_sku_code' => $product_sku_code,			
+			'fk_stock_availability_id' =>$availability_status,
+			'barcode' => $barcode,
+			'batch_no' => $batch_no,
 			'images' => $imagess,
+			'purchase_price' => $purchase_price,
+			'MRP' => $MRP,
+			'selling_price' => $selling_price
 		);
-		$this->model->updateData('tbl_product_type', $update_product_type, ['fk_product_id' => $product_id]);
+		$this->model->updateData('tbl_product_master', $update_product, ['id' => $product_id]);
+		
+		if(!empty($add_new_fk_product_attribute_id)){
+			foreach ($add_new_fk_product_attribute_id as $key => $add_attribute_id_row) {
+				$product_attribute = [
+					'fk_product_id' => $product_id,
+					'fk_product_types_id' => $update_fk_product_types_id,
+					'fk_attribute_id' => $add_attribute_id_row,
+					'fk_attribute_value_id' => $edit_attributes_value[$key],
+				];
+				$this->model->insertData('tbl_product_attributes', $product_attribute);
+			}
+		}
+		
 
 		$update_product_price = array(
-			'purchase_price' => $this->input->post('update_purchase_price'),
-			'MRP' => $this->input->post('update_mrp'),
-			'selling_price' => $this->input->post('update_selling_price'),
+			'purchase_price' => $purchase_price,
+			'MRP' => $MRP,
+			'selling_price' => $selling_price,
 		);
 		$this->model->updateData('tbl_product_price', $update_product_price, ['fk_product_id' => $product_id]);
 
@@ -909,11 +927,9 @@ class Admin extends CI_Controller
 
 			$update_product_inventory = array(
 				'fk_product_id' => $product_id,
-				'fk_product_category_id' => $fk_product_category_id,
-				'fk_product_type_id' => $fk_product_type_id,
-				'fk_product_price_id' => $fk_product_price_id,
 				'add_quantity' => $add_new_quantity,
 				'total_quantity' => $new_total_quantity,
+				'fk_sale_channel_id' => $sale_channel,
 				'used_status' => 1
 			);
 
@@ -930,9 +946,11 @@ class Admin extends CI_Controller
 				$update_product_inventory = array(
 					'add_quantity' => $total_quantity,
 					'total_quantity' => $total_quantity,
+					'channel_type' => $channel_type,
+					'fk_sale_channel_id' => $sale_channel,
 				);
 			}
-			$this->model->updateData('tbl_product_inventory', $update_product_inventory, ['fk_product_id' => $product_id, 'used_status' => 1]);
+			$this->model->updateData('tbl_product_inventory', $update_product_inventory, ['id'=> $inventory_id,'fk_product_id' => $product_id, 'used_status' => 1]);
 		}
 		echo json_encode(['status' => 'success', 'message' => 'Product updated successfully']);
 	}

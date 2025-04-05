@@ -176,7 +176,7 @@ $(document).ready(function () {
 			data: { attribute_id: attributeId },
 			dataType: "json",
 			success: function (response) {
-				var fieldHtml = `<div class="form-group"><label>${attributeName}</label>`;
+				var fieldHtml = `<div class="col-lg-6 mb-3"><div class="form-group"><label>${attributeName}</label>`;
 				if (selectedType === "text") {
 					fieldHtml += `<input type="text" name="attributes_value[]" id="attributes_value_${attributeId}" class="form-control" placeholder="Enter ${attributeName}">`;
 				} else if (selectedType === "dropdown") {
@@ -193,7 +193,7 @@ $(document).ready(function () {
                                       </div>`;
 					});
 				}
-				fieldHtml += `</div>`;
+				fieldHtml += `</div></div>`;
 				$("#attribute_fields_container").html(fieldHtml);
 				// Reinitialize Chosen Select for newly added dropdowns
 				$(".chosen-select").chosen({ width: "100%" }).trigger("chosen:updated");
@@ -337,31 +337,31 @@ document.addEventListener("DOMContentLoaded", function () {
 			data: { attribute_id: attributeId },
 			dataType: "json",
 			success: function (response) {
-				var fieldHtml = `<div class="form-group" data-index="${attributeIndex}"><label>${attributeName}</label>`;
+				var fieldHtml_addmore = `<div class="form-group" data-index="${attributeIndex}"><label>${attributeName}</label>`;
 				if (selectedType === "text") {
-					fieldHtml += `<input type="text" name="attributes_value[]" id="attributes_value_${attributeIndex}" class="form-control" placeholder="Enter ${attributeName}">`;
+					fieldHtml_addmore += `<input type="text" name="attributes_value[]" id="attributes_value_${attributeIndex}" class="form-control" placeholder="Enter ${attributeName}">`;
 				} else if (selectedType === "dropdown") {
-					fieldHtml += `<select name="attributes_value[]" id="attributes_value_${attributeIndex}" class="chosen-select form-control" style="width: 100%;">                                    
+					fieldHtml_addmore += `<select name="attributes_value[]" id="attributes_value_${attributeIndex}" class="chosen-select form-control" style="width: 100%;">                                    
                     <option value="" disabled selected>Select ${attributeName}</option>`;
 					$.each(response.data, function (index, item) {
-						fieldHtml += `<option value="${item.id}">${item.attribute_value}</option>`;
+						fieldHtml_addmore += `<option value="${item.id}">${item.attribute_value}</option>`;
 					});
-					fieldHtml += `</select>`;
+					fieldHtml_addmore += `</select>`;
 				} else if (selectedType === "checkbox") {
 					$.each(response.data, function (index, item) {
-						fieldHtml += `<div>
+						fieldHtml_addmore += `<div>
                                         <input type="checkbox" name="attributes_value[]" id="attributes_value_${attributeIndex}" value="${item.attribute_value}"> ${item.label}
                                       </div>`;
 					});
 				}
-				fieldHtml += `</div>`;
+				fieldHtml_addmore += `</div>`;
 
 				// Append or update the attribute fields container
 				var existingField = $("#attribute_fields_container").find(`[data-index="${attributeIndex}"]`);
 				if (existingField.length > 0) {
-					existingField.replaceWith(fieldHtml);
+					existingField.replaceWith(fieldHtml_addmore);
 				} else {
-					$("#attribute_fields_container").append(fieldHtml);
+					$("#attribute_fields_container").append(fieldHtml_addmore);
 				}
 
 				// Reinitialize Chosen Select for newly added dropdowns
@@ -435,6 +435,7 @@ $(document).on("click", ".update-product", function () {
 
 			// Fill general product fields
 			$("#update_product_id").val(product.id);
+			$('#update_inventory_id').val(product.inventory_id);
 			$("#update_product_name").val(product.product_name);
 			$("#update_product_sku_code").val(product.product_sku_code);
 			$("#update_batch_no").val(product.batch_no);
@@ -471,22 +472,7 @@ $(document).on("click", ".update-product", function () {
 				let attributeName = attributeTypes[index];
 				let attributeValue = attributeValues[index];
 				let attributeValueId = valueIds[index];
-
-				// // Append attribute dropdown
-				// let attributeDiv = `<div class="col-lg-6 mb-3" data-index="${attributeIndex}">
-				//     <div class="form-group">
-				//         <label class="col-form-label" for="fk_product_attribute_id_${attributeIndex}">
-				//             ${attributeName} <span class="text-danger">*</span>
-				//         </label>
-				//         <select id="fk_product_attribute_id_${attributeIndex}" name="fk_product_attribute_id[]" 
-				//             class="chosen-select form-control fk_product_attribute_id" 
-				//             style="width: 100%;" data-index="${attributeIndex}">
-				//             <option value="${attrId}" selected data-type="dropdown">${attributeName}</option>
-				//         </select>
-				//     </div>
-				// </div>`;
-
-				// $("#attributes_name_container_edit").append(attributeDiv);
+				// Create attribute row
 				let attributeRow = `
 				<div class="row attribute-row mb-2" data-index="${attributeIndex}">
 						<div class="col-lg-6">
@@ -494,7 +480,7 @@ $(document).on("click", ".update-product", function () {
 								<label for="fk_product_attribute_id_${attributeIndex}">
 									${attributeName} <span class="text-danger">*</span>
 								</label>
-								<select id="fk_product_attribute_id_${attributeIndex}" name="fk_product_attribute_id[]" 
+								<select id="fk_product_attribute_id_${attributeIndex}" name="edit_fk_product_attribute_id[]" 
 									class="chosen-select form-control fk_product_attribute_id" 
 									data-index="${attributeIndex}" style="width: 100%;">
 									<option value="${attrId}" selected>${attributeName}</option>
@@ -521,12 +507,12 @@ $(document).on("click", ".update-product", function () {
 						let inputHtml = "";
 
 						if (type === "text") {
-							inputHtml = `<input type="text" name="attributes_value[]" 
-												id="attributes_value_${attributeIndex}" 
+							inputHtml = `<input type="text" name="edit_attributes_value[]" 
+												id="edit_attributes_value_${attributeIndex}" 
 												class="form-control" placeholder="Enter ${attributeName}" 
 												value="${attributeValue}">`;
 						} else if (type === "dropdown") {
-							inputHtml = `<select name="attributes_value[]" id="attributes_value_${attributeIndex}" 
+							inputHtml = `<select name="edit_attributes_value[]" id="edit_attributes_value_${attributeIndex}" 
 												class="chosen-select form-control" style="width: 100%;">
 												<option value="">Select ${attributeName}</option>`;
 							$.each(res.data, function (i, item) {
@@ -539,7 +525,7 @@ $(document).on("click", ".update-product", function () {
 								let checked = attributeValue.includes(item.attribute_value) ? "checked" : "";
 								inputHtml += `<div class="form-check">
 									<input class="form-check-input" type="checkbox" 
-										name="attributes_value[${attributeIndex}][]" 
+										name="edit_attributes_value[${attributeIndex}][]" 
 										value="${item.attribute_value}" ${checked}>
 									<label class="form-check-label">${item.attribute_value}</label>
 								</div>`;
@@ -591,7 +577,7 @@ $(document).on("click", ".update-product", function () {
 												</label>
 												<select class="chosen-select form-control fk_product_attribute_id_edit" 
 														id="fk_product_attribute_id_edit_${editAttributeIndex}" 
-														name="fk_product_attribute_id[]" 
+														name="add_new_fk_product_attribute_id[]" 
 														data-index="${editAttributeIndex}" 
 														style="width: 100%;">
 													${attributeOptions}
@@ -653,9 +639,9 @@ $(document).on("click", ".update-product", function () {
 							let html = "";
 
 							if (selectedType === "text") {
-								html = `<input type="text" name="attributes_value[]" class="form-control" placeholder="Enter ${attributeName}">`;
+								html = `<input type="text" name="add_new_attributes_value[]" class="form-control" placeholder="Enter ${attributeName}">`;
 							} else if (selectedType === "dropdown") {
-								html = `<select name="attributes_value[]" class="chosen-select form-control" style="width: 100%;">
+								html = `<select name="add_new_attributes_value[]" class="chosen-select form-control" style="width: 100%;">
 									<option value="" disabled selected>Select ${attributeName}</option>`;
 								$.each(response.data, function (i, item) {
 									html += `<option value="${item.id}">${item.attribute_value}</option>`;
@@ -663,7 +649,7 @@ $(document).on("click", ".update-product", function () {
 								html += `</select>`;
 							} else if (selectedType === "checkbox") {
 								$.each(response.data, function (i, item) {
-									html += `<div><input type="checkbox" name="attributes_value[]" value="${item.attribute_value}"> ${item.label}</div>`;
+									html += `<div><input type="checkbox" name="add_new_attributes_value[]" value="${item.attribute_value}"> ${item.label}</div>`;
 								});
 							}
 
@@ -675,79 +661,46 @@ $(document).on("click", ".update-product", function () {
 						}
 					});
 				});
-
-
-
-				// // Function to Populate Select Dropdowns
-				// function populateFlavourSelect(selector, dataArray, selectedValue) {
-				//     var selectElement = $(selector);
-				//     selectElement.empty(); // Clear existing options
-				//     selectElement.append(`<option value="">Select Flavour</option>`); // Default option
-
-				//     $.each(dataArray, function (index, item) {
-				//         var selected = item.id == selectedValue ? "selected" : "";
-				//         selectElement.append(`<option value="${item.id}" ${selected}>${item.flavour_name}</option>`);
-				//     });
-
-				//     selectElement.trigger("chosen:updated"); // Update Chosen Select
-				// }
-
-				// function populateBottleSizeSelect(selector, dataArray, selectedValue) {
-				//     var selectElement = $(selector);
-				//     selectElement.empty(); // Clear existing options
-				//     selectElement.append(`<option value="">Select Bottle Size</option>`); // Default option
-
-				//     $.each(dataArray, function (index, item) {
-				//         var selected = item.id == selectedValue ? "selected" : "";
-				//         selectElement.append(`<option value="${item.id}" ${selected}>${item.bottle_size}</option>`);
-				//     });
-
-				//     selectElement.trigger("chosen:updated"); // Update Chosen Select
-				// }
-
-				// function populateBottleTypeSelect(selector, dataArray, selectedValue) {
-				//     var selectElement = $(selector);
-				//     selectElement.empty(); // Clear existing options
-				//     selectElement.append(`<option value="">Select Bottle Type</option>`); // Default option
-
-				//     $.each(dataArray, function (index, item) {
-				//         var selected = item.id == selectedValue ? "selected" : "";
-				//         selectElement.append(`<option value="${item.id}" ${selected}>${item.bottle_type}</option>`);
-				//     });
-
-				//     selectElement.trigger("chosen:updated"); // Update Chosen Select
-				// }
-
-				// function populateAvailabilityStatusSelect(selector, dataArray, selectedValue) {
-				//     var selectElement = $(selector);
-				//     selectElement.empty(); // Clear existing options
-				//     selectElement.append(`<option value="">Select Availability Status</option>`); // Default option
-
-				//     $.each(dataArray, function (index, item) {
-				//         var selected = item.id == selectedValue ? "selected" : "";
-				//         selectElement.append(`<option value="${item.id}" ${selected}>${item.stock_availability}</option>`);
-				//     });
-
-				//     selectElement.trigger("chosen:updated"); // Update Chosen Select
-				// }
-
-				// function populateSaleChannelSelect(selector, dataArray, selectedValue) {
-				//     var selectElement = $(selector);
-				//     selectElement.empty(); // Clear existing options
-				//     selectElement.append(`<option value="">Select Sale Channel</option>`); // Default option
-
-				//     $.each(dataArray, function (index, item) {
-				//         var selected = item.id == selectedValue ? "selected" : "";
-				//         selectElement.append(`<option value="${item.id}" ${selected}>${item.sale_channel}</option>`);
-				//     });
-
-				//     selectElement.trigger("chosen:updated"); // Update Chosen Select
-
-				//     // $(".chosen-select").chosen({
-				//     //     allow_single_deselect: true,
-				//     //     width: "100%"
-				//     // });
-				// }
+				$("#update_channel_type").off("change").on("change", function () {
+					var channel_type = $(this).val(); // Get selected Product Type ID
+			
+					if (channel_type) {
+						$.ajax({
+							url: frontend + "admin/get_sales_channel_on_channel_type", // API to get attributes
+							type: "POST",
+							data: { channel_type: channel_type },
+							dataType: "json",
+							success: function (response) {
+								var update_options = '<option value="" disabled>Select Sale Channel</option>';
+							
+								if (response.data.length === 0) {
+									update_options += '<option value="" disabled>No Sale Channel available</option>';
+								}
+							
+								$.each(response.data, function (_, item) {
+									update_options += `<option value="${item.id}">${item.sale_channel}</option>`;
+								});
+							
+								$("#update_sale_channel").html(update_options);
+							
+								const preselectedValue = "3"; // Replace with your dynamic value
+								$("#update_sale_channel").val(preselectedValue); // Set selected value here
+							
+								if ($("#update_sale_channel").data('chosen')) {
+									$("#update_sale_channel").trigger("chosen:updated");
+								} else {
+									$("#update_sale_channel").chosen({ width: "100%" });
+								}
+							}
+						});
+					} else {
+						$("#update_sale_channel").html('<option value="">Select Sale Channel</option>');
+						if ($("#update_sale_channel").data('chosen')) {
+							$("#update_sale_channel").trigger("chosen:updated");
+						}
+					}
+							
+			});
 
 				$("#UpdateProductForm").on("submit", function (e) {
 					e.preventDefault();

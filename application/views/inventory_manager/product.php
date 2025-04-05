@@ -102,21 +102,9 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <!-- Select Attribute
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="form-group">
-                                                    <label class="col-form-label" for="fk_product_attribute_id">Attribute <span
-                                                            class="text-danger">*</span></label>
-                                                    <select class="chosen-select form-control" id="fk_product_attribute_id"
-                                                        name="fk_product_attribute_id">
-                                                       
-                                                    </select>
-                                                    <div class="text-danger"><?= form_error('fk_product_attribute_id'); ?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                             -->
-                                            <!-- Select Attribute -->
+                                        
+                                        <!-- Select Attribute -->
+                                       
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
                                                     <label class="col-form-label"
@@ -135,14 +123,17 @@
                                                 </div>
                                             </div>
 
-                                            <div id="_edit"></div>
-                                            <!-- Add More Button -->
-                                            <!-- Add More Button -->
+                                            <div id="attribute_fields_container"></div>
+                                    
+                                        <!-- Add More Button -->
+                                        <!-- Add More Button -->
+                                       
                                             <div class="col-lg-2 mb-3 d-flex align-items-end">
                                                 <button type="button" class="btn btn-success w-100"
                                                     id="add_more_attributes">Add More</button>
                                             </div>
-
+                                       
+                                        <div class="row">
                                             <!-- Barcode -->
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
@@ -236,13 +227,13 @@
                                             <div class="form-group">
                                                 <label class="col-form-label" for="channel_type">Channel
                                                     Type</label>
-                                                <div><select class=" chosen-select form-control"
-                                                        id="channel_type" name="channel_type">
+                                                <div><select class=" chosen-select form-control" id="channel_type"
+                                                        name="channel_type">
                                                         <option value=""></option>
                                                         <option value="Online">Online</option>
                                                         <option value="Offline">Offline</option>
                                                     </select></div>
-													<div class="text-danger"><?= form_error('channel_type'); ?>
+                                                <div class="text-danger"><?= form_error('channel_type'); ?>
                                                 </div>
                                             </div>
                                         </div>
@@ -398,8 +389,7 @@
                 </div>
                 <form id="UpdateProductForm" enctype="multipart/form-data">
                     <input type="hidden" id="update_product_id" name="update_product_id">
-                    <input type="hidden" id="fk_product_category_id" name="fk_product_category_id">
-                    <input type="hidden" id="fk_product_type_id" name="fk_product_type_id">
+                    <input type="hidden" id="update_inventory_id" name="update_inventory_id">
                     <input type="hidden" id="fk_product_price_id" name="fk_product_price_id">
                     <input type="hidden" id="update_product_image" name="update_product_image">
                     <div class="modal-body">
