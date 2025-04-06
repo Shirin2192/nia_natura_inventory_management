@@ -938,6 +938,7 @@ class Admin extends CI_Controller
 				'fk_product_id' => $product_id,
 				'add_quantity' => $add_new_quantity,
 				'total_quantity' => $new_total_quantity,
+				'channel_type' => $channel_type,
 				'fk_sale_channel_id' => $sale_channel,
 				'used_status' => 1
 			);
@@ -950,6 +951,8 @@ class Admin extends CI_Controller
 				$update_product_inventory = array(
 					'add_quantity' => $get_last_quantity['add_quantity'],
 					'total_quantity' => $total_quantity,
+					'channel_type' => $channel_type,
+					'fk_sale_channel_id' => $sale_channel,
 				);
 			} else {
 				$update_product_inventory = array(
@@ -1084,8 +1087,14 @@ class Admin extends CI_Controller
 	}
 
 	public function add_product_attributes(){
-		$response['product_types'] = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
-		$this->load->view('inventory_manager/add_product_attributes',$response);
+		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
+		if (!$admin_session) {
+			redirect(base_url('common/index')); // Redirect to login page if session is not active
+		} else {
+			$response['product_types'] = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
+			$this->load->view('inventory_manager/add_product_attributes',$response);
+		}
+		
 	}
 	public function get_product_attribute_detail()
 	{
@@ -1200,9 +1209,13 @@ class Admin extends CI_Controller
 	}
 
 	public function add_product_attributes_value(){
-		$response['product_attributes'] = $this->model->selectWhereData('tbl_attribute_master', array('is_delete' => 1), "*", false, array('id', "DESC"));
-		// print_r($response['product_attributes']);die;
-		$this->load->view('inventory_manager/add_product_attributes_value',$response);
+		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
+		if (!$admin_session) {
+			redirect(base_url('common/index')); // Redirect to login page if session is not active
+		} else {
+			$response['product_attributes'] = $this->model->selectWhereData('tbl_attribute_master', array('is_delete' => 1), "*", false, array('id', "DESC"));
+			$this->load->view('inventory_manager/add_product_attributes_value',$response);
+		}
 	}
 	public function get_product_attributes_value_detail()
 	{
@@ -1302,6 +1315,66 @@ class Admin extends CI_Controller
 			echo json_encode(['status' => 'error', 'message' => 'Failed to delete Product Attribute Value']);
 		}
 	}
+	public function role_and_access()
+	{
+		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
+		if (!$admin_session) {
+			redirect(base_url('common/index'));
+		} else {
+			$response['roles'] = $this->model->selectWhereData('tbl_role', array('is_delete' => 1), "*", false, array('id', "DESC"));
+			
+			$response['modules'] = $this->model->selectWhereData('tbl_sidebar',array(), "*", false, array('id', "ASC"));
+			$this->load->view('inventory_manager/role_access',$response); 
+		}
+	}
+	public function save_permissions() {
+		// print_r($_POST);
+		$this->form_validation->set_rules('role_id', 'Role', 'required');
+		// $this->form_validation->set_rules('permissions', 'Permissions', 'required');
+
+		if ($this->form_validation->run() == FALSE) {
+			echo json_encode([
+				'status' => false,
+				'errors' => [
+					'role_id_error' => form_error('role_id'),
+					// 'permissions_error' => form_error('permissions')
+				]
+			]);
+			return;
+		}
+
+		$role_id = $this->input->post('role_id');
+		$permissions = $this->input->post('permissions');
+		
+		// Delete existing permissions
+		// Check if permissions already exist for the role and module
+		foreach ($permissions as $module_id => $perm) {
+			$existing_permission = $this->model->CountWhereRecord('tbl_permissions', array('fk_role_id' => $role_id,'fk_sidebar_id' => $module_id));
+
+			if (!empty($existing_permission)) {
+				echo json_encode([
+					'status' => false,
+					'message' => "Permissions already exist for this role and module"
+				]);
+				return;
+			}else{
+				$data = [
+					'fk_role_id' => $role_id,
+					'fk_sidebar_id' => $module_id,
+					'can_view' => !empty($perm['view']) ? 1 : 0,
+					'can_add' => !empty($perm['add']) ? 1 : 0,
+					'can_edit' => !empty($perm['edit']) ? 1 : 0,
+					'can_delete' => !empty($perm['delete']) ? 1 : 0,
+					'has_access' => isset($perm['access']) ? 1 : 0 // For dashboard only
+				];
+				// print_r($data);
+				$this->model->insertData('tbl_permissions', $data);
+			}
+		}
+
+		echo json_encode(['status' => true, 'message' => 'Permissions saved successfully']);
+	}
+	
 
 
 	

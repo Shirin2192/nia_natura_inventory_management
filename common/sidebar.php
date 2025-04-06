@@ -52,9 +52,14 @@
                             <i class="icon-star menu-icon"></i> <span class="nav-text"> Product</span>
                         </a>
                     </li>
-                    <li>
+                    <!-- <li>
                         <a href="<?= base_url()?>admin/order_details" aria-expanded="false">
                             <i class="icon-star menu-icon"></i> <span class="nav-text">Order</span>
+                        </a>
+                    </li> -->
+					<li>
+                        <a href="<?= base_url()?>admin/role_and_access" aria-expanded="false">
+                            <i class="icon-star menu-icon"></i> <span class="nav-text">Role & Access</span>
                         </a>
                     </li>
                     
