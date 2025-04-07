@@ -59,6 +59,7 @@ $("#userForm").submit(function (e) {
 });
 
 $(document).ready(function () {
+    let currentPermission = null; // ✅ define it globally inside ready()
     var userTable = $("#userTable").DataTable({
         processing: true,
         serverSide: true,
@@ -66,6 +67,10 @@ $(document).ready(function () {
             url: frontend + "admin/get_users",
             type: "POST",
             dataSrc: function (json) {
+                const permissions = json.permissions;
+                const currentSidebarId = json.current_sidebar_id;
+                currentPermission = permissions[currentSidebarId];
+
                 if (!json.data) {
                     json.data = [];
                 }
@@ -82,19 +87,26 @@ $(document).ready(function () {
                 title: "Actions",
                 orderable: false,
                 render: function (data, type, row) {
-                    return `
-                        <button class="btn btn-info btn-sm view-user" data-id="${row.id}">
-                            <i class="icon-eye menu-icon"></i>
-                        </button>
-                        <button class="btn btn-warning btn-sm editUser" data-id="${row.id}">
-                            <i class="icon-pencil menu-icon"></i>
-                        </button>
-                     
-                    `;
+                    let actions = '';
+
+                    // ✅ Check if currentPermission is available
+                    if (currentPermission) {
+                        if (currentPermission.can_view === "1") {
+                            actions += `
+                                <button class="btn btn-info btn-sm view-user" data-id="${row.id}">
+                                    <i class="icon-eye menu-icon"></i>
+                                </button>`;
+                        }
+                        if (currentPermission.can_edit === "1") {
+                            actions += `
+                                <button class="btn btn-warning btn-sm editUser" data-id="${row.id}">
+                                    <i class="icon-pencil menu-icon"></i>
+                                </button>`;
+                        }
+                    }
+
+                    return actions || '-';
                 }
-            //     <button class="btn btn-danger btn-sm deleteUser" data-id="${row.id}">
-            //     <i class="icon-trash menu-icon"></i>
-            // </button>
             }
         ],
         order: [[0, "desc"]],

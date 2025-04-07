@@ -4,13 +4,19 @@ $(".chosen-select").chosen({
 });
 
 $(document).ready(function () { 
+    let currentPermission = null; // Define it globally inside ready()
     var table = $("#ProductAttributeTable").DataTable({
         processing: true,
         serverSide: false, // ✅ Change to false (since JSON is pre-processed)
         ajax: {
             url: frontend + "admin/get_product_attribute_detail",
             type: "POST",
-            dataSrc: "data" // ✅ Ensure correct data parsing
+            dataSrc: function(data) {              
+                const permissions = data.permissions;
+                const currentSidebarId = data.current_sidebar_id; // Hardcoded to 4 as per the response               
+                currentPermission = permissions[currentSidebarId];
+                return data.data; // Assuming product types are in data.data
+            }
         },
         columns: [
             {
@@ -25,7 +31,6 @@ $(document).ready(function () {
         pageLength: 10,
         responsive: true
     });
-
     // ✅ Handle row expansion for nested table
     $("#ProductAttributeTable tbody").on("click", "td.dt-control", function () {
         var tr = $(this).closest("tr");
@@ -43,7 +48,6 @@ $(document).ready(function () {
             tr.addClass("shown");
         }
     });
-
     // ✅ Function to create child table
     function formatChildTable(attributes, attribute_types, attribute_ids) {
         var html = '<table class="table table-bordered"><thead><tr>' +
@@ -52,20 +56,30 @@ $(document).ready(function () {
                    '</tr></thead><tbody>';
 
         attributes.forEach(function (attr, index) {
-            html += "<tr><td>" + attr + "</td><td>" + attribute_types[index] + "</td>" +'<td><button class="btn btn-sm btn-primary view-attribute" data-attribute="' + attr + 
-                    '" data-type="' + attribute_types[index] + '" data-id="' + attribute_ids[index] + 
-                    '" data-toggle="modal" data-target="#viewProductAttributeModal"><i class="icon-eye menu-icon"></i></button><button class="btn btn-sm btn-warning edit-attribute" data-attribute="' + attr + 
-                    '" data-type="' + attribute_types[index] + '" data-id="' + attribute_ids[index] + 
-                    '" data-toggle="modal" data-target="#editProductAttributeModal"><i class="icon-pencil menu-icon"></i></button><button class="btn btn-sm btn-danger delete-attribute" data-attribute="' + attr + 
-                    '" data-type="' + attribute_types[index] + '" data-id="' + attribute_ids[index] + 
-                    '" data-toggle="modal" data-target="#deleteProductAttributeModal"><i class="icon-trash menu-icon"></i></button></td></tr>';
+            html += "<tr><td>" + attr + "</td><td>" + attribute_types[index] + "</td>";
+
+            if (currentPermission && currentPermission.can_view === "1") {
+                html += '<td><button class="btn btn-sm btn-primary view-attribute" data-attribute="' + attr + 
+                        '" data-type="' + attribute_types[index] + '" data-id="' + attribute_ids[index] + 
+                        '" data-toggle="modal" data-target="#viewProductAttributeModal"><i class="icon-eye menu-icon"></i></button>';
+            }
+            if (currentPermission && currentPermission.can_edit === "1") {
+                html += '<button class="btn btn-sm btn-warning edit-attribute" data-attribute="' + attr + 
+                        '" data-type="' + attribute_types[index] + '" data-id="' + attribute_ids[index] + 
+                        '" data-toggle="modal" data-target="#editProductAttributeModal"><i class="icon-pencil menu-icon"></i></button>';
+            }
+            if (currentPermission && currentPermission.can_delete === "1") {
+                html += '<button class="btn btn-sm btn-danger delete-attribute" data-attribute="' + attr + 
+                        '" data-type="' + attribute_types[index] + '" data-id="' + attribute_ids[index] + 
+                        '" data-toggle="modal" data-target="#deleteProductAttributeModal"><i class="icon-trash menu-icon"></i></button>';
+            }
+            html += "</td></tr>";
         });
 
         html += "</tbody></table>";
         return html;
     }
 });
-
 $("#productAttributeForm").on("submit", function (event) {
     event.preventDefault(); // Prevent page reload
     $.ajax({
@@ -96,11 +110,9 @@ $("#productAttributeForm").on("submit", function (event) {
         }
     });
 });
-
     // View Attribute
     $(document).on("click", ".view-attribute", function () {
-        var attrId = $(this).data("id"); // Get Attribute ID
-    
+        var attrId = $(this).data("id"); // Get Attribute ID    
         $.ajax({
             url: frontend + "admin/get_product_attribute_detail_id", // Backend Controller URL
             type: "POST",
@@ -121,9 +133,7 @@ $("#productAttributeForm").on("submit", function (event) {
                 alert("Error: Could not retrieve data.");
             }
         });
-    });
-    
-
+    });   
     // Edit Attribute
     $(document).on("click", ".edit-attribute", function () {
         var attrId = $(this).data("id"); // Get Attribute ID
@@ -150,8 +160,7 @@ $("#productAttributeForm").on("submit", function (event) {
                 alert("Error: Could not retrieve data.");
             }
         });
-    });
-    
+    });    
     $("#editAttributeForm").on("submit", function (event) {
         event.preventDefault(); // Prevent page reload
     
@@ -186,7 +195,6 @@ $("#productAttributeForm").on("submit", function (event) {
             }
         });
     });
-
     // Delete Attribute
     $(document).on("click", ".delete-attribute", function () {
         var attrId = $(this).data("id"); // Get Attribute ID
@@ -199,7 +207,6 @@ $("#productAttributeForm").on("submit", function (event) {
         // Show the delete modal
         $("#deleteProductAttributeModal").modal("show");
     });
-    
     // Handle the confirm delete button click
     $("#confirmDeleteAttribute").on("click", function () {
         var attrId = $("#delete_attribute_id").val(); // Get the attribute ID from hidden input

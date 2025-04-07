@@ -29,11 +29,15 @@
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="<?= base_url() ?>admin">Dashboard</a></li>
                         <li class="breadcrumb-item active"><a
-                                href="<?= base_url() ?>admin/add_product_type_name">Product Type</a></li>
+                                href="<?= base_url() ?>admin/add_product_attributes">Product Attribute</a></li>
                     </ol>
                 </div>
             </div>
-
+            <?php
+                $sidebar_id = $current_sidebar_id;            
+                $can_add = isset($permissions[$sidebar_id]['can_add']) && $permissions[$sidebar_id]['can_add'] == 1;
+            ?>
+            <?php if ($can_add): ?>
             <div class="container-fluid">
                 <div class="row justify-content-center">
                     <div class="col-lg-12">
@@ -90,7 +94,7 @@
                     </div>
                 </div>
             </div>
-
+            <?php endif; ?>
             <div class="container-fluid">
                 <div class="row justify-content-center">
                     <div class="col-lg-12">
@@ -111,7 +115,6 @@
                 </div>
             </div>
         </div>
-
         <div class="modal fade" id="viewProductAttributeModal" tabindex="-1" role="dialog"
             aria-labelledby="viewProductAttributeModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">

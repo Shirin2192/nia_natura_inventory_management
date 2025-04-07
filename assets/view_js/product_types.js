@@ -1,5 +1,6 @@
 $(document).ready(function() {
     loadTable();
+    let currentPermission = null; // Define it globally inside ready()
 });
 
 function loadTable() {
@@ -9,27 +10,31 @@ function loadTable() {
         "destroy": true,
         "ajax": {
             "url": frontend + "admin/fetch_product_type",
-            "type": "GET",
-            "dataSrc": ""
+            "type": "POST",
+            "dataSrc": function(data) {
+                const permissions = data.data.permissions;
+                const currentSidebarId = data.data.current_sidebar_id;
+                currentPermission = permissions[currentSidebarId];
+                return data.response; // Assuming product types are in data.response
+            }
         },
         "columns": [
             { "data": "id" },
             { "data": "product_type_name" },
-            // { 
-            //     "data": "status",
-            //     "render": function(status) {
-            //         return status == 1 ? 
-            //             '<span class="badge badge-success">Active</span>' : 
-            //             '<span class="badge badge-danger">Inactive</span>';
-            //     }
-            // },
             {
                 "data": "id",
-                "render": function(id) {
-                    return `
-                    <button class="btn btn-primary btn-sm view_Product_type" data-id="${id}" data-toggle="modal" data-target="#viewProductTypeModal"><i class="icon-eye menu-icon"></i></button>
-                    <button class="btn btn-warning btn-sm edit_Product_type" data-id="${id}" data-toggle="modal" data-target="#editProductTypeModal"> <i class="icon-pencil menu-icon"></i></button>
-                    <button class="btn btn-danger btn-sm delete_Product_type" data-id="${id}"> <i class="icon-trash menu-icon"></i></button>`;
+                "render": function(id, type, row) {
+                    let buttons = '';
+                    if (currentPermission.can_view === "1") {
+                        buttons += `<button class="btn btn-primary btn-sm view_Product_type" data-id="${id}" data-toggle="modal" data-target="#viewProductTypeModal"><i class="icon-eye menu-icon"></i></button> `;
+                    }
+                    if (currentPermission.can_edit === "1") {
+                        buttons += `<button class="btn btn-warning btn-sm edit_Product_type" data-id="${id}" data-toggle="modal" data-target="#editProductTypeModal"><i class="icon-pencil menu-icon"></i></button> `;
+                    }
+                    if (currentPermission.can_delete === "1") {
+                        buttons += `<button class="btn btn-danger btn-sm delete_Product_type" data-id="${id}"><i class="icon-trash menu-icon"></i></button>`;
+                    }
+                    return buttons;
                 }
             }
         ]

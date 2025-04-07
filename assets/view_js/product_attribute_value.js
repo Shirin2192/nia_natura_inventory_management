@@ -4,6 +4,7 @@ $(".chosen-select").chosen({
 });
 
 $(document).ready(function () { 
+    let currentPermission = null; // Define it globally inside ready()
     var table = $("#ProductAttributeValueTable").DataTable({
         processing: false, // No server-side processing
         serverSide: false, // Fetch data locally
@@ -11,7 +12,9 @@ $(document).ready(function () {
             url: frontend + "admin/get_product_attributes_value_detail",
             type: "POST",
             dataSrc: function (json) {
-                console.log("Response Data:", json); // Debugging: Check response structure
+                const permissions = json.permissions;
+                const currentSidebarId = json.current_sidebar_id;
+                currentPermission = permissions[currentSidebarId];
                 return json.data; // Ensure data is correctly mapped
             }
         },
@@ -24,31 +27,41 @@ $(document).ready(function () {
                 title: "Action",
                 orderable: false,
                 render: function (data, type, row) {
-                    console.log("Row Data:", row); // Debugging: Ensure 'id' exists
-                    return `
+                    let actions = '';
+
+                    // ✅ Check if currentPermission is available
+                    if (currentPermission) {
+                        if (currentPermission.can_view === "1") {
+                            actions += `
                         <button class="btn btn-sm btn-primary view-attribute" 
                             data-attribute="${row.attribute_name}" 
                             data-type="${row.attribute_value || ''}" 
                             data-id="${row.id}" 
                             data-toggle="modal" data-target="#viewProductAttributeModal">
                             <i class="icon-eye menu-icon"></i>
-                        </button>
+                        </button>`;
 
-                        <button class="btn btn-sm btn-warning edit-attribute" 
+                       }
+                        if (currentPermission.can_edit === "1") {
+                            actions += ` <button class="btn btn-sm btn-warning edit-attribute" 
                             data-attribute="${row.attribute_name}" 
                             data-type="${row.attribute_value || ''}" 
                             data-id="${row.id}" 
                             data-toggle="modal" data-target="#editProductAttributeModal">
                             <i class="icon-pencil menu-icon"></i>
-                        </button>
-
-                        <button class="btn btn-sm btn-danger delete-attribute" 
+                        </button>`;
+                    }
+                    if (currentPermission.can_delete === "1") {
+                        actions += `<button class="btn btn-sm btn-danger delete-attribute" 
                             data-attribute="${row.attribute_name}" 
                             data-type="${row.attribute_value || ''}" 
                             data-id="${row.id}" 
                             data-toggle="modal" data-target="#deleteProductAttributeValueModal">
                             <i class="icon-trash menu-icon"></i>
                         </button>`;
+                    }
+                }
+                return actions || '-';
                 }
             }
         ],

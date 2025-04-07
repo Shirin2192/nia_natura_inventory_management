@@ -62,6 +62,12 @@
                 </div>
             </div>
             <!-- row -->
+            <?php
+    $sidebar_id = $current_sidebar_id;
+   
+    $can_add = isset($permissions[$sidebar_id]['can_add']) && $permissions[$sidebar_id]['can_add'] == 1;
+?>
+<?php if ($can_add): ?>
             <div class="container-fluid">
                 <div class="row justify-content-center">
                     <div class="col-lg-12">
@@ -135,6 +141,7 @@
                     </div>
                 </div>
             </div>
+            <?php endif; ?>
             <!-- Row for DataTable -->
             <div class="container-fluid">
                 <div class="row justify-content-center">

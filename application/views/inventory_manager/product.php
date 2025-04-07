@@ -442,7 +442,8 @@
                         <div id="attribute_fields_container_edit"></div>
 
 
-
+                                             <!-- Add More Attributes (dropdown + button) – move this BELOW -->
+                        <div id="attributes_container_edit"></div>
                         <!-- Add More Attributes Button -->
                         <div class="row mt-3">
                             <div class="col-md-12 text-right">
@@ -451,8 +452,7 @@
                                 </button>
                             </div>
                         </div>
-                        <!-- Add More Attributes (dropdown + button) – move this BELOW -->
-                        <div id="attributes_container_edit"></div>
+                       
                         <div class="row">
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">

@@ -85,4 +85,9 @@ function validateToken(){
         $output['token'] = AUTHORIZATION::generateToken($tokenData);
         return $output['token'];
     }
-
+    function has_permission($module_name, $action) {
+        $CI =& get_instance();
+        $CI->load->model('Admin_model');
+        return $CI->Admin_model->check_permission($module_name, $action);
+    }
+    

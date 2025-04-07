@@ -7,36 +7,17 @@ class Admin extends CI_Controller
 	public function __construct()
 	{
 		parent::__construct();
-		$this->load->model('Product_model'); 
-		$this->load->model('user_model'); 
-		$this->load->model('Product_attribute_model'); 
-		$this->load->model('Role_model'); 
-		$this->load->model('model'); 
-		$this->load->library('form_validation'); 
-
-		$admin_session = $this->session->userdata('admin_session');
-        $role_id = $admin_session['role_id'] ?? null;
-		if ($role_id) {
-            $role_permission = $this->Role_model->get_role_permission($role_id);
-
-            foreach ($role_permission as $role_permission_row) {
-                $sidebar_id = $role_permission_row['fk_sidebar_id'];
-
-                $this->permissions[$sidebar_id] = [
-                    'can_view' => $role_permission_row['can_view'] ?? 0,
-                    'can_add' => $role_permission_row['can_add'] ?? 0,
-                    'can_edit' => $role_permission_row['can_edit'] ?? 0,
-                    'can_delete' => $role_permission_row['can_delete'] ?? 0,
-                    'has_access' => $role_permission_row['has_access'] ?? 0
-                ];
-            }
-        }
+		$this->load->model('Product_model'); // Load the Product_model
+		$this->load->model('user_model'); // Load the Product_model
+		$this->load->model('Product_attribute_model'); // Ensure the model is loaded
+		$this->load->model('model'); // Load the generic model for database operations
+		$this->load->library('form_validation'); // Load form validation library
+		
 	}
 	// Default method for the Admin controller
 	public function index()
 	{
 		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
-			
 		if (!$admin_session) {
 			redirect(base_url('common/index')); // Redirect to login page if session is not active
 		} else {
@@ -45,15 +26,12 @@ class Admin extends CI_Controller
 	}
 	public function add_staff()
 	{
-		
 		$admin_session = $this->session->userdata('admin_session');
-
 		if (!$admin_session) {
 			redirect(base_url('common/index'));
 		} else {
-			$response['role'] = $this->model->selectWhereData('tbl_role', array('is_delete' => 1), "*", false, array('id', "ASC"));
-			$response['permissions'] = $this->permissions; // Pass full permissions array
-			$response['current_sidebar_id'] = 2; // Set the sidebar ID for the current view
+			$response['role'] = $this->model->selectWhereData('tbl_role', array('is_delete' => 1), "*", false, array('id', "DESC"));
+
 			$this->load->view('admin/add_staff', $response);
 		}
 	}
@@ -120,11 +98,8 @@ class Admin extends CI_Controller
 		$totalRecords = $this->user_model->get_total_users_count();
 		// Fetch paginated data
 		$users = $this->user_model->get_paginated_users($start, $length);
+
 		$data = [];
-
-		$response['permissions'] = $this->permissions; // Pass full permissions array
-		$response['current_sidebar_id'] = 2; // Set the sidebar ID for the current view
-
 		foreach ($users as $user) {
 			$data[] = [
 				"id" => $user['id'],
@@ -133,12 +108,12 @@ class Admin extends CI_Controller
 				"role_name" => $user['role_name']
 			];
 		}
-		$response['draw'] = intval($draw);
-		$response['recordsTotal'] = $totalRecords;
-		$response['recordsFiltered'] = $totalRecords;
-		$response['data'] = $data;
-
-		echo json_encode($response);
+		echo json_encode([
+			"draw" => intval($draw),
+			"recordsTotal" => $totalRecords,
+			"recordsFiltered" => $totalRecords,
+			"data" => $data
+		]);
 	}
 
 	public function view_user()
@@ -189,23 +164,318 @@ class Admin extends CI_Controller
 			}
 		}
 	}
+	public function add_flavour()
+	{
+		$admin_session = $this->session->userdata('admin_session');
+		if (!$admin_session) {
+			redirect(base_url('common/index'));
+		} else {
+			$this->load->view('inventory_manager/add_flavour');
+		}
+	}
+	public function fetch_flavours()
+	{
+		$response = $this->model->selectWhereData('tbl_flavour', array('is_delete' => 1), "*", false, array('id', "DESC"));
+		echo json_encode($response);
+	}
+	public function save_flavour()
+	{
+		$flavour_name = $this->input->post('flavour_name');
+		$this->form_validation->set_rules('flavour_name', 'Flavour Name', 'required|trim|regex_match[/^[a-zA-Z ]+$/]');
+		if ($this->form_validation->run() == FALSE) {
+			// Return validation errors as JSON (No page reload)
+			$response = [
+				'status' => 'error',
+				'flavour_name_error' => form_error('flavour_name'),
+			];
+		} else {
+			$count = $this->model->CountWhereRecord('tbl_flavour', array('flavour_name' => $flavour_name, 'is_delete' => 1));
+			if ($count == 1) {
+				$response = ["status" => "error", 'flavour_name_error' => "Flavour Already Exist"];
+			} else {
+				$data = array(
+					'flavour_name' => $flavour_name,
+				);
+				$this->model->insertData('tbl_flavour', $data);
+				$response = ["status" => "success", "message" => "Flavour added successfully"];
+			}
+		}
+		echo json_encode($response); // Return response as JSON
+	}
+	public function get_flavour_details()
+	{
+		$id = $this->input->post('id'); // Retrieve flavour ID from POST request		
+		if (!$id) {
+			echo json_encode(["status" => "error", "message" => "Invalid request"]);
+			return;
+		}
+		$flavour = $this->model->selectWhereData('tbl_flavour', array('id' => $id, 'is_delete' => 1));
+		if ($flavour) {
+			echo json_encode(["status" => "success", "flavour" => $flavour]);
+		} else {
+			echo json_encode(["status" => "error", "message" => "Flavour not found"]);
+		}
+	}
+	public function update_flavour()
+	{
+		$flavour_id = $this->input->post('edit_flavour_id');
+		$flavour_name = $this->input->post('edit_flavour_name');
+		$this->form_validation->set_rules('edit_flavour_name', 'Flavour Name', 'required|trim|regex_match[/^[a-zA-Z ]+$/]');
+		if ($this->form_validation->run() == FALSE) {
+			$response = [
+				'status' => 'error',
+				'edit_flavour_name_error' => form_error('edit_flavour_name'),
+			];
+		} else {
+			$count = $this->model->CountWhereRecord('tbl_flavour', array('flavour_name' => $flavour_name, 'id !=' => $flavour_id));
+			if ($count == 1) {
+				$response = ["status" => "error", 'flavour_name_error' => "Flavour Already Exist"];
+			} else {
+				$update_data = ['flavour_name' => $flavour_name];
+
+				$this->model->updateData('tbl_flavour', $update_data, ['id' => $flavour_id]);
+
+				$response = ["status" => "success", "message" => "Flavour updated successfully"];
+			}
+		}
+		echo json_encode($response);
+	}
+	public function delete_flavour()
+	{
+		$id = $this->input->post('id'); // Get the flavour ID from AJAX	
+		if (!$id) {
+			echo json_encode(['status' => 'error', 'message' => 'Invalid flavour ID']);
+			return;
+		}
+		$result = $this->model->updateData('tbl_flavour', ['is_delete' => '0'], ['id' => $id]); // Soft delete	
+		if ($result) {
+			echo json_encode(['status' => 'success', 'message' => 'Flavour deleted successfully']);
+		} else {
+			echo json_encode(['status' => 'error', 'message' => 'Failed to delete flavour']);
+		}
+	}
+	public function add_bottle_size()
+	{
+		$admin_session = $this->session->userdata('admin_session');
+		if (!$admin_session) {
+			redirect(base_url('common/index'));
+		} else {
+			$this->load->view('inventory_manager/add_bottle_size');
+		}
+	}
+	public function fetch_bottle_size()
+	{
+		$response = $this->model->selectWhereData('tbl_bottle_size', array('is_delete' => 1), "*", false, array('id', "DESC"));
+		echo json_encode($response);
+	}
+
+	public function save_bottle_size()
+	{
+		$bottle_size = $this->input->post('bottle_size');
+		$this->form_validation->set_rules('bottle_size', 'Bottle Size', 'required|trim');
+
+		if ($this->form_validation->run() == FALSE) {
+			// Return validation errors as JSON (No page reload)
+			$response = [
+				'status' => 'error',
+				'bottle_size_error' => form_error('bottle_size'),
+			];
+		} else {
+			$count = $this->model->CountWhereRecord('tbl_bottle_size', array('bottle_size' => $bottle_size, 'is_delete' => 1));
+			if ($count == 1) {
+				$response = ["status" => "error", 'bottle_size_error' => "Bottle Size Already Exist"];
+			} else {
+				$data = array(
+					'bottle_size' => $bottle_size,
+				);
+
+				$this->model->insertData('tbl_bottle_size', $data);
+				$response = ["status" => "success", "message" => "Bottle Size added successfully"];
+			}
+		}
+
+		echo json_encode($response); // Return response as JSON
+	}
+	public function get_bottle_size_details()
+	{
+		$id = $this->input->post('id'); // Retrieve Bottle SIze ID from POST request
+
+		if (!$id) {
+			echo json_encode(["status" => "error", "message" => "Invalid request"]);
+			return;
+		}
+
+		$bottle_size = $this->model->selectWhereData('tbl_bottle_size', array('id' => $id, 'is_delete' => 1));
+
+		if ($bottle_size) {
+			echo json_encode(["status" => "success", "bottle_size" => $bottle_size]);
+		} else {
+			echo json_encode(["status" => "error", "message" => "Bottle Size not found"]);
+		}
+	}
+
+	public function update_bottle_size()
+	{
+		$bottle_size_id = $this->input->post('edit_bottle_size_id');
+		$bottle_size = $this->input->post('edit_bottle_size');
+
+		$this->form_validation->set_rules('edit_bottle_size', 'Bottle Size', 'required|trim');
+
+		if ($this->form_validation->run() == FALSE) {
+			$response = [
+				'status' => 'error',
+				'edit_bottle_size_error' => form_error('edit_bottle_size'),
+			];
+		} else {
+			$count = $this->model->CountWhereRecord('tbl_bottle_size', array('bottle_size' => $bottle_size, 'id !=' => $bottle_size_id));
+			if ($count == 1) {
+				$response = ["status" => "error", 'bottle_size_error' => "Bottle Size Already Exist"];
+			} else {
+				$update_data = ['bottle_size' => $bottle_size];
+
+				$this->model->updateData('tbl_bottle_size', $update_data, ['id' => $bottle_size_id]);
+
+				$response = ["status" => "success", "message" => "Bottle Size updated successfully"];
+			}
+		}
+
+		echo json_encode($response);
+	}
+	public function delete_bottle_size()
+	{
+		$id = $this->input->post('id'); // Get the flavour ID from AJAX
+
+		if (!$id) {
+			echo json_encode(['status' => 'error', 'message' => 'Invalid flavour ID']);
+			return;
+		}
+
+		$result = $this->model->updateData('tbl_bottle_size', ['is_delete' => '0'], ['id' => $id]); // Soft delete
+
+		if ($result) {
+			echo json_encode(['status' => 'success', 'message' => 'Bottle Size deleted successfully']);
+		} else {
+			echo json_encode(['status' => 'error', 'message' => 'Failed to delete Bottle Size']);
+		}
+	}
+	public function add_bottle_type()
+	{
+		$admin_session = $this->session->userdata('admin_session');
+		if (!$admin_session) {
+			redirect(base_url('common/index'));
+		} else {
+			$this->load->view('inventory_manager/add_bottle_type');
+		}
+	}
+	public function fetch_bottle_type()
+	{
+		$response = $this->model->selectWhereData('tbl_bottle_type', array('is_delete' => 1), "*", false, array('id', "DESC"));
+		echo json_encode($response);
+	}
+
+	public function save_bottle_type()
+	{
+		$bottle_type = $this->input->post('bottle_type');
+		$this->form_validation->set_rules('bottle_type', 'Bottle Type', 'required|trim');
+
+		if ($this->form_validation->run() == FALSE) {
+			// Return validation errors as JSON (No page reload)
+			$response = [
+				'status' => 'error',
+				'bottle_type_error' => form_error('bottle_type'),
+			];
+		} else {
+			$count = $this->model->CountWhereRecord('tbl_bottle_type', array('bottle_type' => $bottle_type, 'is_delete' => 1));
+			if ($count == 1) {
+				$response = ["status" => "error", 'bottle_type_error' => "Bottle Type Already Exist"];
+			} else {
+				$data = array(
+					'bottle_type' => $bottle_type,
+				);
+
+				$this->model->insertData('tbl_bottle_type', $data);
+				$response = ["status" => "success", "message" => "Bottle Type added successfully"];
+			}
+		}
+
+		echo json_encode($response); // Return response as JSON
+	}
+	public function get_bottle_type_details()
+	{
+		$id = $this->input->post('id'); // Retrieve Bottle SIze ID from POST request
+
+		if (!$id) {
+			echo json_encode(["status" => "error", "message" => "Invalid request"]);
+			return;
+		}
+
+		$bottle_type = $this->model->selectWhereData('tbl_bottle_type', array('id' => $id, 'is_delete' => 1));
+
+		if ($bottle_type) {
+			echo json_encode(["status" => "success", "bottle_type" => $bottle_type]);
+		} else {
+			echo json_encode(["status" => "error", "message" => "Bottle Type not found"]);
+		}
+	}
+
+	public function update_bottle_type()
+	{
+		$bottle_type_id = $this->input->post('edit_bottle_type_id');
+		$bottle_type = $this->input->post('edit_bottle_type');
+
+		$this->form_validation->set_rules('edit_bottle_type', 'Bottle Size', 'required|trim');
+
+		if ($this->form_validation->run() == FALSE) {
+			$response = [
+				'status' => 'error',
+				'edit_bottle_type_error' => form_error('edit_bottle_type'),
+			];
+		} else {
+			$count = $this->model->CountWhereRecord('tbl_bottle_type', array('bottle_type' => $bottle_type, 'id !=' => $bottle_type_id));
+			if ($count == 1) {
+				$response = ["status" => "error", 'bottle_type_error' => "Bottle Type Already Exist"];
+			} else {
+				$update_data = ['bottle_type' => $bottle_type];
+
+				$this->model->updateData('tbl_bottle_type', $update_data, ['id' => $bottle_type_id]);
+
+				$response = ["status" => "success", "message" => "Bottle Type updated successfully"];
+			}
+		}
+
+		echo json_encode($response);
+	}
+	public function delete_bottle_type()
+	{
+		$id = $this->input->post('id'); // Get the flavour ID from AJAX
+
+		if (!$id) {
+			echo json_encode(['status' => 'error', 'message' => 'Invalid flavour ID']);
+			return;
+		}
+
+		$result = $this->model->updateData('tbl_bottle_type', ['is_delete' => '0'], ['id' => $id]); // Soft delete
+
+		if ($result) {
+			echo json_encode(['status' => 'success', 'message' => 'Bottle Type deleted successfully']);
+		} else {
+			echo json_encode(['status' => 'error', 'message' => 'Failed to delete Bottle Type']);
+		}
+	}
 	public function add_sale_channel()
 	{
 		$admin_session = $this->session->userdata('admin_session');
 		if (!$admin_session) {
 			redirect(base_url('common/index'));
 		} else {
-			$response['permissions'] = $this->permissions; // Pass full permissions array
-			$response['current_sidebar_id'] = 6; // Set the sidebar ID for the current view
-			$this->load->view('inventory_manager/add_sales_channel',$response);
+			$this->load->view('inventory_manager/add_sales_channel');
 		}
 	}
 	public function fetch_sale_channel()
 	{
 		$response = $this->model->selectWhereData('tbl_sale_channel', array('is_delete' => 1), "*", false, array('id', "DESC"));
-		$data['permissions'] = $this->permissions; // Pass full permissions array
-		$data['current_sidebar_id'] = 6; // Set the sidebar ID for the current view
-		echo json_encode(['response' => $response, 'data' => $data]);
+
+		echo json_encode($response);
 	}
 
 	public function save_sale_channel()
@@ -313,9 +583,10 @@ class Admin extends CI_Controller
 			redirect(base_url('common/index'));
 		} else {
 			$response['product_types'] = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
+			// $response['attributes'] = $this->model->selectWhereData('tbl_attribute_master', array('is_delete' => 1), "*", false, array('id', "DESC"));
+			// $response['attribute_values'] = $this->model->selectWhereData('tbl_attribute_values', array('is_delete' => 1), "*", false, array('id', "DESC"));
+			// $response['sale_channel'] = $this->model->selectWhereData('tbl_sale_channel', array('is_delete' => 1), "*", false, array('id', "DESC"));
 			$response['stock_availability'] = $this->model->selectWhereData('tbl_stock_availability', array('is_delete' => 1), "*", false, array('id', "DESC"));
-			$response['permissions'] = $this->permissions; // Pass full permissions array
-			$response['current_sidebar_id'] = 7; // Set the sidebar ID for the current view
 
 			$this->load->view('inventory_manager/product', $response);
 		}
@@ -521,8 +792,7 @@ class Admin extends CI_Controller
 
 			$structuredData[] = $productDetails;
 		}
-		// $structuredData['permissions'] = $this->permissions; // Pass full permissions array
-		// $structuredData['current_sidebar_id'] = 7; // Set the sidebar ID for the current view
+
 		echo json_encode(['data' => $structuredData]); // Send JSON response
 	}
 	public function view_product()
@@ -731,18 +1001,13 @@ class Admin extends CI_Controller
 		if (!$admin_session) {
 			redirect(base_url('common/index'));
 		} else {
-			$response['permissions'] = $this->permissions; // Pass full permissions array
-			$response['current_sidebar_id'] = 3; // Set the sidebar ID for the current view
-			$this->load->view('inventory_manager/add_product_type',$response);
+			$this->load->view('inventory_manager/add_product_type');
 		}
 	}
 	public function fetch_product_type()
 	{
 		$response = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
-		$data['permissions'] = $this->permissions; // Pass full permissions array
-		$data['current_sidebar_id'] = 3; // Set the sidebar ID for the current view
-		// echo json_encode('response'=>$response, 'data'=>$data);
-		echo json_encode(['response' => $response, 'data' => $data]);
+		echo json_encode($response);
 	}
 	public function save_product_types()
 	{
@@ -827,17 +1092,14 @@ class Admin extends CI_Controller
 			redirect(base_url('common/index')); // Redirect to login page if session is not active
 		} else {
 			$response['product_types'] = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
-			$response['permissions'] = $this->permissions; // Pass full permissions array
-			$response['current_sidebar_id'] = 4; // Set the sidebar ID for the current view
 			$this->load->view('inventory_manager/add_product_attributes',$response);
 		}
 		
 	}
 	public function get_product_attribute_detail()
 	{
+		
 		$response['data'] = $this->Product_attribute_model->get_product_attribute_detail(); // Correctly access the model
-		$response['permissions'] = $this->permissions; // Pass full permissions array
-		$response['current_sidebar_id'] = 4; // Set the sidebar ID for the current view
 		echo json_encode($response);
 	}
 	public function save_product_attributes()
@@ -952,16 +1214,12 @@ class Admin extends CI_Controller
 			redirect(base_url('common/index')); // Redirect to login page if session is not active
 		} else {
 			$response['product_attributes'] = $this->model->selectWhereData('tbl_attribute_master', array('is_delete' => 1), "*", false, array('id', "DESC"));
-			$response['permissions'] = $this->permissions; // Pass full permissions array
-			$response['current_sidebar_id'] = 5; // Set the sidebar ID for the current view
 			$this->load->view('inventory_manager/add_product_attributes_value',$response);
 		}
 	}
 	public function get_product_attributes_value_detail()
 	{
 		$response['data'] = $this->Product_attribute_model->get_product_attributes_value_detail(); // Correctly access the model
-		$response['permissions'] = $this->permissions; // Pass full permissions array
-		$response['current_sidebar_id'] = 5; // Set the sidebar ID for the current view
 		echo json_encode($response);
 	}
 	public function save_product_attributes_value()

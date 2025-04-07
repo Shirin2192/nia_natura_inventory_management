@@ -63,52 +63,59 @@
                 </div>
             </div>
             <!-- row -->
-            <div class="container-fluid">
-                <div class="row justify-content-center">
-                    <div class="col-lg-12">
-                        <div class="card">
-                            <div class="card-body">
-                                <form id="SaleChannelForm">
-                                    <div class="row">
-                                    <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <label class="col-form-label" for="sale_channel">Channel Type<span
-                                                        class="text-danger">*</span>
-                                                </label>
-                                               <select class="chosen-select form-control" id="channel_type" name="channel_type">
-                                                    <option value=""></option>
-                                                    <option value="Online">Online</option>
-                                                    <option value="Offline">Offline</option>
-                                               </select>
-                                                <small class="text-danger" id="channel_type_error"></small>
-                                                <!-- Error message here -->
+            <?php
+                $sidebar_id = $current_sidebar_id;            
+                $can_add = isset($permissions[$sidebar_id]['can_add']) && $permissions[$sidebar_id]['can_add'] == 1;
+            ?>
+            <?php if ($can_add): ?>
+                <div class="container-fluid">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <form id="SaleChannelForm">
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label class="col-form-label" for="sale_channel">Channel Type<span
+                                                            class="text-danger">*</span>
+                                                    </label>
+                                                    <select class="chosen-select form-control" id="channel_type"
+                                                        name="channel_type">
+                                                        <option value=""></option>
+                                                        <option value="Online">Online</option>
+                                                        <option value="Offline">Offline</option>
+                                                    </select>
+                                                    <small class="text-danger" id="channel_type_error"></small>
+                                                    <!-- Error message here -->
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label class="col-form-label" for="sale_channel">Sale Channel <span
+                                                            class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text" class="form-control" id="sale_channel"
+                                                        name="sale_channel" placeholder="Enter Sale Channel">
+                                                    <small class="text-danger" id="sale_channel_error"></small>
+                                                    <!-- Error message here -->
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-lg-8 ml-auto">
+                                                <button type="submit" class="btn btn-primary">Submit</button>
                                             </div>
                                         </div>
-
-                                        <div class="col-lg-6">
-                                            <div class="form-group">
-                                                <label class="col-form-label" for="sale_channel">Sale Channel <span
-                                                        class="text-danger">*</span>
-                                                </label>
-                                                <input type="text" class="form-control" id="sale_channel"
-                                                    name="sale_channel" placeholder="Enter Sale Channel">
-                                                <small class="text-danger" id="sale_channel_error"></small>
-                                                <!-- Error message here -->
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="col-lg-8 ml-auto">
-                                            <button type="submit" class="btn btn-primary">Submit</button>
-                                        </div>
-                                    </div>
-                                </form>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            <?php endif ?>
             <!-- Row for DataTable -->
             <div class="container-fluid">
                 <div class="row justify-content-center">
@@ -152,22 +159,28 @@
                 <div class="modal-body" id="sale_channelContent">
                     <!-- Flavour details will be loaded here -->
                 </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
     <!-- Edit Sale Channel Modal -->
-    <div class="modal fade" id="edit_sale_channel_modal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal fade" id="edit_sale_channel_modal" tabindex="-1" aria-labelledby="editModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editModalLabel">Edit Sale Channel</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <form id="edit_sale_channel_form">
                     <div class="modal-body">
 
                         <div class="row">
-                        <div class="col-lg-6 mb-3">
+                            <div class="col-lg-6 mb-3">
                                 <div class="form-group">
                                     <input type="hidden" name="edit_sale_channel_id" id="edit_sale_channel_id">
                                     <label class="col-form-label" for="edit_channel_type">Channel Type<span
@@ -177,10 +190,10 @@
                                     <small class="text-danger" id="edit_channel_type_error"></small>
                                     <!-- Error message here -->
                                 </div>
-                            </div>    
-                        <div class="col-lg-6 mb-3">
+                            </div>
+                            <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                   
+
                                     <label class="col-form-label" for="edit_sale_channel">Sale Channel <span
                                             class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="edit_sale_channel"
@@ -194,7 +207,7 @@
 
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                     </div>
                 </form>
