@@ -137,63 +137,71 @@
         <!-- Edit Product Attribute Modal -->
         <div class="modal fade" id="editProductAttributeModal" tabindex="-1" role="dialog"
             aria-labelledby="editProductAttributeModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
+            <div class="modal-dialog modal-xl custom-modal-fullwidth">
+            <div class="modal-content">
 
-                    <!-- Modal Header -->
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="editProductAttributeModalLabel">
-                            <i class="icon-pencil"></i> Edit Attribute
-                        </h5>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-
-                    <!-- Modal Body -->
-                    <div class="modal-body">
-                        <form id="editAttributeForm">
-
-                            <!-- Hidden Input for Attribute ID -->
-                            <input type="hidden" id="edit_attribute_id" name="edit_attribute_id">
-
-                            <!-- Product Type (Readonly) -->
-                            <div class="form-group">
-                                <label for="edit_product_type">Product Type</label>
-                                <span class="form-control bg-light" id="edit_product_type" name="edit_product_type"
-                                    readonly></span>
-                            </div>
-
-                            <!-- Attribute Name -->
-                            <div class="form-group">
-                                <label for="edit_attribute_name">Attribute Name</label>
-                                <input type="text" class="form-control" id="edit_attribute_name"
-                                    name="edit_attribute_name" required>
-                            </div>
-
-                            <!-- Attribute Type -->
-                            <div class="form-group">
-                                <label for="edit_attribute_type">Attribute Type</label>
-                                <select class="chosen-select form-control" id="edit_attribute_type"
-                                    name="edit_attribute_type">
-                                    <option value="text">Text</option>
-                                    <option value="dropdown">Dropdown</option>
-                                </select>
-                            </div>
-
-                            <!-- Save Button -->
-                            <div class="text-right">
-                                <button type="submit" class="btn btn-primary">
-                                    Save Changes
-                                </button>
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                    <i class="icon-close"></i> Cancel
-                                </button>
-                            </div>
-
-                        </form>
-                    </div>
+                <!-- Modal Header -->
+                <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editProductAttributeModalLabel">
+                    <i class="icon-pencil"></i> Edit Attribute
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
                 </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                <form id="editAttributeForm">
+                    <div class="row">
+                    <!-- Hidden Input for Attribute ID -->
+                   
+                      
+                        <input type="hidden" id="edit_attribute_id" name="edit_attribute_id">
+                        
+                  
+
+                    <!-- Product Type (Readonly) -->
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                        <label class="col-form-label" for="edit_product_type">Product Type</label>
+                        <span class="form-control bg-light" id="edit_product_type" name="edit_product_type" readonly></span>
+                        </div>
+                    </div>
+
+                    <!-- Attribute Name -->
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                        <label class="col-form-label" for="edit_attribute_name">Attribute Name</label>
+                        <input type="text" class="form-control" id="edit_attribute_name" name="edit_attribute_name" required>
+                        </div>
+                    </div>
+
+                    <!-- Attribute Type -->
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                        <label class="col-form-label" for="edit_attribute_type">Attribute Type</label>
+                        <select class="chosen-select form-control" id="edit_attribute_type" name="edit_attribute_type">
+                            <option value="text">Text</option>
+                            <option value="dropdown">Dropdown</option>
+                        </select>
+                        </div>
+                    </div>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div class="form-group text-right">
+                    <button type="submit" class="btn btn-primary">
+                        Save Changes
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="icon-close"></i> Cancel
+                    </button>
+                    </div>
+
+                </form>
+                </div>
+            </div>
             </div>
         </div>
         <div class="modal fade" id="deleteProductAttributeModal" tabindex="-1" role="dialog"

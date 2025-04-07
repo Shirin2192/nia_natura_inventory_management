@@ -10,7 +10,7 @@ $('#RoleAccessForm').on('submit', function (e) {
     let formData = form.serialize();
 
     $.ajax({
-        url: frontend + 'admin/save_permissions',
+        url: frontend + controllerName+'/save_permissions',
         type: 'POST',
         data: formData,
         dataType: 'json',

@@ -81,7 +81,7 @@ class Common extends CI_Controller {
 							break;
 						case 3:
 							$session_name = 'staff_session';
-							$redirect_url = base_url('user');
+							$redirect_url = base_url('staff');
 							break;
 						default:
 							$session_name = 'admin_session';

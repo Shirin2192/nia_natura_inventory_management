@@ -6,7 +6,7 @@ $("#userForm").submit(function (e) {
     e.preventDefault();
 
     $.ajax({
-        url: frontend + "admin/save_user",
+        url: frontend + controllerName+"/save_user",
         type: "POST",
         data: $(this).serialize(),
         dataType: "json",
@@ -64,7 +64,7 @@ $(document).ready(function () {
         processing: true,
         serverSide: true,
         ajax: {
-            url: frontend + "admin/get_users",
+            url: frontend + controllerName+"/get_users",
             type: "POST",
             dataSrc: function (json) {
                 const permissions = json.permissions;
@@ -129,7 +129,7 @@ $(document).on("click", ".view-user", function () {
     var user_id = $(this).data("id"); // Get user ID from button
 
     $.ajax({
-        url: frontend + "admin/view_user",
+        url: frontend + controllerName+"/view_user",
         type: "POST",
         data: { user_id: user_id },
         dataType: "json",
@@ -158,7 +158,7 @@ $(document).on("click", ".view-user", function () {
 $(document).on("click", ".editUser", function () {
     var user_id = $(this).data("id"); // Get user ID from button
     $.ajax({
-        url: frontend + "admin/view_user",
+        url: frontend + controllerName+"/view_user",
         type: "POST",
         data: { user_id: user_id },
         dataType: "json",
@@ -207,7 +207,7 @@ $("#edit-staff-form").submit(function (event) {
     event.preventDefault();
     var formData = $(this).serialize(); // Get form data
     $.ajax({
-        url: frontend + "admin/update_staff",
+        url: frontend + controllerName+"/update_staff",
         type: "POST",
         data: formData,
         dataType: "json",

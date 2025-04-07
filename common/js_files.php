@@ -35,4 +35,5 @@
 <script src="<?= base_url()?>assets/view_js/form.js"></script>
 <script>
     var frontend = "<?= base_url();?>";
+    var controllerName = "<?= $this->router->fetch_class(); ?>";
 </script>

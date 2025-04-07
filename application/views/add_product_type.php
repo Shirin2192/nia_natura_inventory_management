@@ -135,7 +135,7 @@
     <!-- Bootstrap Modal -->
     <!-- View Product Type Modal -->
 <div class="modal fade" id="viewProductTypeModal" tabindex="-1" aria-labelledby="viewProductTypeLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal-dialog modal-xl custom-modal-fullwidth">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="viewProductTypeLabel">View Product Type</h5>
@@ -157,7 +157,7 @@
 
     <!-- Edit Product Modal -->
     <div class="modal fade" id="editProductTypeModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl custom-modal-fullwidth">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editModalLabel">Edit Product Type</h5>

@@ -9,7 +9,7 @@ function loadTable() {
         "serverSide": false,
         "destroy": true,
         "ajax": {
-            "url": frontend + "admin/fetch_product_type",
+            "url": frontend + controllerName+"/fetch_product_type",
             "type": "POST",
             "dataSrc": function(data) {
                 const permissions = data.data.permissions;
@@ -43,7 +43,7 @@ function loadTable() {
 $("#ProductTypeForm").on("submit", function (event) {
     event.preventDefault(); // Prevent page reload
     $.ajax({
-        url: frontend + "admin/save_product_types", // URL to controller function
+        url: frontend + controllerName+"/save_product_types", // URL to controller function
         type: "POST",
         data: $(this).serialize(), // Serialize form data
         dataType: "json",
@@ -51,6 +51,10 @@ $("#ProductTypeForm").on("submit", function (event) {
             if (response.status === "error") {
                 // Show validation error below the textbox
                 $("#product_type_name_error").html(response.product_type_name_error);
+                // Clear error message after 3 seconds
+                setTimeout(function () {
+                    $("#product_type_name_error").text("");
+                }, 1500);
             } else {
                 swal({
                     title: "Success!",
@@ -72,7 +76,7 @@ $("#ProductTypeForm").on("submit", function (event) {
     var id = $(this).data("id"); // Get the product type ID from data-id attribute
 
     $.ajax({
-        url: frontend + "admin/get_product_types_details", // URL to controller function
+        url: frontend + controllerName+"/get_product_types_details", // URL to controller function
         type: "POST",
         data: { id: id }, // Sending data as POST
         dataType: "json",
@@ -91,7 +95,7 @@ $(document).on("click", ".edit_Product_type", function () {
     var id = $(this).data("id"); // Get the product type ID
 
     $.ajax({
-        url: frontend + "admin/get_product_types_details", // Fetch data URL
+        url: frontend + controllerName+"/get_product_types_details", // Fetch data URL
         type: "POST",
         data: { id: id },
         dataType: "json",
@@ -111,7 +115,7 @@ $(document).on("click", ".edit_Product_type", function () {
     e.preventDefault();
 
     $.ajax({
-        url: frontend + "admin/update_product_types", // Update data URL
+        url: frontend + controllerName+"/update_product_types", // Update data URL
         type: "POST",
         data: $(this).serialize(), // Serialize form data
         dataType: "json",
@@ -146,7 +150,7 @@ $(document).on("click", ".delete_Product_type", function() {
 $("#confirm-delete").on("click", function() {
     var id = $(this).data("id");
     $.ajax({
-        url: frontend + "admin/delete_product_type", // Your API endpoint
+        url: frontend + controllerName+"/delete_product_type", // Your API endpoint
         type: "POST",
         data: { id: id },
         dataType: "json",

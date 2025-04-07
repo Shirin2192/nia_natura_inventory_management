@@ -10,6 +10,7 @@ foreach ($session_types as $session_type_row) {
         break;
     }
 }
+// print_r($admin_session); die;// Debugging line to check session data
 
 if (!$admin_session) {
     // Handle case where no session is found

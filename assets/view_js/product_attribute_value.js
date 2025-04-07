@@ -9,7 +9,7 @@ $(document).ready(function () {
         processing: false, // No server-side processing
         serverSide: false, // Fetch data locally
         ajax: {
-            url: frontend + "admin/get_product_attributes_value_detail",
+            url: frontend + controllerName+"/get_product_attributes_value_detail",
             type: "POST",
             dataSrc: function (json) {
                 const permissions = json.permissions;
@@ -76,7 +76,7 @@ $(document).ready(function () {
 $("#productAttributeValueForm").on("submit", function (event) {
     event.preventDefault(); // Prevent page reload
     $.ajax({
-        url: frontend + "admin/save_product_attributes_value", // URL to controller function
+        url: frontend + controllerName+"/save_product_attributes_value", // URL to controller function
         type: "POST",
         data: $(this).serialize(), // Serialize form data
         dataType: "json",
@@ -85,6 +85,10 @@ $("#productAttributeValueForm").on("submit", function (event) {
                 // Show validation error below the textbox
                 $("#fk_attribute_id_error").html(response.fk_attribute_id_error);
                 $("#attribute_value_error").html(response.attribute_value_error);
+                setTimeout(function () {
+                    $("#fk_attribute_id_error").text("");
+                    $("#attribute_value_error").text("");
+                }, 1500);
             } else {
                 swal({
                     title: "Success!",
@@ -110,7 +114,7 @@ $("#productAttributeValueForm").on("submit", function (event) {
         var attrId = $(this).data("id"); // Get Attribute ID
     
         $.ajax({
-            url: frontend + "admin/get_product_attributes_value_detail_id", // Backend Controller URL
+            url: frontend + controllerName+"/get_product_attributes_value_detail_id", // Backend Controller URL
             type: "POST",
             data: { id: attrId }, // Send ID to Backend
             dataType: "json",
@@ -135,7 +139,7 @@ $("#productAttributeValueForm").on("submit", function (event) {
         var attrId = $(this).data("id"); // Get Attribute ID
     
         $.ajax({
-            url: frontend + "admin/get_product_attributes_value_detail_id", // Backend Controller URL
+            url: frontend + controllerName+"/get_product_attributes_value_detail_id", // Backend Controller URL
             type: "POST",
             data: { id: attrId }, // Send ID to Backend
             dataType: "json",
@@ -143,6 +147,7 @@ $("#productAttributeValueForm").on("submit", function (event) {
                 if (response.status == "success") {                
                     $("#edit_attribute_name").html(response.data.attribute_name); // Set Attribute Name                     
                     $("#edit_attribute_value").val(response.data.attribute_value);
+                    
                     $("#edit_attribute_value_id").val(response.data.id); // Set ID
                     $("#editProductAttributeValueModal").modal("show"); // Show Modal
                 } else {
@@ -159,7 +164,7 @@ $("#productAttributeValueForm").on("submit", function (event) {
         event.preventDefault(); // Prevent page reload
     
         $.ajax({
-            url: frontend + "admin/update_product_attributes_value", // Save updates
+            url: frontend + controllerName+"/update_product_attributes_value", // Save updates
             type: "POST",
             data: $(this).serialize(), // Serialize form data
             dataType: "json",
@@ -167,6 +172,10 @@ $("#productAttributeValueForm").on("submit", function (event) {
                 if (response.status === "error") {
                     // Display validation errors for all fields
                     $("#edit_attribute_value_error").html(response.attribute_type_error || "");
+                    setTimeout(function () {
+                        $("#edit_attribute_value_error").text("");
+                       
+                    }, 1500);
                 } else {
                    
                     swal({
@@ -207,7 +216,7 @@ $("#productAttributeValueForm").on("submit", function (event) {
         var attrId = $("#delete_attribute_value_id").val(); // Get the attribute ID from hidden input
     
         $.ajax({
-            url: frontend + "admin/delete_product_attributes_value", // Backend URL
+            url: frontend + controllerName+"/delete_product_attributes_value", // Backend URL
             type: "POST",
             data: { id: attrId }, // Send ID to backend
             dataType: "json",

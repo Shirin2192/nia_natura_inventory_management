@@ -10,7 +10,7 @@ $(document).ready(function () {
     // Load DataTable
     function loadSaleChannel() {
         $.ajax({
-            url: frontend + "admin/fetch_sale_channel",
+            url: frontend + controllerName+"/fetch_sale_channel",
             type: "POST",
             dataType: "json",
             success: function (data) {
@@ -62,7 +62,7 @@ $(document).ready(function () {
     $("#SaleChannelForm").on("submit", function (event) {
         event.preventDefault(); // Prevent page reload
         $.ajax({
-            url: frontend + "admin/save_sale_channel",
+            url: frontend + controllerName+"/save_sale_channel",
             type: "POST",
             data: $(this).serialize(),
             dataType: "json",
@@ -91,7 +91,7 @@ $(document).ready(function () {
 $(document).on("click", ".view-sale-channel", function () {
     var channelId = $(this).data("id");
     $.ajax({
-        url: frontend + "admin/get_sale_channel_details",
+        url: frontend + controllerName+"/get_sale_channel_details",
         type: "POST",
         data: { id: channelId },
         dataType: "json",
@@ -116,7 +116,7 @@ $(document).on("click", ".view-sale-channel", function () {
 $(document).on("click", ".edit-sale-channel", function () {
     var channelId = $(this).data("id");
     $.ajax({
-        url: frontend + "admin/get_sale_channel_details",
+        url: frontend + controllerName+"/get_sale_channel_details",
         type: "POST",
         data: { id: channelId },
         dataType: "json",
@@ -139,7 +139,7 @@ $(document).on("click", ".edit-sale-channel", function () {
 $("#edit_sale_channel_form").on("submit", function (event) {
     event.preventDefault();
     $.ajax({
-        url: frontend + "admin/update_sale_channel",
+        url: frontend + controllerName+"/update_sale_channel",
         type: "POST",
         data: $(this).serialize(),
         dataType: "json",
@@ -175,7 +175,7 @@ function deleteSaleChannel(id) {
     }).then((willDelete) => {
         if (willDelete) {
             $.ajax({
-                url: frontend + "admin/delete_sale_channel",
+                url: frontend + controllerName+"/delete_sale_channel",
                 type: "POST",
                 data: { id: id },
                 dataType: "json",

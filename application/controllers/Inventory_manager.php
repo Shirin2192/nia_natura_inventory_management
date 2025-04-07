@@ -11,6 +11,24 @@ class Inventory_manager extends CI_Controller {
 		$this->load->model('Product_attribute_model');
 		$this->load->model('model');
 		$this->load->library('form_validation'); 
+
+		$inventory_session = $this->session->userdata('inventory_session'); // Check if admin session exists
+		$role_id = $inventory_session['role_id'] ?? null;
+		if ($role_id) {
+            $role_permission = $this->Role_model->get_role_permission($role_id);
+
+            foreach ($role_permission as $role_permission_row) {
+                $sidebar_id = $role_permission_row['fk_sidebar_id'];
+
+                $this->permissions[$sidebar_id] = [
+                    'can_view' => $role_permission_row['can_view'] ?? 0,
+                    'can_add' => $role_permission_row['can_add'] ?? 0,
+                    'can_edit' => $role_permission_row['can_edit'] ?? 0,
+                    'can_delete' => $role_permission_row['can_delete'] ?? 0,
+                    'has_access' => $role_permission_row['has_access'] ?? 0
+                ];
+            }
+        }
 		
 	}
 
@@ -29,13 +47,18 @@ class Inventory_manager extends CI_Controller {
 		if (!$inventory_session) {
 			redirect(base_url('common/index'));
 		} else {
-			$this->load->view('inventory_manager/add_product_type');
+			$data['permissions'] = $this->permissions; // Pass full permissions array
+			$data['current_sidebar_id'] = 3; // Set the sidebar ID for the current view
+			$this->load->view('add_product_type',$data);
 		}
 	}
 	public function fetch_product_type()
 	{
 		$response = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
-		echo json_encode($response);
+		$data['permissions'] = $this->permissions; // Pass full permissions array
+		$data['current_sidebar_id'] = 3; // Set the sidebar ID for the current view
+		// echo json_encode('response'=>$response, 'data'=>$data);
+		echo json_encode(['response' => $response, 'data' => $data]);
 	}
 	public function save_product_types()
 	{
@@ -120,14 +143,17 @@ class Inventory_manager extends CI_Controller {
 			redirect(base_url('common/index')); // Redirect to login page if session is not active
 		} else {
 			$response['product_types'] = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
-			$this->load->view('inventory_manager/add_product_attributes',$response);
+			$response['permissions'] = $this->permissions; // Pass full permissions array
+			$response['current_sidebar_id'] = 4; // Set the sidebar ID for the current view
+			$this->load->view('add_product_attributes',$response);
 		}
 		
 	}
 	public function get_product_attribute_detail()
 	{
-		
 		$response['data'] = $this->Product_attribute_model->get_product_attribute_detail(); // Correctly access the model
+		$response['permissions'] = $this->permissions; // Pass full permissions array
+		$response['current_sidebar_id'] = 4; // Set the sidebar ID for the current view
 		echo json_encode($response);
 	}
 	public function save_product_attributes()
@@ -242,12 +268,16 @@ class Inventory_manager extends CI_Controller {
 			redirect(base_url('common/index')); // Redirect to login page if session is not active
 		} else {
 			$response['product_attributes'] = $this->model->selectWhereData('tbl_attribute_master', array('is_delete' => 1), "*", false, array('id', "DESC"));
-			$this->load->view('inventory_manager/add_product_attributes_value',$response);
+			$response['permissions'] = $this->permissions; // Pass full permissions array
+			$response['current_sidebar_id'] = 5; // Set the sidebar ID for the current view
+			$this->load->view('add_product_attributes_value',$response);
 		}
 	}
 	public function get_product_attributes_value_detail()
 	{
 		$response['data'] = $this->Product_attribute_model->get_product_attributes_value_detail(); // Correctly access the model
+		$response['permissions'] = $this->permissions; // Pass full permissions array
+		$response['current_sidebar_id'] = 5; // Set the sidebar ID for the current view
 		echo json_encode($response);
 	}
 	public function save_product_attributes_value()
@@ -349,14 +379,17 @@ class Inventory_manager extends CI_Controller {
 		if (!$inventory_session) {
 			redirect(base_url('common/index'));
 		} else {
-			$this->load->view('inventory_manager/add_sales_channel');
+			$response['permissions'] = $this->permissions; // Pass full permissions array
+			$response['current_sidebar_id'] = 6; // Set the sidebar ID for the current view
+			$this->load->view('add_sales_channel',$response);
 		}
 	}
 	public function fetch_sale_channel()
 	{
 		$response = $this->model->selectWhereData('tbl_sale_channel', array('is_delete' => 1), "*", false, array('id', "DESC"));
-
-		echo json_encode($response);
+		$data['permissions'] = $this->permissions; // Pass full permissions array
+		$data['current_sidebar_id'] = 6; // Set the sidebar ID for the current view
+		echo json_encode(['response' => $response, 'data' => $data]);
 	}
 
 	public function save_sale_channel()
@@ -456,12 +489,10 @@ class Inventory_manager extends CI_Controller {
 			redirect(base_url('common/index'));
 		} else {
 			$response['product_types'] = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
-			// $response['attributes'] = $this->model->selectWhereData('tbl_attribute_master', array('is_delete' => 1), "*", false, array('id', "DESC"));
-			// $response['attribute_values'] = $this->model->selectWhereData('tbl_attribute_values', array('is_delete' => 1), "*", false, array('id', "DESC"));
-			// $response['sale_channel'] = $this->model->selectWhereData('tbl_sale_channel', array('is_delete' => 1), "*", false, array('id', "DESC"));
 			$response['stock_availability'] = $this->model->selectWhereData('tbl_stock_availability', array('is_delete' => 1), "*", false, array('id', "DESC"));
-
-			$this->load->view('inventory_manager/product', $response);
+			$response['permissions'] = $this->permissions; // Pass full permissions array
+			$response['current_sidebar_id'] = 7; // Set the sidebar ID for the current view
+			$this->load->view('product', $response);
 		}
 	}
 
@@ -495,9 +526,6 @@ class Inventory_manager extends CI_Controller {
 			$product_name = $this->input->post('product_name');
 			$product_sku_code = $this->input->post('product_sku_code');
 			$batch_no = $this->input->post('batch_no');
-			// $fk_flavour_id = $this->input->post('fk_flavour_id');
-			// $fk_bottle_size_id = $this->input->post('fk_bottle_size_id');
-			// $fk_bottle_type_id = $this->input->post('fk_bottle_type_id');
 			$barcode = $this->input->post('barcode');
 			$description = $this->input->post('description');
 			$purchase_price = $this->input->post('purchase_price');
@@ -514,9 +542,6 @@ class Inventory_manager extends CI_Controller {
 			// Validation Rules
 			$this->form_validation->set_rules('product_name', 'Product Name', 'required|trim');
 			$this->form_validation->set_rules('product_sku_code', 'Product SKU Code', 'required|trim|is_unique[tbl_product_type.product_sku_code]');
-			// $this->form_validation->set_rules('fk_flavour_id', 'Flavor', 'required|trim');
-			// $this->form_validation->set_rules('fk_bottle_size_id', 'Bottle Size', 'required|trim');
-			// $this->form_validation->set_rules('fk_bottle_type_id', 'Bottle Type', 'required|trim');
 			$this->form_validation->set_rules('description', 'Description', 'required|trim');
 			$this->form_validation->set_rules('purchase_price', 'Purchase Price', 'required|trim');
 			$this->form_validation->set_rules('mrp', 'MRP', 'required|trim');
@@ -565,23 +590,9 @@ class Inventory_manager extends CI_Controller {
 			if ($count == 1) {
 				$response = ["status" => "error", 'product_name_error' => "Already Exist"];
 			} else {
-				// Insert product data
-				
-				
-				// $product_category = [
-				// 	'fk_product_id' => $product_insert_id,
-				// 	'fk_flavour_id' => $fk_flavour_id,
-					
-				// ];
-				// $product_category_insert_id = $this->model->insertData('tbl_product_category', $product_category);
-
 				$product_data = [
-					'product_name' => $product_name,				
-					// 'fk_product_category_id' => $product_category_insert_id,
-					'product_sku_code' => $product_sku_code,
-					// 'fk_bottle_size_id' => $fk_bottle_size_id,
-					// 'fk_bottle_type_id' => $fk_bottle_type_id,
-					// 'fk_sale_channel_id' => $sale_channel,
+					'product_name' => $product_name,
+					'product_sku_code' => $product_sku_code,					
 					'fk_stock_availability_id' => $stock_availability,
 					'barcode' => $barcode,
 					'batch_no' => $batch_no,
@@ -591,10 +602,7 @@ class Inventory_manager extends CI_Controller {
 					'MRP' => $mrp,
 					'selling_price' => $selling_price,
 				];
-				//  print_r($product_data);
 				$product_insert_id = $this->model->insertData('tbl_product_master', $product_data);
-
-				
 
 				foreach ($fk_product_attribute_id as $key => $attribute_id) {
 					$product_attribute = [
@@ -603,31 +611,23 @@ class Inventory_manager extends CI_Controller {
 						'fk_attribute_id' => $attribute_id,
 						'fk_attribute_value_id' => $attributes_value[$key],
 					];
+					// Insert product attributes into the database
 					$this->model->insertData('tbl_product_attributes', $product_attribute);
 				}
-				// print_r($product_attributes);
-				// Insert product attributes into the database
-				
+				// Insert product price into the database			
 				$product_price = [
 					'fk_product_id' => $product_insert_id,
-					// 'fk_product_category_id' => $product_category_insert_id,
-					// 'fk_product_type_id' => $product_type_insert_id,
 					'purchase_price' => $purchase_price,
 					'MRP' => $mrp,
 					'selling_price' => $selling_price,
 				];
 				$this->model->insertData('tbl_product_price', $product_price);
-				// print_r($product_price);
 				$product_inventory = [
 					'fk_product_id' => $product_insert_id,
-					// 'fk_product_category_id' => $product_category_insert_id,
-					// 'fk_product_type_id' => $product_type_insert_id,
-					// 'fk_product_price_id' => $product_price_insert_id,
 					'add_quantity' => $add_quantity,
 					'total_quantity' => $add_quantity,
 					'used_status' => 1
 				];
-				// print_r($product_inventory);
 				$product_inventory_insert_id = $this->model->insertData('tbl_product_inventory', $product_inventory);
 			}
 			if ($product_inventory_insert_id) {
@@ -665,8 +665,7 @@ class Inventory_manager extends CI_Controller {
 
 			$structuredData[] = $productDetails;
 		}
-
-		echo json_encode(['data' => $structuredData]); // Send JSON response
+		echo json_encode(['data' => $structuredData, 'permissions' => $this->permissions, 'current_sidebar_id' => 7]); // Send JSON response
 	}
 	public function view_product()
 	{
@@ -701,7 +700,6 @@ class Inventory_manager extends CI_Controller {
 			echo json_encode($response);
 			return;
 		}
-
 		$product_id = $this->input->post('update_product_id');
 		$fk_product_price_id = $this->input->post('fk_product_price_id');
 		$product_name = $this->input->post('update_product_name');

@@ -11,7 +11,7 @@ $(document).ready(function () {
 
 		let formData = new FormData(this);
 		$.ajax({
-			url: frontend + "admin/save_product",
+			url: frontend + controllerName + "/save_product",
 			type: "POST",
 			data: formData,
 			processData: false,
@@ -44,6 +44,7 @@ $(document).ready(function () {
 		});
 	});
 
+	
 	function formatDetails(d) {
 		let attributeTable = '<table style="border-collapse: collapse; margin-left: 50px; width: 80%;">' +
 			'<thead style="background-color: #f2f2f2; text-align: left;">' +
@@ -63,9 +64,18 @@ $(document).ready(function () {
 
 		return `<b>Product Types:</b> ${productTypes}<br><br>` + attributeTable;
 	}
-
+	let currentPermission = {};
 	let table = $('#product_table').DataTable({
-		ajax: frontend + "admin/fetch_product_details", // Adjust the URL
+		ajax: {
+			url: frontend + controllerName + "/fetch_product_details",
+			dataSrc: function (json) {
+				const permissions = json.permissions;
+				const currentSidebarId = json.current_sidebar_id;
+				currentPermission = permissions[currentSidebarId]; // store for global access
+	
+				return json.data; // return product details to datatable
+			}
+		},
 		columns: [
 			{
 				className: 'details-control',
@@ -85,18 +95,25 @@ $(document).ready(function () {
 			},
 			{
 				data: 'id',
-				render: function (data) {
-					return `
-                         <button class="btn btn-primary btn-sm view-product" data-id="${data}" data-toggle="modal" data-target="#viewProductModal">
-                             <i class="icon-eye menu-icon"></i>
-                         </button>
-                         <button class="btn btn-warning btn-sm update-product" data-id="${data}" data-toggle="modal" data-target="#editProductModal">
-                             <i class="icon-pencil menu-icon"></i>
-                         </button>
-                         <button class="btn btn-danger btn-sm delete-product" data-id="${data}">
-                             <i class="icon-trash menu-icon"></i>
-                         </button>
-                     `;
+				render: function (id, type, row, meta) {
+					let buttons = '';
+	
+					if (currentPermission?.can_view === "1") {
+						buttons += `<button class="btn btn-primary btn-sm view-product" data-id="${id}" data-toggle="modal" data-target="#viewProductModal">
+							<i class="icon-eye menu-icon"></i>
+						</button> `;
+					}
+					if (currentPermission?.can_edit === "1") {
+						buttons += `<button class="btn btn-warning btn-sm update-product" data-id="${id}" data-toggle="modal" data-target="#editProductModal">
+							<i class="icon-pencil menu-icon"></i>
+						</button> `;
+					}
+					if (currentPermission?.can_delete === "1") {
+						buttons += `<button class="btn btn-danger btn-sm delete-product" data-id="${id}">
+							<i class="icon-trash menu-icon"></i>
+						</button>`;
+					}
+					return buttons;
 				}
 			}
 		],
@@ -379,7 +396,7 @@ document.addEventListener("DOMContentLoaded", function () {
 $(document).on("click", ".view-product", function () {
 	var product_id = $(this).data("id");
 	$.ajax({
-		url: frontend + "admin/view_product",
+		url: frontend + controllerName+"/view_product",
 		type: "POST",
 		data: { product_id: product_id }, // Sending data as POST
 		dataType: "json",
@@ -426,7 +443,7 @@ $(document).on("click", ".update-product", function () {
 	var product_id = $(this).data("id");
 
 	$.ajax({
-		url: frontend + "admin/view_product",
+		url: frontend + controllerName+"/view_product",
 		type: "POST",
 		data: { product_id: product_id },
 		dataType: "json",
@@ -503,7 +520,7 @@ $(document).on("click", ".update-product", function () {
 				$("#attribute_fields_container_edit").append(attributeRow);
 				// Fetch attribute value options and append selected
 				$.ajax({
-					url: frontend + "admin/get_attribute_values_on_product_attributes_id",
+					url: frontend + controllerName+"/get_attribute_values_on_product_attributes_id",
 					type: "POST",
 					data: { attribute_id: attrId },
 					dataType: "json",
@@ -636,7 +653,7 @@ $(document).on("click", ".update-product", function () {
 					}
 
 					$.ajax({
-						url: frontend + "admin/get_attribute_values_on_product_attributes_id",
+						url: frontend + controllerName+"/get_attribute_values_on_product_attributes_id",
 						type: "POST",
 						data: { attribute_id: attributeId },
 						dataType: "json",
@@ -671,7 +688,7 @@ $(document).on("click", ".update-product", function () {
 			
 					if (channel_type) {
 						$.ajax({
-							url: frontend + "admin/get_sales_channel_on_channel_type", // API to get attributes
+							url: frontend + controllerName+"/get_sales_channel_on_channel_type", // API to get attributes
 							type: "POST",
 							data: { channel_type: channel_type },
 							dataType: "json",
@@ -714,7 +731,7 @@ $(document).on("click", ".update-product", function () {
 					$("#save-changes-btn").prop("disabled", true).text("Saving...");
 
 					$.ajax({
-						url: frontend + "admin/update_product",
+						url: frontend + controllerName+"/update_product",
 						type: "POST",
 						data: formData,
 						dataType: "json",
@@ -767,7 +784,7 @@ $(document).on("click", ".update-product", function () {
 					var product_id = $(this).data("id");
 
 					$.ajax({
-						url: frontend + "admin/delete_product", // Your API endpoint
+						url: frontend + controllerName+"/delete_product", // Your API endpoint
 						type: "POST",
 						data: { product_id: product_id },
 						dataType: "json",

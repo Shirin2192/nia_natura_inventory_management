@@ -7,3 +7,8 @@
 .logo-container img {
     width: 100px;
 }
+
+.custom-modal-fullwidth {
+    max-width: 98%;
+    margin: 1rem auto;
+}

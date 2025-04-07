@@ -54,7 +54,7 @@ class Admin extends CI_Controller
 			$response['role'] = $this->model->selectWhereData('tbl_role', array('is_delete' => 1), "*", false, array('id', "ASC"));
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 2; // Set the sidebar ID for the current view
-			$this->load->view('admin/add_staff', $response);
+			$this->load->view('add_staff', $response);
 		}
 	}
 	public function save_user()
@@ -197,7 +197,7 @@ class Admin extends CI_Controller
 		} else {
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 6; // Set the sidebar ID for the current view
-			$this->load->view('inventory_manager/add_sales_channel',$response);
+			$this->load->view('add_sales_channel',$response);
 		}
 	}
 	public function fetch_sale_channel()
@@ -303,7 +303,7 @@ class Admin extends CI_Controller
 		if (!$admin_session) {
 			redirect(base_url('common/index'));
 		} else {
-			$this->load->view('admin/add_role_permission');
+			$this->load->view('add_role_permission');
 		}
 	}
 	public function add_product()
@@ -317,7 +317,7 @@ class Admin extends CI_Controller
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 7; // Set the sidebar ID for the current view
 
-			$this->load->view('inventory_manager/product', $response);
+			$this->load->view('product', $response);
 		}
 	}
 
@@ -521,9 +521,7 @@ class Admin extends CI_Controller
 
 			$structuredData[] = $productDetails;
 		}
-		// $structuredData['permissions'] = $this->permissions; // Pass full permissions array
-		// $structuredData['current_sidebar_id'] = 7; // Set the sidebar ID for the current view
-		echo json_encode(['data' => $structuredData]); // Send JSON response
+		echo json_encode(['data' => $structuredData, 'permissions' => $this->permissions, 'current_sidebar_id' => 7]); // Send JSON response
 	}
 	public function view_product()
 	{
@@ -722,7 +720,7 @@ class Admin extends CI_Controller
 
 	public function order_details(){
 		$data['products'] = $this->model->selectWhereData('tbl_product', array('is_delete' => 1), "*", false, array('id', "DESC"));
-		$this->load->view('inventory_manager/order_details');
+		$this->load->view('order_details');
 	}
 
 	public function add_product_type()
@@ -733,7 +731,7 @@ class Admin extends CI_Controller
 		} else {
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 3; // Set the sidebar ID for the current view
-			$this->load->view('inventory_manager/add_product_type',$response);
+			$this->load->view('add_product_type',$response);
 		}
 	}
 	public function fetch_product_type()
@@ -829,7 +827,7 @@ class Admin extends CI_Controller
 			$response['product_types'] = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 4; // Set the sidebar ID for the current view
-			$this->load->view('inventory_manager/add_product_attributes',$response);
+			$this->load->view('add_product_attributes',$response);
 		}
 		
 	}
@@ -954,7 +952,7 @@ class Admin extends CI_Controller
 			$response['product_attributes'] = $this->model->selectWhereData('tbl_attribute_master', array('is_delete' => 1), "*", false, array('id', "DESC"));
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 5; // Set the sidebar ID for the current view
-			$this->load->view('inventory_manager/add_product_attributes_value',$response);
+			$this->load->view('add_product_attributes_value',$response);
 		}
 	}
 	public function get_product_attributes_value_detail()
@@ -1017,7 +1015,6 @@ class Admin extends CI_Controller
 			echo json_encode($response);
 			return;
 		}
-
 		// Get input data
 		$id = $this->input->post('edit_attribute_value_id');
 		$attribute_value = $this->input->post('edit_attribute_value');
@@ -1064,16 +1061,14 @@ class Admin extends CI_Controller
 			redirect(base_url('common/index'));
 		} else {
 			$response['roles'] = $this->model->selectWhereData('tbl_role', array('is_delete' => 1), "*", false, array('id', "DESC"));
-			
 			$response['modules'] = $this->model->selectWhereData('tbl_sidebar',array(), "*", false, array('id', "ASC"));
-			$this->load->view('inventory_manager/role_access',$response); 
+			$this->load->view('role_access',$response); 
 		}
 	}
 	public function save_permissions() {
 		// print_r($_POST);
 		$this->form_validation->set_rules('role_id', 'Role', 'required');
 		// $this->form_validation->set_rules('permissions', 'Permissions', 'required');
-
 		if ($this->form_validation->run() == FALSE) {
 			echo json_encode([
 				'status' => false,
@@ -1084,15 +1079,10 @@ class Admin extends CI_Controller
 			]);
 			return;
 		}
-
 		$role_id = $this->input->post('role_id');
 		$permissions = $this->input->post('permissions');
-		
-		// Delete existing permissions
-		// Check if permissions already exist for the role and module
 		foreach ($permissions as $module_id => $perm) {
 			$existing_permission = $this->model->CountWhereRecord('tbl_permissions', array('fk_role_id' => $role_id,'fk_sidebar_id' => $module_id));
-
 			if (!empty($existing_permission)) {
 				echo json_encode([
 					'status' => false,
@@ -1113,11 +1103,6 @@ class Admin extends CI_Controller
 				$this->model->insertData('tbl_permissions', $data);
 			}
 		}
-
 		echo json_encode(['status' => true, 'message' => 'Permissions saved successfully']);
-	}
-	
-
-
-	
+	}	
 }

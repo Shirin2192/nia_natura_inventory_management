@@ -8,12 +8,6 @@
     <title>Nia Natura Inventory Management</title>
     <!-- Favicon icon -->
     <?php include('common/css_files.php')?>
-    <style>
-    .custom-modal-fullwidth {
-        max-width: 98%;
-        margin: 1rem auto;
-    }
-    </style>
 </head>
 
 <body>
@@ -47,6 +41,11 @@
                     </ol>
                 </div>
             </div>
+            <?php
+                $sidebar_id = $current_sidebar_id;            
+                $can_add = isset($permissions[$sidebar_id]['can_add']) && $permissions[$sidebar_id]['can_add'] == 1;
+            ?>
+            <?php if ($can_add): ?>
             <div class="container-fluid">
                 <div class="row justify-content-center">
                     <div class="col-lg-12">
@@ -132,7 +131,7 @@
                                                 <button type="button" class="btn btn-success w-100"
                                                     id="add_more_attributes">Add More</button>
                                             </div>
-                                       
+                                        </div>
                                         <div class="row">
                                             <!-- Barcode -->
                                             <div class="col-lg-6 mb-3">
@@ -265,6 +264,8 @@
                     </div>
                 </div>
             </div>
+            <?php endif;?>
+
             <!-- Table to show added products -->
             <div class="container-fluid">
                 <div class="row justify-content-center">
@@ -301,7 +302,7 @@
     <!-- View Product Modal -->
     <div class="modal fade" id="viewProductModal" tabindex="-1" role="dialog" aria-labelledby="viewProductLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl custom-modal-fullwidth">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="viewProductLabel">Product Details</h5>
