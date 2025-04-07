@@ -87,8 +87,7 @@ class Common extends CI_Controller {
 							$session_name = 'admin_session';
 							$redirect_url = base_url('admin');
 							break;
-					}
-	
+					}	
 					// Set session data with role-based session name
 					$session_data = [
 						'user_id'   => $user['id'],
@@ -97,7 +96,13 @@ class Common extends CI_Controller {
 						'role_id'   => $user['fk_role_id'],
 						'session_type' => $session_name // Store session type
 					];
+					
 					$this->session->set_userdata($session_name, $session_data);
+
+					// Save this session under multi_user_sessions
+					// $multi_sessions = $this->session->userdata('multi_user_sessions') ?? [];
+					// $multi_sessions[$session_name] = $session_data;
+					// $this->session->set_userdata('multi_user_sessions', $multi_sessions);
 	
 					$response = ['status' => 'success', 'redirect' => $redirect_url];
 				} else {
