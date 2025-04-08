@@ -21,7 +21,12 @@ $role_id = $admin_session['role_id'];
 $role_permission = $this->Role_model->get_role_permission($role_id);
 
 $accessible_sidebars = array_filter($role_permission, function ($permission) {
-    return isset($permission['fk_sidebar_id']) || $permission['fk_sidebar_id']== 1 && $permission['has_access'] == 1;
+    if (isset($permission['fk_sidebar_id']) && $permission['fk_sidebar_id'] == 1) {
+        return $permission['has_access'] == 1; // Only include if has_access is 1 for the dashboard
+    }
+
+    // For other modules, include them if fk_sidebar_id is set
+    return isset($permission['fk_sidebar_id']);
 });
 
 $accessible_sidebar_ids = array_column($accessible_sidebars, 'fk_sidebar_id');

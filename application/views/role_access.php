@@ -7,33 +7,32 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Nia Natura Inventory Management</title>
     <?php include('common/css_files.php') ?>
-	<style>
-		/* Bigger checkboxes */
-.larger-checkbox {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-}
+    <style>
+    /* Bigger checkboxes */
+    .larger-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
 
-/* Make it more visible on light backgrounds */
-.form-check-input {
-    border: 2px solid #555;
-    background-color: #fff;
-}
+    /* Make it more visible on light backgrounds */
+    .form-check-input {
+        border: 2px solid #555;
+        background-color: #fff;
+    }
 
-/* On checked */
-.form-check-input:checked {
-    background-color: #28a745;
-    border-color: #28a745;
-}
+    /* On checked */
+    .form-check-input:checked {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
 
-/* Label spacing for better alignment */
-.form-check-label {
-    font-weight: normal;
-    font-size: 14px;
-}
-
-	</style>
+    /* Label spacing for better alignment */
+    .form-check-label {
+        font-weight: normal;
+        font-size: 14px;
+    }
+    </style>
 </head>
 
 <body>
@@ -44,7 +43,6 @@
             </svg>
         </div>
     </div>
-
     <div id="main-wrapper">
         <?php include('common/nav_head.php') ?>
         <?php include('common/header.php') ?>
@@ -55,7 +53,8 @@
                 <div class="col p-md-0">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="<?= base_url() ?><?= $controller_name?>">Dashboard</a></li>
-                        <li class="breadcrumb-item active"><a href="<?= base_url() ?><?= $controller_name?>/role_and_access">Role &
+                        <li class="breadcrumb-item active"><a
+                                href="<?= base_url() ?><?= $controller_name?>/role_and_access">Role &
                                 Access</a></li>
                     </ol>
                 </div>
@@ -65,7 +64,6 @@
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-body">
-
                                 <div class="row">
                                     <form id="RoleAccessForm">
                                         <div class="col-lg-6">
@@ -89,7 +87,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="container-fluid mt-4">
                 <div class="row justify-content-center">
                     <div class="col-lg-12">
@@ -114,9 +111,11 @@
                                             <td><strong><?= ucfirst($module_row['sidebar_name']) ?></strong></td>
 
                                             <?php if (strtolower($module_row['sidebar_name']) === 'dashboard'): ?>
-												<td colspan="4" class="text-center">
-                                                <div
-                                                    class="form-check">
+                                            <td colspan="4" class="text-center">
+                                                <div class="form-check">
+                                                    <!-- Hidden input to ensure the field is always sent -->
+                                                    <input type="hidden"
+                                                        name="permissions[<?= $module_row['id'] ?>][access]" value="0">
                                                     <input class="form-check-input larger-checkbox" type="checkbox"
                                                         name="permissions[<?= $module_row['id'] ?>][access]" value="1"
                                                         id="access_<?= $module_row['id'] ?>">
@@ -158,125 +157,6 @@
             </form>
         </div>
 
-
-        <div class="modal fade" id="viewProductAttributeModal" tabindex="-1" role="dialog"
-            aria-labelledby="viewProductAttributeModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="viewProductAttributeModalLabel">View Attribute</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <p><strong>Product Type:</strong> <span id="view_product_type"></span></p>
-                        <p><strong>Attribute Name:</strong> <span id="view_attribute_name"></span></p>
-                        <p><strong>Attribute Type:</strong> <span id="view_attribute_type"></span></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Edit Product Attribute Modal -->
-        <div class="modal fade" id="editProductAttributeModal" tabindex="-1" role="dialog"
-            aria-labelledby="editProductAttributeModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-
-                    <!-- Modal Header -->
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title" id="editProductAttributeModalLabel">
-                            <i class="icon-pencil"></i> Edit Attribute
-                        </h5>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-
-                    <!-- Modal Body -->
-                    <div class="modal-body">
-                        <form id="editAttributeForm">
-
-                            <!-- Hidden Input for Attribute ID -->
-                            <input type="hidden" id="edit_attribute_id" name="edit_attribute_id">
-
-                            <!-- Product Type (Readonly) -->
-                            <div class="form-group">
-                                <label for="edit_product_type">Product Type</label>
-                                <span class="form-control bg-light" id="edit_product_type" name="edit_product_type"
-                                    readonly></span>
-                            </div>
-
-                            <!-- Attribute Name -->
-                            <div class="form-group">
-                                <label for="edit_attribute_name">Attribute Name</label>
-                                <input type="text" class="form-control" id="edit_attribute_name"
-                                    name="edit_attribute_name" required>
-                            </div>
-
-                            <!-- Attribute Type -->
-                            <div class="form-group">
-                                <label for="edit_attribute_type">Attribute Type</label>
-                                <select class="chosen-select form-control" id="edit_attribute_type"
-                                    name="edit_attribute_type">
-                                    <option value="text">Text</option>
-                                    <option value="dropdown">Dropdown</option>
-                                </select>
-                            </div>
-
-                            <!-- Save Button -->
-                            <div class="text-right">
-                                <button type="submit" class="btn btn-primary">
-                                    Save Changes
-                                </button>
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                    <i class="icon-close"></i> Cancel
-                                </button>
-                            </div>
-
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal fade" id="deleteProductAttributeModal" tabindex="-1" role="dialog"
-            aria-labelledby="deleteProductAttributeModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-
-                    <!-- Modal Header -->
-                    <div class="modal-header ">
-                        <h5 class="modal-title" id="deleteProductAttributeModalLabel">
-                            Confirm Delete
-                        </h5>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-
-                    <!-- Modal Body -->
-                    <div class="modal-body text-center">
-                        <p class="font-weight-bold text-dark">
-                            Are you sure you want to delete this attribute type?
-                        </p>
-                        <input type="hidden" id="delete_attribute_id"> <!-- Hidden field for attribute ID -->
-                    </div>
-
-                    <!-- Modal Footer -->
-                    <div class="modal-footer">
-
-                        <button type="button" class="btn btn-primary" id="confirmDeleteAttribute">
-                            Delete
-                        </button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                            Cancel
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-        </div>
 
 
 

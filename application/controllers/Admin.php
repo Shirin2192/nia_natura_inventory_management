@@ -51,7 +51,6 @@ class Admin extends CI_Controller
 	{
 		
 		$admin_session = $this->session->userdata('admin_session');
-
 		if (!$admin_session) {
 			redirect(base_url('common/index'));
 		} else {
@@ -64,7 +63,6 @@ class Admin extends CI_Controller
 	public function save_user()
 	{
 		$this->load->library('form_validation'); // Load validation library
-
 		$first_name = $this->input->post('first_name');
 		$last_name = $this->input->post('last_name');
 		$email = $this->input->post('email');
@@ -154,19 +152,16 @@ class Admin extends CI_Controller
 		}
 		// Get user data
 		$user = $this->user_model->get_user_by_id($user_id);
-
 		if (!$user) {
 			echo json_encode(["status" => false, "message" => "User not found"]);
 			return;
 		}
 		$roles = $this->model->selectWhereData('tbl_role', array('is_delete' => 1), "*", false, array('id', "DESC"));
-
 		// Prepare response
 		$response = [
 			"user" => $user,
 			"roles" => $roles
 		];
-
 		echo json_encode(["status" => true, "data" => $response]);
 	}
 	public function update_staff()
@@ -215,6 +210,7 @@ class Admin extends CI_Controller
 	public function save_sale_channel()
 	{
 		$sale_channel = $this->input->post('sale_channel');
+		$channel_type = $this->input->post('channel_type');
 		$this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim|regex_match[/^[a-zA-Z ]+$/]');
 
 		if ($this->form_validation->run() == FALSE) {
@@ -229,6 +225,7 @@ class Admin extends CI_Controller
 				$response = ["status" => "error", 'sale_channel_error' => "Sale Channel Already Exist"];
 			} else {
 				$data = array(
+					'channel_type' => $channel_type,
 					'sale_channel' => $sale_channel,
 				);
 
@@ -287,14 +284,11 @@ class Admin extends CI_Controller
 	public function delete_sale_channel()
 	{
 		$id = $this->input->post('id'); // Get the flavour ID from AJAX
-
 		if (!$id) {
 			echo json_encode(['status' => 'error', 'message' => 'Invalid flavour ID']);
 			return;
 		}
-
 		$result = $this->model->updateData('tbl_sale_channel', ['is_delete' => '0'], ['id' => $id]); // Soft delete
-
 		if ($result) {
 			echo json_encode(['status' => 'success', 'message' => 'Sale Channel deleted successfully']);
 		} else {
@@ -1069,44 +1063,85 @@ class Admin extends CI_Controller
 			$this->load->view('role_access',$response); 
 		}
 	}
-	public function save_permissions() {
-		// print_r($_POST);
-		$this->form_validation->set_rules('role_id', 'Role', 'required');
-		// $this->form_validation->set_rules('permissions', 'Permissions', 'required');
-		if ($this->form_validation->run() == FALSE) {
-			echo json_encode([
-				'status' => false,
-				'errors' => [
-					'role_id_error' => form_error('role_id'),
-					// 'permissions_error' => form_error('permissions')
-				]
-			]);
-			return;
-		}
-		$role_id = $this->input->post('role_id');
-		$permissions = $this->input->post('permissions');
-		foreach ($permissions as $module_id => $perm) {
-			$existing_permission = $this->model->CountWhereRecord('tbl_permissions', array('fk_role_id' => $role_id,'fk_sidebar_id' => $module_id));
-			if (!empty($existing_permission)) {
-				echo json_encode([
-					'status' => false,
-					'message' => "Permissions already exist for this role and module"
-				]);
-				return;
-			}else{
-				$data = [
-					'fk_role_id' => $role_id,
-					'fk_sidebar_id' => $module_id,
-					'can_view' => !empty($perm['view']) ? 1 : 0,
-					'can_add' => !empty($perm['add']) ? 1 : 0,
-					'can_edit' => !empty($perm['edit']) ? 1 : 0,
-					'can_delete' => !empty($perm['delete']) ? 1 : 0,
-					'has_access' => isset($perm['access']) ? 1 : 0 // For dashboard only
-				];
-				// print_r($data);
-				$this->model->insertData('tbl_permissions', $data);
-			}
-		}
-		echo json_encode(['status' => true, 'message' => 'Permissions saved successfully']);
-	}	
+
+public function save_permissions()
+{
+    $this->form_validation->set_rules('role_id', 'Role', 'required');
+
+    if ($this->form_validation->run() == FALSE) {
+        echo json_encode([
+            'status' => false,
+            'errors' => [
+                'role_id_error' => form_error('role_id'),
+            ]
+        ]);
+        return;
+    }
+
+    $role_id = $this->input->post('role_id');
+    $permissions = $this->input->post('permissions');
+
+    if (empty($permissions)) {
+        echo json_encode([
+            'status' => false,
+            'message' => "No permissions selected"
+        ]);
+        return;
+    }
+
+    // Check if permissions already exist for the role and module
+    $role_exist = $this->model->CountWhereRecord('tbl_permissions', array('fk_role_id' => $role_id));
+    if ($role_exist) {
+        foreach ($permissions as $module_id => $perm) {
+            $data = [
+                'can_view' => !empty($perm['view']) ? 1 : 0,
+                'can_add' => !empty($perm['add']) ? 1 : 0,
+                'can_edit' => !empty($perm['edit']) ? 1 : 0,
+                'can_delete' => !empty($perm['delete']) ? 1 : 0,
+                'has_access' => !empty($perm['access']) ? 1 : 0 // For dashboard only
+            ];
+            $this->model->updateData('tbl_permissions', $data, array('fk_role_id' => $role_id, 'fk_sidebar_id' => $module_id));
+        }
+		$response = "Permissions updated successfully";
+    } else {
+        foreach ($permissions as $module_id => $perm) {
+            $existing_permission = $this->model->CountWhereRecord('tbl_permissions', array('fk_role_id' => $role_id, 'fk_sidebar_id' => $module_id));
+            if (!empty($existing_permission)) {
+                echo json_encode([
+                    'status' => false,
+                    'message' => "Permissions already exist for this role and module"
+                ]);
+                return;
+            } else {
+                $data = [
+                    'fk_role_id' => $role_id,
+                    'fk_sidebar_id' => $module_id,
+                    'can_view' => !empty($perm['view']) ? 1 : 0,
+                    'can_add' => !empty($perm['add']) ? 1 : 0,
+                    'can_edit' => !empty($perm['edit']) ? 1 : 0,
+                    'can_delete' => !empty($perm['delete']) ? 1 : 0,
+                    'has_access' => !empty($perm['access']) ? 1 : 0 // For dashboard only
+                ];
+                $this->model->insertData('tbl_permissions', $data);
+            }
+        }
+		$response = "Permissions added successfully";
+    }
+    echo json_encode(['status' => true, 'message' => $response]);
+}
+	public function get_role_permissions()
+    {
+        $role_id = $this->input->post('role_id');
+        if (!$role_id) {
+            echo json_encode(['status' => 'error', 'message' => 'Invalid role ID']);
+            return;
+        }
+        // $this->load->model('Role_model');
+        $permissions = $this->Role_model->get_permissions_by_role($role_id);
+        if ($permissions) {
+            echo json_encode(['status' => 'success', 'permissions' => $permissions]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'No permissions found for this role']);
+        }
+    }
 }

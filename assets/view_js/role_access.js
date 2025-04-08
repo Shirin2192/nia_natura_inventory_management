@@ -21,16 +21,16 @@ $('#RoleAccessForm').on('submit', function (e) {
 
             if (response.status === true) {
                 swal({
-                    icon: 'success',
-                    title: 'Success!',
+                    title: "Success!",
                     text: response.message,
-                    timer: 2000,
-                    buttons: false
+                    icon: "success",
+                    button: false,
+                    timer: 2000 // Auto close after 2 seconds
                 });
 
                 // Optional: reset form or refresh page
                 // form[0].reset();
-                // location.reload();
+                location.reload();
 
             } else if (response.status === false && response.errors) {
                 // Show validation errors
@@ -59,3 +59,49 @@ $('#RoleAccessForm').on('submit', function (e) {
     });
 });
 
+
+    // Trigger when a role is selected
+    $(document).on('change', '#role', function () {
+        const roleId = $(this).val();
+              
+        if (roleId) {
+            $.ajax({
+                url: frontend + controllerName+'/get_role_permissions', // Backend URL to fetch permissions
+                type: 'POST',
+                data: { role_id: roleId },
+                dataType: 'json',
+                success: function (response) {
+                    if (response.status === 'success') {
+                       // Reset all checkboxes
+                    $('input[type="checkbox"]').prop('checked', false);
+
+                    // Populate checkboxes with existing permissions
+                    $.each(response.permissions, function (moduleId, permissions) {
+                        // Handle dashboard access permission
+                        if (permissions.access === '1') {
+                            $(`#access_${moduleId}`).prop('checked', true);
+                        }
+
+                        // Handle other permissions (view, add, edit, delete)
+                        $.each(permissions, function (permType, isChecked) {
+                            if (isChecked === '1') {
+                                $(`#${permType}_${moduleId}`).prop('checked', true);
+                            }
+                        });
+                    });
+                    } else {
+                        swal({
+                            icon: 'warning',
+                            title: 'warning!',
+                            text: response.message,
+                            timer: 2000,
+                            buttons: false
+                        });
+                    }
+                },
+                error: function () {
+                    alert('An error occurred while fetching permissions.');
+                }
+            });
+        }
+    });

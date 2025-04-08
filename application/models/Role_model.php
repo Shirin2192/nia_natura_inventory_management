@@ -25,4 +25,26 @@ class Role_model extends CI_Model {
         $query = $this->db->get();
         return $query->result_array();
     }
+
+    public function get_permissions_by_role($role_id="")
+    {
+        $this->db->select('fk_sidebar_id, can_view, can_add, can_edit, can_delete, has_access');
+        $this->db->from('tbl_permissions');
+        $this->db->where('fk_role_id', $role_id);
+        $query = $this->db->get();
+
+        $permissions = [];
+        foreach ($query->result_array() as $row) {
+            $permissions[$row['fk_sidebar_id']] = [
+                'view' => $row['can_view'],
+                'add' => $row['can_add'],
+                'edit' => $row['can_edit'],
+                'delete' => $row['can_delete'],
+                'access' => $row['has_access'] // Include access for dashboard
+            ];
+        }
+
+        return $permissions;
+    }
+
 }
