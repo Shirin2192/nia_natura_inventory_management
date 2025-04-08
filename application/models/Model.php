@@ -504,158 +504,6 @@ class Model extends CI_Model {
 		return $result;
 	}
 
-	public function get_org_count($where_in_condition='')
-    {        
-        if(!empty($where_in_condition)){   
-            $this->db->select('count(id) as org_count');
-            $this->db->from('tbl_users');           
-            $this->db->where_in('tbl_users.fkuser_lic_id',$where_in_condition);           
-            $this->db->where('tbl_users.fk_user_type',4);
-            $this->db->where('tbl_users.del_status','Active');       
-            $query = $this->db->get();
-            return $query->result_array();
-        } else {
-            return false;
-        }
-	} 
-	
-	public function get_resp_count($where_in_condition='')
-    {        
-        if(!empty($where_in_condition)){   
-            $this->db->select('count(tbl_orgclient.id) as resp_count');
-			$this->db->from('tbl_orgclient'); 
-			$this->db->join('tbl_users','tbl_users.fk_orgclient=tbl_orgclient.id');           
-            $this->db->where_in('tbl_orgclient.fkuser_l1_id',$where_in_condition);     
-			$this->db->where('tbl_orgclient.del_status','Active');    
-			$this->db->where('tbl_users.del_status','Active'); 
-            $query = $this->db->get();
-            return $query->result_array();
-        } else {
-            return false;
-        }
-	}
-
-	public function get_org_resp_count($where_in_condition='')
-    {        
-        if(!empty($where_in_condition)){   
-            $this->db->select('count(tbl_orgclient.id) as resp_count');
-			$this->db->from('tbl_orgclient'); 
-			$this->db->join('tbl_users','tbl_users.fk_orgclient=tbl_orgclient.id');           
-            $this->db->where_in('tbl_orgclient.fk_userid_org',$where_in_condition);     
-			$this->db->where('tbl_orgclient.del_status','Active');    
-			$this->db->where('tbl_users.del_status','Active'); 
-            $query = $this->db->get();
-            return $query->result_array();
-        } else {
-            return false;
-        }
-	}
-
-	public function get_org_group_count($where_in_condition='')
-    {        
-		if(!empty($where_in_condition)){   
-            $this->db->select('count(id) as group_count');
-            $this->db->from('tbl_master_group');           
-            $this->db->where('fk_tbl_user',$where_in_condition);        
-            $this->db->where('status','Active');       
-            $query = $this->db->get();
-            return $query->result_array();
-        } else {
-            return false;
-        }
-	}
-	
-	public function get_orgresp_count($where_in_condition='')
-    {        
-        if(!empty($where_in_condition)){   
-            $this->db->select('count(tbl_orgclient.id) as resp_count');
-			$this->db->from('tbl_orgclient'); 
-			$this->db->join('tbl_users','tbl_users.fk_orgclient=tbl_orgclient.id');           
-            $this->db->where_in('tbl_orgclient.fk_userid_org',$where_in_condition);     
-			$this->db->where('tbl_orgclient.del_status','Active');    
-			$this->db->where('tbl_users.del_status','Active'); 
-            $query = $this->db->get();
-            return $query->result_array();
-        } else {
-            return false;
-        }
-    }
-
-    public function get_org($where_in_condition='')
-    {        
-        if(!empty($where_in_condition)){   
-            $this->db->select('id,fname,lname,fk_user_type');
-            $this->db->from('tbl_users');           
-            $this->db->where_in('tbl_users.fkuser_lic_id',$where_in_condition);           
-            $this->db->where('tbl_users.fk_user_type',4);
-            $this->db->where('tbl_users.del_status','Active');       
-            $query = $this->db->get();
-            return $query->result_array();
-        } else {
-            return false;
-        }
-	}  
-
-	public function get_l1_used_fuel($user_id='')
-    {        
-        if(!empty($user_id)){   
-            $this->db->select('count(id) as used_fuel');
-            $this->db->from(' tbl_fuel_purchase_info');           
-            $this->db->where('l1_id',$user_id);     
-            $this->db->where('used_status','Inactive');       
-            $query = $this->db->get();
-            return $query->result_array();
-        } else {
-            return false;
-        }
-	}
-
-
-
-	// Code by Shirin Start
-	public function get_superadmin_appointment_data()
-	{
-		    $this->db->select('tbl_appointment.*,tbl_users.first_name as nav_first_name,tbl_users.last_name as nav_last_name, user.first_name as user_first_name, user.last_name as user_last_name,tbl_kit_order_status.status,tbl_gender.gender,tbl_users.contact_number,tbl_appointment_type.appointment_type as appointment_types ');
-	        $this->db->from('tbl_appointment');
-	        $this->db->join('tbl_users','tbl_users.id=tbl_appointment.navigator_user_id','left');
-	        $this->db->join('tbl_gender','tbl_gender.id=tbl_users.gender','left');
-	        $this->db->join('tbl_users AS user','user.id=tbl_appointment.user_id','left');
-	        $this->db->join('tbl_appointment_type','tbl_appointment_type.id=tbl_appointment.appointment_type','left');
-	        $this->db->join('tbl_kit_order_status','tbl_kit_order_status.id=tbl_appointment.appo_status','left');
-	        $query=$this->db->get();
-	        return $query->result_array();
-	}
-
-	public function get_userlist($usertype = '') {
-        $this->db->select("*");
-        $this->db->from("tbl_users");
-        $this->db->where("fk_user_type_id", $usertype);
-        // $this->db->where("delete_status", 1);
-        $query = $this->db->get();
-        $query = $query->result_array();
-        $result = array();
-        foreach ($query as $query_key => $query_value) {
-            $query_value['decpassword'] = decrypt($query_value['password']);
-            array_push($result, $query_value);
-        }
-        return $result;
-    }
-    public function get_sponser_org_admin_user_list($usertype = '') {
-        $this->db->select("tbl_users.*,tbl_organization.org_name");
-        $this->db->from("tbl_users");
-        $this->db->join('tbl_organization','tbl_users.fk_org_id=tbl_organization.id','left');
-        $this->db->where("tbl_users.fk_user_type_id", $usertype);
-        // $this->db->where("delete_status", 1);
-        $query = $this->db->get();
-        $query = $query->result_array();
-        $result = array();
-        foreach ($query as $query_key => $query_value) {
-            $query_value['decpassword'] = decrypt($query_value['password']);
-            array_push($result, $query_value);
-        }
-        return $result;
-    }
-
     public function get_inventory_on_id($id)
     {
         $this->db->select('tbl_kit_order.*,tbl_organization.org_name,tbl_order_type.order_name, tbl_users.address_one as org_address1,tbl_users.address_two as org_address2,tbl_users.city as org_city,tbl_users.state as org_state,tbl_users.zipcode as org_zipcode,,tbl_users.user_profile_pic as org_profile_pic,tbl_users.email as org_email, tbl_users.contact_number as org_contact,tbl_states.name as org_state_name,tbl_states.name as org_state_name');
@@ -667,21 +515,9 @@ class Model extends CI_Model {
 
         $this->db->where('tbl_kit_order.id',$id);
         $this->db->where('tbl_kit_order.del_status','Active'); 
-
-
-        //  $this->db->select('tbl_inventory.*,tbl_organization.org_name,tbl_users.first_name,tbl_users.middle_name,tbl_users.last_name,tbl_branch.branch_name,Org.address_one as org_address1,Org.address_two as org_address2,Org.city as org_city,Org.state as org_state,Org.zipcode as org_zipcode,,Org.user_profile_pic as org_profile_pic,Org.email as org_email, Org.contact_number as org_contact,tbl_states.name as org_state_name');
-        // $this->db->from('tbl_inventory');
-        // $this->db->join('tbl_organization','tbl_organization.id=tbl_inventory.fk_org_id','Left');
-        // $this->db->join('tbl_users','tbl_users.id=tbl_inventory.user_id','Left');
-        // $this->db->join('tbl_users as Org','Org.id=tbl_inventory.org_user_id','Left');
-        // $this->db->join('tbl_branch','tbl_branch.id=tbl_inventory.fk_branch_id','Left');
-        // $this->db->join('tbl_states','tbl_states.id=tbl_users.state','Left');
-        // $this->db->where('tbl_inventory.id',$id);
-        // // $this->db->where('tbl_inventory.order_type',1);
-        // $this->db->where('tbl_inventory.del_status','Active');
         $query=$this->db->get();
         return $query->row_array();
-        // return $this->db->count_all_results();
+    
     }
 
     public function get_superadmin_profile_data($id='')
@@ -695,22 +531,4 @@ class Model extends CI_Model {
         return $query->row_array();
     }
 
-    // public function get_mailing_report($from_date='',$to_date='')
-    // {
-    // 	$this->db->select('tbl_kit_order.*, tbl_kit_order.id as kit_id,tbl_users.first_name,tbl_users.middle_name,tbl_users.last_name,tbl_users.address_one,tbl_users.address_two,tbl_users.state,tbl_users.city,tbl_users.zipcode,tbl_users.email,tbl_users.contact_number,tbl_organization.org_name,tbl_states.name as state_name');
-    // 	$this->db->from('tbl_kit_order');
-    // 	$this->db->join('tbl_users','tbl_kit_order.user_id=tbl_users.id','left');
-    // 	$this->db->join('tbl_organization','tbl_kit_order.fk_org_id=tbl_organization.id','left');
-    // 	$this->db->join('tbl_states','tbl_users.state=tbl_states.id','left');
-    // 	$this->db->where('tbl_kit_order.status',3);
-    //     $from_date =date('Y-m-d', strtotime($from_date));
-    //     $from_date = $from_date ." 00:00:00";
-    //     $this->db->where('tbl_kit_order.date >=',$from_date); 
-    //     $to_date =date('Y-m-d', strtotime($to_date));
-    //     $to_date = $to_date ." 11:59:00";
-    //     $this->db->where('tbl_kit_order.date <=',$to_date); 
-    // 	$query=$this->db->get();
-    //     return $query->result_array();
-    // }
-    // Code by Shirin End
 }//class ends here	

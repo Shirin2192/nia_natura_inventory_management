@@ -56,8 +56,8 @@
             <div class="row page-titles mx-0">
                 <div class="col p-md-0">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="<?=base_url()?>admin">Dashboard</a></li>
-                        <li class="breadcrumb-item active"><a href="<?=base_url()?>admin/add_flavour">Add Sales
+                        <li class="breadcrumb-item"><a href="<?=base_url()?><?= $controller_name?>">Dashboard</a></li>
+                        <li class="breadcrumb-item active"><a href="<?=base_url()?><?= $controller_name?>/add_flavour">Add Sales
                                 Channel</a></li>
                     </ol>
                 </div>
@@ -148,7 +148,7 @@
     <!-- View Sale Channel Details Modal -->
     <div class="modal fade" id="sale_channelModal" tabindex="-1" role="dialog" aria-labelledby="sale_channelModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-xl custom-modal-fullwidth">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="sale_channelModalLabel">Sale Channel Details</h5>
@@ -168,7 +168,7 @@
     <!-- Edit Sale Channel Modal -->
     <div class="modal fade" id="edit_sale_channel_modal" tabindex="-1" aria-labelledby="editModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl custom-modal-fullwidth">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editModalLabel">Edit Sale Channel</h5>

@@ -54,8 +54,8 @@
             <div class="row page-titles mx-0">
                 <div class="col p-md-0">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="<?= base_url() ?>admin">Dashboard</a></li>
-                        <li class="breadcrumb-item active"><a href="<?= base_url() ?>admin/role_and_access">Role &
+                        <li class="breadcrumb-item"><a href="<?= base_url() ?><?= $controller_name?>">Dashboard</a></li>
+                        <li class="breadcrumb-item active"><a href="<?= base_url() ?><?= $controller_name?>/role_and_access">Role &
                                 Access</a></li>
                     </ol>
                 </div>

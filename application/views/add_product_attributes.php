@@ -27,9 +27,9 @@
             <div class="row page-titles mx-0">
                 <div class="col p-md-0">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="<?= base_url() ?>admin">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="<?= base_url() ?><?= $controller_name?>">Dashboard</a></li>
                         <li class="breadcrumb-item active"><a
-                                href="<?= base_url() ?>admin/add_product_attributes">Product Attribute</a></li>
+                                href="<?= base_url() ?><?= $controller_name?>/add_product_attributes">Product Attribute</a></li>
                     </ol>
                 </div>
             </div>
@@ -141,11 +141,9 @@
             <div class="modal-content">
 
                 <!-- Modal Header -->
-                <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="editProductAttributeModalLabel">
-                    <i class="icon-pencil"></i> Edit Attribute
-                </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                <div class="modal-header">
+                <h5 class="modal-title" id="editProductAttributeModalLabel">Edit Attribute</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
                 </div>
@@ -155,33 +153,32 @@
                 <form id="editAttributeForm">
                     <div class="row">
                     <!-- Hidden Input for Attribute ID -->
-                   
-                      
-                        <input type="hidden" id="edit_attribute_id" name="edit_attribute_id">
-                        
-                  
+                    <input type="hidden" id="edit_attribute_id" name="edit_attribute_id">
 
                     <!-- Product Type (Readonly) -->
                     <div class="col-lg-6">
                         <div class="form-group">
-                        <label class="col-form-label" for="edit_product_type">Product Type</label>
-                        <span class="form-control bg-light" id="edit_product_type" name="edit_product_type" readonly></span>
+                        <label for="edit_product_type">Product Type</label>
+                        <input type="text" class="form-control" id="edit_product_type"
+                            name="edit_product_type" readonly>
                         </div>
                     </div>
 
                     <!-- Attribute Name -->
                     <div class="col-lg-6">
                         <div class="form-group">
-                        <label class="col-form-label" for="edit_attribute_name">Attribute Name</label>
-                        <input type="text" class="form-control" id="edit_attribute_name" name="edit_attribute_name" required>
+                        <label for="edit_attribute_name">Attribute Name</label>
+                        <input type="text" class="form-control" id="edit_attribute_name"
+                            name="edit_attribute_name" required>
                         </div>
                     </div>
 
                     <!-- Attribute Type -->
                     <div class="col-lg-6">
                         <div class="form-group">
-                        <label class="col-form-label" for="edit_attribute_type">Attribute Type</label>
-                        <select class="chosen-select form-control" id="edit_attribute_type" name="edit_attribute_type">
+                        <label for="edit_attribute_type">Attribute Type</label>
+                        <select class="form-control" id="edit_attribute_type"
+                            name="edit_attribute_type">
                             <option value="text">Text</option>
                             <option value="dropdown">Dropdown</option>
                         </select>
@@ -191,12 +188,8 @@
 
                     <!-- Save Button -->
                     <div class="form-group text-right">
-                    <button type="submit" class="btn btn-primary">
-                        Save Changes
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                        <i class="icon-close"></i> Cancel
-                    </button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     </div>
 
                 </form>

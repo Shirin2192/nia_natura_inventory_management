@@ -1,6 +1,9 @@
 <?php
 ob_start();
 defined('BASEPATH') or exit('No direct script access allowed');
+header("Access-Control-Allow-Origin: *"); // or use a specific domain instead of '*'
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 class Admin extends CI_Controller
 {
@@ -18,10 +21,8 @@ class Admin extends CI_Controller
         $role_id = $admin_session['role_id'] ?? null;
 		if ($role_id) {
             $role_permission = $this->Role_model->get_role_permission($role_id);
-
             foreach ($role_permission as $role_permission_row) {
                 $sidebar_id = $role_permission_row['fk_sidebar_id'];
-
                 $this->permissions[$sidebar_id] = [
                     'can_view' => $role_permission_row['can_view'] ?? 0,
                     'can_add' => $role_permission_row['can_add'] ?? 0,
@@ -31,16 +32,19 @@ class Admin extends CI_Controller
                 ];
             }
         }
+
+		$this->controller_name = $this->router->fetch_class();
+        $this->load->vars(['controller_name' => $this->controller_name]);
 	}
 	// Default method for the Admin controller
 	public function index()
 	{
-		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
-			
+		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists			
 		if (!$admin_session) {
 			redirect(base_url('common/index')); // Redirect to login page if session is not active
 		} else {
-			$this->load->view('admin/dashboard'); // Load the admin dashboard view
+			$response['total_product_count'] = $this->model->selectWhereData('tbl_product_master', array('is_delete' => 1), "COUNT(id) as product_count", true); // Get total product count
+			$this->load->view('admin/dashboard',$response); // Load the admin dashboard view
 		}
 	}
 	public function add_staff()

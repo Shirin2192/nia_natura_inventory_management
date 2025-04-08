@@ -152,7 +152,7 @@ $("#productAttributeForm").on("submit", function (event) {
             dataType: "json",
             success: function (response) {
                 if (response.status == "success") {                
-                    $("#edit_product_type").text(response.data.product_type_name); // Set Product Type (Readonly)
+                    $("#edit_product_type").val(response.data.product_type_name); // Set Product Type (Readonly)
                     $("#edit_attribute_name").val(response.data.attribute_name); // Set Attribute Name
                    // Destroy Chosen if already initialized
                     if ($("#edit_attribute_type").data('chosen')) {

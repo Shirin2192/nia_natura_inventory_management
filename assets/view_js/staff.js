@@ -175,21 +175,16 @@ $(document).on("click", ".editUser", function () {
                 $("#edit_first_name").val(first_name);
                 $("#edit_last_name").val(last_name);
                 $("#edit_email").val(user.email);
-                  // Destroy Chosen before modifying options
-                  if ($(".chosen-select").hasClass("chosen-container")) {
-                    $("#edit_role").chosen("destroy");
-                }
+                 
                 // Populate role dropdown dynamically
-                var role_options = '<option value=""></option>';              
-                $.each(roles, function(_, role) {
-                   
-                    var selected = (role.id == user.fk_role_id) ? "selected" : "";
-                    role_options += `<option value="${role.id}" ${selected}>${role.role_name}</option>`;
-                });
-                $("#edit_role").html(role_options); // Append new options
-                // Reinitialize Chosen plugin
-                $("#edit_role").chosen().trigger("chosen:updated");
-
+                if (!$("#edit_role").data('chosen')) {
+                    $("#edit_role").chosen({ allow_single_deselect: true, width: '100%' }); // Initialize chosen if not already initialized
+                } else {
+                    $("#edit_role").trigger("chosen:destroy").chosen({ allow_single_deselect: true, width: '100%' }); // Reinitialize chosen if already initialized
+                }
+                $("#edit_role").val(user.fk_role_id); // Set the value
+                $("#edit_role").trigger("chosen:updated"); // Update chosen dropdown
+                
                 // Ensure dropdown is visible
                 $("#edit_role").css("display", "block");
                 $("#edit_Staff_modal").modal("show"); // Show modal

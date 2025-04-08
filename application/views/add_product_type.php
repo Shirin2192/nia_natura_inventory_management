@@ -56,8 +56,9 @@
             <div class="row page-titles mx-0">
                 <div class="col p-md-0">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="<?=base_url()?>admin">Dashboard</a></li>
-                        <li class="breadcrumb-item active"><a href="<?=base_url()?>admin/add_product_type">Product Type</a>
+                        <li class="breadcrumb-item"><a href="<?=base_url()?><?= $controller_name?>">Dashboard</a></li>
+                        <li class="breadcrumb-item active"><a href="<?=base_url()?><?= $controller_name?>/add_product_type">Product
+                                Type</a>
                         </li>
                     </ol>
                 </div>
@@ -81,9 +82,10 @@
                                                         class="text-danger">*</span>
                                                 </label>
                                                 <input type="text" class="form-control" id="product_type_name"
-                                                    name="product_type_name" placeholder="Enter Product Type">                                              <small class="text-danger" id="product_type_name_error"></small>
-                                                    <small class="text-danger" id="product_type_name_error"></small>
-                                                    <!-- Error message here -->
+                                                    name="product_type_name" placeholder="Enter Product Type"> <small
+                                                    class="text-danger" id="product_type_name_error"></small>
+                                                <small class="text-danger" id="product_type_name_error"></small>
+                                                <!-- Error message here -->
                                             </div>
                                         </div>
 
@@ -134,30 +136,31 @@
     <!-- View Modal -->
     <!-- Bootstrap Modal -->
     <!-- View Product Type Modal -->
-<div class="modal fade" id="viewProductTypeModal" tabindex="-1" aria-labelledby="viewProductTypeLabel" aria-hidden="true">
-<div class="modal-dialog modal-xl custom-modal-fullwidth">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="viewProductTypeLabel">View Product Type</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="d-flex flex-column">
-                    <p><strong>Product Type Name:</strong> <span id="view_product_type_name"></span></p>
+    <div class="modal fade" id="viewProductTypeModal" tabindex="-1" aria-labelledby="viewProductTypeLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl custom-modal-fullwidth">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewProductTypeLabel">View Product Type</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                <div class="modal-body">
+                    <div class="d-flex flex-column">
+                        <p><strong>Product Type Name:</strong> <span id="view_product_type_name"></span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- Edit Product Modal -->
     <div class="modal fade" id="editProductTypeModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl custom-modal-fullwidth">
+        <div class="modal-dialog modal-xl custom-modal-fullwidth">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editModalLabel">Edit Product Type</h5>
@@ -171,8 +174,7 @@
                         <div class="row">
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <input type="hidden" class="form-control" id="edit_id"
-                                        name="edit_id">
+                                    <input type="hidden" class="form-control" id="edit_id" name="edit_id">
                                     <label class="col-form-label" for="edit_product_type_name">Product Type</than
                                             class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="edit_product_type_name"
@@ -184,8 +186,7 @@
 
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                            aria-label="Close">Close</button>
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                     </div>
                 </form>
@@ -198,14 +199,15 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="deleteModalLabel">Delete Product Type</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     Are you sure you want to delete this product type?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class=" close btn btn-secondary" data-bs-dismiss="modal"
-                        aria-label="Close">Cancel</button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-danger" id="confirm-delete">Delete</button>
                 </div>
             </div>
@@ -214,7 +216,7 @@
     <!--**********************************
          Footer start
          ***********************************-->
-         <?php include('common/footer.php')?>
+    <?php include('common/footer.php')?>
     <!--**********************************
          Footer end
          ***********************************-->

@@ -56,8 +56,8 @@
             <div class="row page-titles mx-0">
                 <div class="col p-md-0">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="<?=base_url()?>admin">Dashboard</a></li>
-                        <li class="breadcrumb-item active"><a href="<?=base_url()?>admin/add_staff">Add Staff</a></li>
+                        <li class="breadcrumb-item"><a href="<?=base_url()?><?= $controller_name?>">Dashboard</a></li>
+                        <li class="breadcrumb-item active"><a href="<?=base_url()?><?= $controller_name?>/add_staff">Add Staff</a></li>
                     </ol>
                 </div>
             </div>
@@ -67,7 +67,7 @@
    
     $can_add = isset($permissions[$sidebar_id]['can_add']) && $permissions[$sidebar_id]['can_add'] == 1;
 ?>
-<?php if ($can_add): ?>
+            <?php if ($can_add): ?>
             <div class="container-fluid">
                 <div class="row justify-content-center">
                     <div class="col-lg-12">
@@ -175,11 +175,13 @@
          ***********************************-->
     <!-- View User Modal -->
     <div class="modal fade" id="viewUserModal" tabindex="-1" aria-labelledby="viewUserModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl custom-modal-fullwidth">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="viewUserModalLabel">User Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="viewUserModalLabel">View Staff Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <p><strong>Name:</strong> <span id="view_first_name"></span></p>
@@ -187,7 +189,7 @@
                     <p><strong>Role:</strong> <span id="view_role"></span></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -195,11 +197,11 @@
 
     <!-- Edit Modal -->
     <div class="modal fade" id="edit_Staff_modal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl custom-modal-fullwidth">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="editModalLabel">Edit Staff</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form id="edit-staff-form">
                     <div class="modal-body">
@@ -246,14 +248,18 @@
                                 <div class="form-group">
                                     <label class="col-form-label" for="edit_role">Role <span
                                             class="text-danger">*</span></label>
-                                    <select class="chosen-select form-control" id="edit_role" name="edit_role">
-                                    </select>
+                                    <div><select class="form-control chosen-select" id="edit_role" name="edit_role">
+                                        <option value=""></option>
+                                        <?php foreach ($role as $role_key => $role_row) { ?>
+                                        <option value="<?=$role_row['id']?>"><?=$role_row['role_name']?></option>
+                                        <?php  }?>
+                                    </select></div>
                                     <small class="text-danger" id="edit_role_error"></small>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
                             <button type="submit" class="btn btn-primary">Save Changes</button>
                         </div>
                     </div>
@@ -261,28 +267,25 @@
             </div>
         </div>
     </div>
-   
-
-    <!-- Delete Modal -->
+   <!-- Delete Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="deleteModalLabel">Delete Staff</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <p>Are you sure you want to delete this staff member?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
                 </div>
             </div>
         </div>
     </div>
-
-    </div>
+    
     <!--**********************************
          Footer start
          ***********************************-->
@@ -299,7 +302,6 @@
          ***********************************-->
     <?php include('common/js_files.php')?>
     <script src="<?= base_url()?>assets/view_js/staff.js"></script>
-
 </body>
 
 </html>

@@ -1,6 +1,9 @@
 <?php
 ob_start();
 defined('BASEPATH') OR exit('No direct script access allowed');
+header("Access-Control-Allow-Origin: *"); // or use a specific domain instead of '*'
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 class Common extends CI_Controller {
 
