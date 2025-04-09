@@ -8,6 +8,11 @@
     <title>Nia Natura Inventory Management</title>
     <!-- Favicon icon -->
     <?php include('common/css_files.php')?>
+    <style>
+        #attribute_fields_container select {
+    width: 100% !important;
+}
+    </style>
 </head>
 
 <body>

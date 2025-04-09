@@ -147,7 +147,7 @@ $(document).ready(function () {
 
 		if (productTypeId) {
 			$.ajax({
-				url: frontend + "admin/get_attribute_on_product_types_id", // API to get attributes
+				url: frontend + controllerName + "/get_attribute_on_product_types_id", // API to get attributes
 				type: "POST",
 				data: { fk_product_types_id: productTypeId },
 				dataType: "json",
@@ -175,29 +175,31 @@ $(document).ready(function () {
 		}
 	});
 
-	// Unbind and rebind change event for attribute selection
-	$(".fk_product_attribute_id").off("change").on("change", function () {
+	
+	// $(".fk_product_attribute_id").off("change").on("change", function () {
+		$(document).off("change", ".fk_product_attribute_id").on("change", ".fk_product_attribute_id", function () {
 		var selectedType = $(".fk_product_attribute_id option:selected").data("type");
 		var attributeName = $(".fk_product_attribute_id option:selected").text();
 		var attributeId = $(this).val();
 
 		if (!attributeId) {
-			$("#attribute_fields_container").empty();
-			return;
-		}
-
+            $("#attribute_fields_container").empty(); // Clear the container if no attribute is selected
+            return;
+        }
+		// Optional: Clear the container before AJAX to avoid visual stacking
+        $("#attribute_fields_container").empty();
 		// Fetch additional data related to selected attribute type dynamically
 		$.ajax({
-			url: frontend + "admin/get_attribute_values_on_product_attributes_id", // API to get additional values
+			url: frontend + controllerName + "/get_attribute_values_on_product_attributes_id", // API to get additional values
 			type: "POST",
 			data: { attribute_id: attributeId },
 			dataType: "json",
 			success: function (response) {
-				var fieldHtml = `<div class="col-lg-6 mb-3"><div class="form-group"><label>${attributeName}</label>`;
+				var fieldHtml = `<div class="col-lg-6 mb-3"><div class="form-group"><label class="col-form-label">${attributeName}</label>`;
 				if (selectedType === "text") {
 					fieldHtml += `<input type="text" name="attributes_value[]" id="attributes_value_${attributeId}" class="form-control" placeholder="Enter ${attributeName}">`;
 				} else if (selectedType === "dropdown") {
-					fieldHtml += `<select name="attributes_value[]" id="attributes_value_${attributeId}" class="chosen-select form-control" style="width: 100%;">                                    
+					fieldHtml += `<select class="chosen-select form-control"  name="attributes_value[]" id="attributes_value_${attributeId}" style="width:100%;">                                    
                     <option value="" disabled selected>Select ${attributeName}</option>`;
 					$.each(response.data, function (index, item) {
 						fieldHtml += `<option value="${item.id}">${item.attribute_value}</option>`;
@@ -212,8 +214,11 @@ $(document).ready(function () {
 				}
 				fieldHtml += `</div></div>`;
 				$("#attribute_fields_container").html(fieldHtml);
-				// Reinitialize Chosen Select for newly added dropdowns
-				$(".chosen-select").chosen({ width: "100%" }).trigger("chosen:updated");
+				// Make sure select is visible and in DOM before initializing
+				setTimeout(function () {
+					$(".chosen-select").chosen("destroy"); // Just in case
+					$(".chosen-select").chosen({ width: "100%" }).trigger("chosen:updated").trigger("resize.chosen");
+				}, 50);
 			},
 			error: function () {
 				alert("Failed to fetch attribute type values.");
@@ -223,10 +228,9 @@ $(document).ready(function () {
 
 	$("#channel_type").off("change").on("change", function () {
 		var channel_type = $(this).val(); // Get selected Product Type ID
-
 		if (channel_type) {
 			$.ajax({
-				url: frontend + "admin/get_sales_channel_on_channel_type", // API to get attributes
+				url: frontend + controllerName + "/get_sales_channel_on_channel_type", // API to get attributes
 				type: "POST",
 				data: { channel_type: channel_type },
 				dataType: "json",
@@ -349,7 +353,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 		// Fetch additional data related to selected attribute type dynamically
 		$.ajax({
-			url: frontend + "admin/get_attribute_values_on_product_attributes_id", // API to get additional values
+			url: frontend + controllerName + "/get_attribute_values_on_product_attributes_id", // API to get additional values
 			type: "POST",
 			data: { attribute_id: attributeId },
 			dataType: "json",
