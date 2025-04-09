@@ -43,7 +43,10 @@ class Product_model extends CI_Model {
             GROUP_CONCAT(tbl_product_types.product_type_name) as product_type_name,
             GROUP_CONCAT(tbl_attribute_values.attribute_value) as attribute_value,
             tbl_product_price.purchase_price,
-            tbl_product_inventory.total_quantity,tbl_product_inventory.id as inventory_id
+            tbl_product_inventory.total_quantity,
+            tbl_product_inventory.id as inventory_id,
+            tbl_product_inventory.channel_type,
+            tbl_product_inventory.fk_sale_channel_id,
         ');
         $this->db->from('tbl_product_master');
         $this->db->join('tbl_product_attributes', 'tbl_product_attributes.fk_product_id = tbl_product_master.id', 'left');

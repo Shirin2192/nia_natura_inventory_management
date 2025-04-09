@@ -676,6 +676,9 @@ class Inventory_manager extends CI_Controller {
 	{
 		$id = $this->input->post('product_id');
 		$data['product'] = $this->Product_model->get_product_by_id($id);
+		$channel_type = $data['product']['channel_type'];
+		$sale_channel = $this->model->selectWhereData('tbl_sale_channel', array('channel_type'=>$channel_type,'is_delete' => 1), "*", false, array('id', "DESC"));
+		$data['sale_channel'] = $sale_channel;
 		echo json_encode($data);
 	}
 

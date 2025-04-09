@@ -176,8 +176,9 @@ $(document).ready(function () {
 	});
 
 	
-	// $(".fk_product_attribute_id").off("change").on("change", function () {
-		$(document).off("change", ".fk_product_attribute_id").on("change", ".fk_product_attribute_id", function () {
+	$(".fk_product_attribute_id").off("change").on("change", function () {
+		// $(document).off("change", ".fk_product_attribute_id").on("change", ".fk_product_attribute_id", function () {
+		
 		var selectedType = $(".fk_product_attribute_id option:selected").data("type");
 		var attributeName = $(".fk_product_attribute_id option:selected").text();
 		var attributeId = $(this).val();
@@ -453,6 +454,7 @@ $(document).on("click", ".update-product", function () {
 		dataType: "json",
 		success: function (response) {
 			const product = response.product;
+			const sale_channel = response.sale_channel;
 
 			// Fill general product fields
 			$("#update_product_id").val(product.id);
@@ -468,6 +470,7 @@ $(document).on("click", ".update-product", function () {
 			$("#update_description").val(product.description);
 			$("#update_product_image").val(product.images);
 			$("#update_availability_status").val(product.fk_stock_availability_id).trigger("chosen:updated");
+			$("#update_channel_type").val(product.channel_type).trigger("chosen:updated");
 
 			$('#attribute_id').val(product.attribute_id);
 
@@ -477,6 +480,27 @@ $(document).on("click", ".update-product", function () {
 				`<img src="${frontend + 'uploads/products/' + img.trim()}" class="img-fluid m-2" width="100" height="100">`
 			).join('');
 			$("#update_images").html(imagePreview || "<p>No images available</p>");
+			
+			// Build sale channel options dynamically
+			let saleChannelOptions = '<option value="" disabled>Select Sale Channel</option>';
+
+			if (sale_channel && sale_channel.length > 0) {
+				sale_channel.forEach(item => {
+					const selected = item.id == product.fk_sale_channel_id ? 'selected' : '';
+					saleChannelOptions += `<option value="${item.id}" ${selected}>${item.sale_channel}</option>`;
+				});
+			} else {
+				saleChannelOptions += '<option value="" disabled>No Sale Channel Available</option>';
+			}
+
+			$("#update_sale_channel").html(saleChannelOptions);
+
+			// Update Chosen dropdown
+			if ($("#update_sale_channel").data('chosen')) {
+				$("#update_sale_channel").trigger("chosen:updated");
+			} else {
+				$("#update_sale_channel").chosen({ width: "100%" });
+			}
 
 			// Handle dynamic attributes
 			$("#attributes_container_edit").empty();

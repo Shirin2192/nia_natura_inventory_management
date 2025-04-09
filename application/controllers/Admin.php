@@ -318,7 +318,6 @@ class Admin extends CI_Controller
 			$this->load->view('product', $response);
 		}
 	}
-
 	public function get_attribute_on_product_types_id()
 	{
 		$fk_product_types_id = $this->input->post('fk_product_types_id'); // Get the product type ID from POST request
@@ -525,6 +524,9 @@ class Admin extends CI_Controller
 	{
 		$id = $this->input->post('product_id');
 		$data['product'] = $this->Product_model->get_product_by_id($id);
+		$channel_type = $data['product']['channel_type'];
+		$sale_channel = $this->model->selectWhereData('tbl_sale_channel', array('channel_type'=>$channel_type,'is_delete' => 1), "*", false, array('id', "DESC"));
+		$data['sale_channel'] = $sale_channel;
 		echo json_encode($data);
 	}
 
@@ -717,8 +719,8 @@ class Admin extends CI_Controller
 	}
 
 	public function order_details(){
-		$data['products'] = $this->model->selectWhereData('tbl_product', array('is_delete' => 1), "*", false, array('id', "DESC"));
-		$this->load->view('order_details');
+		$data['products'] = $this->model->selectWhereData('tbl_product_master', array('is_delete' => 1), "*", false, array('id', "DESC"));
+		$this->load->view('order_details',$data);
 	}
 
 	public function add_product_type()

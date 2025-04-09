@@ -86,6 +86,13 @@ $current_controller = $this->router->fetch_class();
                 </a>
             </li>
             <?php endif; ?>
+            <?php if (in_array(8, $accessible_sidebar_ids)) : ?>
+            <li>
+                <a href="<?= base_url() . $current_controller ?>/order_details" aria-expanded="false">
+                    <i class="icon-star menu-icon"></i> <span class="nav-text">Order Details</span>
+                </a>
+            </li>
+            <?php endif; ?>
             <?php if (in_array(9, $accessible_sidebar_ids)) : ?>
             <li>
                 <a href="<?= base_url() . $current_controller ?>/role_and_access" aria-expanded="false">
