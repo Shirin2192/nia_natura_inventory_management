@@ -10,6 +10,13 @@ class Admin extends CI_Controller
 	public function __construct()
 	{
 		parent::__construct();
+
+		 // Prevent browser caching for all admin pages
+		 $this->output
+		 ->set_header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0")
+		 ->set_header("Cache-Control: post-check=0, pre-check=0", false)
+		 ->set_header("Pragma: no-cache");
+		 
 		$this->load->model('Product_model'); 
 		$this->load->model('user_model'); 
 		$this->load->model('Product_attribute_model'); 

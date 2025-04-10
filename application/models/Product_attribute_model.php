@@ -37,6 +37,7 @@ class Product_attribute_model extends CI_Model
         $this->db->from('tbl_attribute_values');
         $this->db->join('tbl_attribute_master', 'tbl_attribute_master.id = tbl_attribute_values.fk_attribute_id', 'left');
         $this->db->where('tbl_attribute_values.is_delete', '1');
+        $this->db->order_by('tbl_attribute_values.id', 'DESC');
         $query = $this->db->get();
         return $data = $query->result_array();
         
