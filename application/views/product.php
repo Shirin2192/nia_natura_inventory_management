@@ -9,9 +9,9 @@
     <!-- Favicon icon -->
     <?php include('common/css_files.php')?>
     <style>
-        #attribute_fields_container select {
-    width: 100% !important;
-}
+    #attribute_fields_container select {
+        width: 100% !important;
+    }
     </style>
 </head>
 
@@ -42,7 +42,8 @@
                 <div class="col p-md-0">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="<?=base_url()?><?= $controller_name?>">Dashboard</a></li>
-                        <li class="breadcrumb-item active"><a href="<?=base_url()?><?= $controller_name?>/add_staff">Add Product</a></li>
+                        <li class="breadcrumb-item active"><a href="<?=base_url()?><?= $controller_name?>/add_staff">Add
+                                Product</a></li>
                     </ol>
                 </div>
             </div>
@@ -106,9 +107,9 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        
-                                        <!-- Select Attribute -->
-                                       
+
+                                            <!-- Select Attribute -->
+
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
                                                     <label class="col-form-label"
@@ -119,19 +120,37 @@
                                                             class="chosen-select form-control fk_product_attribute_id"
                                                             id="fk_product_attribute_id_1"
                                                             name="fk_product_attribute_id[]">
+                                                            <option value="">Select Attribute</option>
+                                                            <?php foreach($product_attributes as $attribute): ?>
+                                                            <option value="<?= $attribute['id'] ?>">
+                                                                <?= $attribute['attribute_name'] ?>
+                                                            </option>
+                                                            <?php endforeach; ?>
                                                         </select>
                                                     </div>
-
                                                     <div class="text-danger">
-                                                        <?= form_error('fk_product_attribute_id'); ?></div>
+                                                        <?= form_error('fk_product_attribute_id'); ?>
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <div id="attribute_fields_container"></div>
-                                    
-                                        <!-- Add More Button -->
-                                        <!-- Add More Button -->
-                                       
+                                            <div class="col-lg-4 mb-3">
+                                                <div class="form-group">
+                                                    <!-- <label class="col-form-label"
+                                                        for="attribute_value">Attribute Value <span
+                                                            class="text-danger">*</span></label> -->
+                                                    <div id="attribute_fields_container">
+
+                                                    </div>
+                                                    <div class="text-danger">
+                                                        <?= form_error('attribute_value'); ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Add More Button -->
+                                            <!-- Add More Button -->
+
                                             <div class="col-lg-2 mb-3 d-flex align-items-end">
                                                 <button type="button" class="btn btn-success w-100"
                                                     id="add_more_attributes">Add More</button>
@@ -450,7 +469,7 @@
                         <div id="attribute_fields_container_edit"></div>
 
 
-                                             <!-- Add More Attributes (dropdown + button) – move this BELOW -->
+                        <!-- Add More Attributes (dropdown + button) – move this BELOW -->
                         <div id="attributes_container_edit"></div>
                         <!-- Add More Attributes Button -->
                         <div class="row mt-3">
@@ -460,7 +479,7 @@
                                 </button>
                             </div>
                         </div>
-                       
+
                         <div class="row">
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">

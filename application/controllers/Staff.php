@@ -15,7 +15,7 @@ class Staff extends CI_Controller {
 		 ->set_header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0")
 		 ->set_header("Cache-Control: post-check=0, pre-check=0", false)
 		 ->set_header("Pragma: no-cache");
-		 
+
 		$this->load->model('Product_model'); 
 		$this->load->model('user_model'); 
 		$this->load->model('Product_attribute_model'); 
@@ -93,8 +93,7 @@ class Staff extends CI_Controller {
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 4; // Set the sidebar ID for the current view
 			$this->load->view('add_product_attributes',$response);
-		}
-		
+		}		
 	}
 	public function get_product_attribute_detail()
 	{

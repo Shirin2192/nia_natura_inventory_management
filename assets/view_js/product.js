@@ -510,19 +510,30 @@ document.addEventListener("DOMContentLoaded", function () {
 				select.appendChild(newOption);
 			});
 		}
-
+		// Create a new div for the attribute
+		let newAttributeRemoveDiv = document.createElement('div');
+		newAttributeRemoveDiv.classList.add('col-lg-2');
+		newAttributeRemoveDiv.setAttribute('data-index', attributeIndex); // Add a data-index for tracking
+		
 		// Create remove button
 		let removeButton = document.createElement('button');
 		removeButton.type = 'button';
 		removeButton.classList.add('btn', 'btn-danger', 'mt-2', 'remove-attribute');
 		removeButton.textContent = 'Remove';
+		
 
 		// Append elements
 		formGroupDiv.appendChild(label);
 		formGroupDiv.appendChild(select);
 		formGroupDiv.appendChild(removeButton);
 		newAttributeDiv.appendChild(formGroupDiv);
-		attributesContainer.appendChild(newAttributeDiv);
+		// attributesContainer.appendChild(newAttributeDiv);
+		// Wrap the new field in a row
+		let rowWrapper = document.createElement('div');
+		rowWrapper.classList.add('row');
+		rowWrapper.appendChild(newAttributeDiv);
+
+		attributesContainer.appendChild(rowWrapper);
 
 		// Initialize Chosen plugin for the new select
 		$("#" + select.id).chosen({ width: "100%" });
@@ -624,8 +635,8 @@ document.addEventListener("DOMContentLoaded", function () {
 			dataType: "json",
 			success: function (response) {
 				// Create a div to contain this attribute value, using column approach to avoid overlapping
-				var fieldHtml = `<div class="col-lg-6 mb-3" data-index="${attributeIndex}">`;
-				fieldHtml += `<div class="form-group"><label class="col-form-label">${attributeName}</label>`;
+				var fieldHtml = `<div class="mb-3" data-index="${attributeIndex}">
+    <label class="col-form-label">${attributeName}</label>`;
 
 				if (selectedType === "text") {
 					fieldHtml += `<input type="text" name="attributes_value[]" id="attributes_value_${attributeIndex}" class="form-control" placeholder="Enter ${attributeName}">`;
@@ -643,7 +654,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                        </div>`;
 					});
 				}
-				fieldHtml += `</div></div>`;
+				fieldHtml += `</div>`; // Close wrapper
 
 				// Check if there's already a field for this index
 				var existingField = $("#attribute_fields_container").find(`[data-index="${attributeIndex}"]`);

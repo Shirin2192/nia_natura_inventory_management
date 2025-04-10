@@ -15,7 +15,7 @@ class Inventory_manager extends CI_Controller {
 		 ->set_header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0")
 		 ->set_header("Cache-Control: post-check=0, pre-check=0", false)
 		 ->set_header("Pragma: no-cache");
-		 
+
 		$this->load->model('Product_model'); 
 		$this->load->model('user_model'); 
 		$this->load->model('Product_attribute_model');
@@ -41,9 +41,7 @@ class Inventory_manager extends CI_Controller {
         }
 		$this->controller_name = $this->router->fetch_class();
         $this->load->vars(['controller_name' => $this->controller_name]);
-		
 	}
-
 	public function index()
 	{
 		$inventory_session = $this->session->userdata('inventory_session'); // Check if admin session exists

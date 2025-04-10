@@ -16,7 +16,7 @@ class Admin extends CI_Controller
 		 ->set_header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0")
 		 ->set_header("Cache-Control: post-check=0, pre-check=0", false)
 		 ->set_header("Pragma: no-cache");
-		 
+
 		$this->load->model('Product_model'); 
 		$this->load->model('user_model'); 
 		$this->load->model('Product_attribute_model'); 
@@ -39,7 +39,6 @@ class Admin extends CI_Controller
                 ];
             }
         }
-
 		$this->controller_name = $this->router->fetch_class();
         $this->load->vars(['controller_name' => $this->controller_name]);
 	}
@@ -365,7 +364,7 @@ class Admin extends CI_Controller
 			$selling_price = $this->input->post('selling_price');
 			$add_quantity = $this->input->post('add_quantity');
 			$stock_availability = $this->input->post('stock_availability');
-			// $sale_channel = $this->input->post('sale_channel');
+			$sale_channel = $this->input->post('sale_channel');
 
 			$fk_product_attribute_id = $this->input->post('fk_product_attribute_id'); // Example: [3, 2, 1]
 			$attributes_value = $this->input->post('attributes_value'); // Example: [19, 16, 1]
@@ -374,7 +373,7 @@ class Admin extends CI_Controller
 			// Validation Rules
 			$this->form_validation->set_rules('product_name', 'Product Name', 'required|trim');
 			$this->form_validation->set_rules('product_sku_code', 'Product SKU Code', 'required|trim|is_unique[tbl_product_type.product_sku_code]');
-			// $this->form_validation->set_rules('fk_flavour_id', 'Flavor', 'required|trim');
+			$this->form_validation->set_rules('fk_product_types_id', 'Product Type', 'required|trim');
 			// $this->form_validation->set_rules('fk_bottle_size_id', 'Bottle Size', 'required|trim');
 			// $this->form_validation->set_rules('fk_bottle_type_id', 'Bottle Type', 'required|trim');
 			$this->form_validation->set_rules('description', 'Description', 'required|trim');
@@ -383,7 +382,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('selling_price', 'Selling Price', 'required|trim');
 			$this->form_validation->set_rules('add_quantity', 'Stock Quantity', 'required|trim');
 			$this->form_validation->set_rules('stock_availability', 'Stock Availability', 'required|trim');
-			// $this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim');
+			$this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim');
+			$this->form_validation->set_rules('channel_type', 'Sale Channel', 'required|trim');
 
 			// Check validation
 			if ($this->form_validation->run() == FALSE) {
@@ -425,16 +425,7 @@ class Admin extends CI_Controller
 			if ($count == 1) {
 				$response = ["status" => "error", 'product_name_error' => "Already Exist"];
 			} else {
-				// Insert product data
 				
-				
-				// $product_category = [
-				// 	'fk_product_id' => $product_insert_id,
-				// 	'fk_flavour_id' => $fk_flavour_id,
-					
-				// ];
-				// $product_category_insert_id = $this->model->insertData('tbl_product_category', $product_category);
-
 				$product_data = [
 					'product_name' => $product_name,				
 					// 'fk_product_category_id' => $product_category_insert_id,
@@ -452,9 +443,7 @@ class Admin extends CI_Controller
 					'selling_price' => $selling_price,
 				];
 				//  print_r($product_data);
-				$product_insert_id = $this->model->insertData('tbl_product_master', $product_data);
-
-				
+				$product_insert_id = $this->model->insertData('tbl_product_master', $product_data);				
 
 				foreach ($fk_product_attribute_id as $key => $attribute_id) {
 					$product_attribute = [
@@ -465,13 +454,9 @@ class Admin extends CI_Controller
 					];
 					$this->model->insertData('tbl_product_attributes', $product_attribute);
 				}
-				// print_r($product_attributes);
-				// Insert product attributes into the database
-				
+				// Insert product price and inventory data				
 				$product_price = [
 					'fk_product_id' => $product_insert_id,
-					// 'fk_product_category_id' => $product_category_insert_id,
-					// 'fk_product_type_id' => $product_type_insert_id,
 					'purchase_price' => $purchase_price,
 					'MRP' => $mrp,
 					'selling_price' => $selling_price,
@@ -480,12 +465,11 @@ class Admin extends CI_Controller
 				// print_r($product_price);
 				$product_inventory = [
 					'fk_product_id' => $product_insert_id,
-					// 'fk_product_category_id' => $product_category_insert_id,
-					// 'fk_product_type_id' => $product_type_insert_id,
-					// 'fk_product_price_id' => $product_price_insert_id,
 					'add_quantity' => $add_quantity,
 					'total_quantity' => $add_quantity,
-					'used_status' => 1
+					'used_status' => 1,
+					'channel_type' => $_POST['channel_type'],
+					'fk_sale_channel_id' => $sale_channel,
 				];
 				// print_r($product_inventory);
 				$product_inventory_insert_id = $this->model->insertData('tbl_product_inventory', $product_inventory);
@@ -835,8 +819,7 @@ class Admin extends CI_Controller
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 4; // Set the sidebar ID for the current view
 			$this->load->view('add_product_attributes',$response);
-		}
-		
+		}		
 	}
 	public function get_product_attribute_detail()
 	{
@@ -906,7 +889,6 @@ class Admin extends CI_Controller
 			echo json_encode($response);
 			return;
 		}
-
 		// Get input data
 		$id = $this->input->post('edit_attribute_id');
 		$attribute_name = $this->input->post('edit_attribute_name');
