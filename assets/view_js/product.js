@@ -20,7 +20,20 @@ $(document).ready(function () {
 			success: function (response) {
 				if (response.status === "error") {
 					$.each(response.errors, function (key, value) {
-						$("#" + key).after('<span class="error text-danger">' + value + '</span>');
+						// Avoid duplicate error messages
+							const inputElement = $("#" + key);
+							inputElement.next(".error").remove();
+
+							// Append new error
+							const errorMsg = $('<span class="error text-danger">' + value + '</span>');
+							inputElement.after(errorMsg);
+
+							// Auto-remove after 3 seconds
+							setTimeout(() => {
+								errorMsg.fadeOut(300, function () {
+									$(this).remove();
+								});
+							}, 3000);
 					});
 				} else if (response.status === "success") {
 					swal({
@@ -512,7 +525,7 @@ document.addEventListener("DOMContentLoaded", function () {
 		}
 		// Create a new div for the attribute
 		let newAttributeRemoveDiv = document.createElement('div');
-		newAttributeRemoveDiv.classList.add('col-lg-2');
+		newAttributeRemoveDiv.classList.add('col-lg-6');
 		newAttributeRemoveDiv.setAttribute('data-index', attributeIndex); // Add a data-index for tracking
 		
 		// Create remove button
@@ -635,8 +648,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			dataType: "json",
 			success: function (response) {
 				// Create a div to contain this attribute value, using column approach to avoid overlapping
-				var fieldHtml = `<div class="mb-3" data-index="${attributeIndex}">
-    <label class="col-form-label">${attributeName}</label>`;
+				var fieldHtml = `<div class="mb-3" data-index="${attributeIndex}"><label class="col-form-label">${attributeName}</label>`;
 
 				if (selectedType === "text") {
 					fieldHtml += `<input type="text" name="attributes_value[]" id="attributes_value_${attributeIndex}" class="form-control" placeholder="Enter ${attributeName}">`;

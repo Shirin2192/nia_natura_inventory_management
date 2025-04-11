@@ -12,6 +12,8 @@
     #attribute_fields_container select {
         width: 100% !important;
     }
+
+    
     </style>
 </head>
 

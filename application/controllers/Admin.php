@@ -1135,4 +1135,69 @@ public function save_permissions()
             echo json_encode(['status' => 'error', 'message' => 'No permissions found for this role']);
         }
     }
+
+	public function sku_code(){
+		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
+		if (!$admin_session) {
+			redirect(base_url('common/index')); // Redirect to login page if session is not active
+		} else {
+			$response['permissions'] = $this->permissions; // Pass full permissions array
+			$response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
+			$this->load->view('sku_code',$response);
+		}
+	}
+	public function get_sku_code_detail()
+	{
+		$response['data'] = $this->model->selectWhereData('tbl_sku_code_master',array('is_delete'=>'1'),'*',false,array('id','DESC')); // Correctly access the model
+		// $response['permissions'] = $this->permissions; // Pass full permissions array
+		// $response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
+		echo json_encode($response);
+	}
+	public function save_sku_code()
+	{
+		$sku_code = $this->input->post('sku_code');
+		$this->form_validation->set_rules(
+			'sku_code',
+			'SKU Code',
+			'required|regex_match[/^[A-Z]{2}-[A-Z]{2,}-[0-9]{2,4}$/]',
+			array(
+				'required'     => 'The %s field is required.',
+				'regex_match'  => 'The %s must be in the format: NN-KA-250.'
+			)
+		);
+		if ($this->form_validation->run() == FALSE) {
+			// Return validation errors as JSON (No page reload)
+			$response = [
+				'status' => 'error',
+				'sku_code_error' => form_error('sku_code'),
+			];
+		} else {
+			$count = $this->model->CountWhereRecord('tbl_sku_code_master', array('sku_code' => $sku_code, 'is_delete' => 1));
+			if ($count == 1) {
+				$response = ["status" => "error", 'sku_code_error' => "SKU Code Already Exist"];
+			} else {
+				$data = array(
+					'sku_code' => $sku_code,
+				);
+				$this->model->insertData('tbl_sku_code_master', $data);
+				$response = ["status" => "success", "message" => "SKU Code added successfully"];
+			}
+		}
+		echo json_encode($response); // Return response as JSON
+	}
+	public function get_sku_code_details_on_id()
+	{
+		$id = $this->input->post('id'); // Retrieve flavour ID from POST request		
+		if (!$id) {
+			echo json_encode(["status" => "error", "message" => "Invalid request"]);
+			return;
+		}
+		$sku_code = $this->model->selectWhereData('tbl_sku_code_master', array('id' => $id, 'is_delete' => 1));
+		if ($sku_code) {
+			echo json_encode(["status" => "success", "sku_code" => $sku_code]);
+		} else {
+			echo json_encode(["status" => "error", "message" => "SKU Code not found"]);
+		}
+		
+	}
 }

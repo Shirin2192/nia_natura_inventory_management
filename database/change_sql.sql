@@ -11,3 +11,6 @@ DROP TABLE `tbl_bottle_size`, `tbl_bottle_type`, `tbl_flavour`, `tbl_product`, `
 ALTER TABLE `tbl_product_price`
   DROP `fk_product_category_id`,
   DROP `fk_product_type_id`;
+
+ALTER TABLE `tbl_product_master`
+  DROP `batch_no`;
