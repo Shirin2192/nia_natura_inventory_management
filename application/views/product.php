@@ -63,22 +63,22 @@
                                     <div class="form-validation">
                                         <!-- Product Information -->
                                         <div class="row">
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="form-group">
-                                                    <label class="col-form-label" for="product_name">Product Name <span
-                                                            class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" id="product_name"
-                                                        name="product_name" placeholder="Enter Product Name">
-                                                    <div class="text-danger"><?= form_error('product_name'); ?></div>
-                                                </div>
-                                            </div>
+                                            
                                             <!-- Product ID/SKU -->
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
                                                     <label class="col-form-label" for="product_sku_code">Product SKU
                                                         Code <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" id="product_sku_code"
-                                                        name="product_sku_code" placeholder="Enter Product SKU Code">
+                                                    <!-- <input type="text" class="form-control" id="product_sku_code"
+                                                        name="product_sku_code" placeholder="Enter Product SKU Code"> -->
+                                                        <select class="chosen-select form-control" id="product_sku_code"
+                                                        name="product_sku_code">
+                                                        <option value=""></option>
+                                                        <?php foreach($product_sku_code as $product_sku_code_key => $product_sku_code_row) {?>
+                                                        <option value="<?= $product_sku_code_row['id']?>">
+                                                            <?= $product_sku_code_row['sku_code']?></option>
+                                                        <?php } ?>
+                                                    </select>
                                                     <div class="text-danger"><?= form_error('product_sku_code'); ?>
                                                     </div>
                                                 </div>
@@ -90,6 +90,15 @@
                                                     <input type="text" class="form-control" id="batch_no"
                                                         name="batch_no" placeholder="Enter Batch No">
                                                     <div class="text-danger"><?= form_error('batch_no'); ?></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 mb-3">
+                                                <div class="form-group">
+                                                    <label class="col-form-label" for="product_name">Product Name <span
+                                                            class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" id="product_name"
+                                                        name="product_name" placeholder="Enter Product Name">
+                                                    <div class="text-danger"><?= form_error('product_name'); ?></div>
                                                 </div>
                                             </div>
                                             <!-- Flavor -->

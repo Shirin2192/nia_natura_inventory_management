@@ -203,7 +203,6 @@ class Staff extends CI_Controller {
 				'product_types' => array_unique($types),
 				'attributes' => []
 			];
-
 			foreach ($attributes as $index => $attribute) {
 				$productDetails['attributes'][] = [
 					'name' => $attribute,
@@ -224,6 +223,36 @@ class Staff extends CI_Controller {
 		$data['sale_channel'] = $sale_channel;
 		echo json_encode($data);
 	}
-
-
+	public function sku_code(){
+		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
+		if (!$admin_session) {
+			redirect(base_url('common/index')); // Redirect to login page if session is not active
+		} else {
+			$response['permissions'] = $this->permissions; // Pass full permissions array
+			$response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
+			$this->load->view('sku_code',$response);
+		}
+	}
+	public function get_sku_code_detail()
+	{
+		$response['data'] = $this->model->selectWhereData('tbl_sku_code_master',array('is_delete'=>'1'),'*',false,array('id','DESC')); // Correctly access the model
+		// $response['permissions'] = $this->permissions; // Pass full permissions array
+		// $response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
+		echo json_encode($response);
+	}
+	
+	public function get_sku_code_details_on_id()
+	{
+		$id = $this->input->post('id'); // Retrieve flavour ID from POST request		
+		if (!$id) {
+			echo json_encode(["status" => "error", "message" => "Invalid request"]);
+			return;
+		}
+		$sku_code = $this->model->selectWhereData('tbl_sku_code_master', array('id' => $id, 'is_delete' => 1));
+		if ($sku_code) {
+			echo json_encode(["status" => "success", "sku_code" => $sku_code]);
+		} else {
+			echo json_encode(["status" => "error", "message" => "SKU Code not found"]);
+		}		
+	}
 }
