@@ -159,18 +159,18 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form id="edit_sku_code__form">
+                <form id="edit_sku_code_form">
                     <div class="modal-body">
 
                         <div class="row">
-                        <input type="hidden" name="edit_sku_code__id" id="edit_sku_code__id">        
+                        <input type="hidden" name="edit_sku_code_id" id="edit_sku_code_id">        
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="edit_sku_code_">Sale Channel <span
+                                    <label class="col-form-label" for="edit_sku_code">Sale Channel <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="edit_sku_code_"
-                                        name="edit_sku_code_" placeholder="Enter Sale Channel">
-                                    <small class="text-danger" id="edit_sku_code__error"></small>
+                                    <input type="text" class="form-control" id="edit_sku_code"
+                                        name="edit_sku_code" placeholder="Enter Sale Channel">
+                                    <small class="text-danger" id="edit_sku_code_error"></small>
                                     <!-- Error message here -->
                                 </div>
                             </div>
@@ -189,11 +189,11 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Delete Sale Channel</h5>
+                    <h5 class="modal-title" id="deleteModalLabel">Delete SKU Code</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to delete this Sale Channel?
+                    Are you sure you want to delete this SKU Code?
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

@@ -110,19 +110,19 @@ $(document).on("click", ".view-sku-code", function () {
     });
 });
 
-$(document).on("click", ".edit-sale-channel", function () {
+$(document).on("click", ".edit-sku-code", function () {
     var channelId = $(this).data("id");
     $.ajax({
-        url: frontend + controllerName+"/get_sale_channel_details",
+        url: frontend + controllerName+"/get_sku_code_details_on_id",
         type: "POST",
         data: { id: channelId },
         dataType: "json",
         success: function (response) {
             if (response.status == "success") {
-                $("#edit_sale_channel_id").val(response.sale_channel.id);
-                $("#edit_sale_channel").val(response.sale_channel.sale_channel);
-                $("#edit_channel_type").val(response.sale_channel.channel_type);
-                $("#edit_sale_channel_modal").modal("show");
+                $("#edit_sku_code_id").val(response.sku_code.id);
+               
+                $("#edit_sku_code").val(response.sku_code.sku_code);
+                $("#edit_sku_code_modal").modal("show");
             } else {
                 alert("Error: Unable to fetch details.");
             }
@@ -133,16 +133,16 @@ $(document).on("click", ".edit-sale-channel", function () {
     });
 });
 
-$("#edit_sale_channel_form").on("submit", function (event) {
+$("#edit_sku_code_form").on("submit", function (event) {
     event.preventDefault();
     $.ajax({
-        url: frontend + controllerName+"/update_sale_channel",
+        url: frontend + controllerName+"/update_sku_code",
         type: "POST",
         data: $(this).serialize(),
         dataType: "json",
         success: function (response) {
             if (response.status === "error") {
-                $("#edit_sale_channel_error").html(response.sale_channel_error);
+                $("#edit_sku_code_error").html(response.errors.edit_sku_code);
             } else {
                 swal({
                     icon: "success",
@@ -151,8 +151,8 @@ $("#edit_sale_channel_form").on("submit", function (event) {
                     button: false,
                     timer: 2000
                 });
-                $("#edit_sale_channel_modal").modal("hide");
-                $("#edit_sale_channel_form")[0].reset();
+                $("#edit_sku_code_modal").modal("hide");
+                $("#edit_sku_code_form")[0].reset();
                 location.reload();
             }
         },
@@ -172,7 +172,7 @@ function deleteSaleChannel(id) {
     }).then((willDelete) => {
         if (willDelete) {
             $.ajax({
-                url: frontend + controllerName+"/delete_sale_channel",
+                url: frontend + controllerName+"/delete_sku_code",
                 type: "POST",
                 data: { id: id },
                 dataType: "json",

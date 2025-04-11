@@ -1197,7 +1197,69 @@ public function save_permissions()
 			echo json_encode(["status" => "success", "sku_code" => $sku_code]);
 		} else {
 			echo json_encode(["status" => "error", "message" => "SKU Code not found"]);
+		}		
+	}
+	public function update_sku_code()
+	{
+		// Set validation rules
+		$this->form_validation->set_rules(
+			'edit_sku_code',
+			'SKU Code',
+			'required|regex_match[/^[A-Z]{2}-[A-Z]{2,}-[0-9]{2,4}$/]',
+			array(
+				'required'     => 'The %s field is required.',
+				'regex_match'  => 'The %s must be in the format: NN-KA-250.'
+			)
+		);
+
+		if ($this->form_validation->run() == FALSE) {
+			$response = [
+				"status" => "error",
+				"errors" => [
+					"edit_sku_code" => form_error('edit_sku_code'),
+				]
+			];
+			echo json_encode($response);
+			return;
 		}
 		
+		// Get input data
+		$id = $this->input->post('edit_sku_code_id');
+		$sku_code = $this->input->post('edit_sku_code');
+		
+		$count = $this->model->CountWhereRecord('tbl_sku_code_master', array('sku_code' => $sku_code, 'id !=' => $id, 'is_delete' => 1));	
+		if ($count == 1) {
+			$response = ["status" => "error", 'edit_sku_code' => "SKU Code Already Exist"];
+			echo json_encode($response);
+			return;
+		}else{
+			$updateData = [
+				'sku_code' => $sku_code,
+			];
+				
+			$updated = $this->model->updateData('tbl_sku_code_master', $updateData, ['id' => $id]);
+			if ($updated) {
+				echo json_encode(["status" => "success", "message" => "SKU Code updated successfully."]);
+			} else {
+				echo json_encode(["status" => "error", "message" => "Failed to update SKU Code."]);
+			}
+			
+		}
 	}
+	public function delete_sku_code()
+	{
+		$id = $this->input->post('id'); // Get the flavour ID from AJAX
+		if (!$id) {
+			echo json_encode(['status' => 'error', 'message' => 'Invalid SKU Code ID']);
+			return;
+		}
+
+		$result = $this->model->updateData('tbl_sku_code_master', ['is_delete' => '0'], ['id' => $id]); // Soft delete
+
+		if ($result) {
+			echo json_encode(['status' => 'success', 'message' => 'SKU Code deleted successfully']);
+		} else {
+			echo json_encode(['status' => 'error', 'message' => 'Failed to delete SKU Code']);
+		}
+	}	
 }
