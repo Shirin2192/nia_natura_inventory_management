@@ -1159,4 +1159,10 @@ $("#confirm-delete").on("click", function () {
 	});
 });
 
-
+function downloadSampleExcel() {
+    const formData = $('#productTypeForm').serialize(); // grabs product_type_id as query string
+    console.log(formData); // Debug the serialized data here.
+    const downloadUrl = frontend + controllerName + "/downloadProductSampleExcel?" + formData;
+    console.log(downloadUrl); // Debug the full URL here.
+    window.location.href = downloadUrl; // triggers Excel download
+}

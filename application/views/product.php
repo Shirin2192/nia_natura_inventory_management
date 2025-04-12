@@ -12,8 +12,6 @@
     #attribute_fields_container select {
         width: 100% !important;
     }
-
-    
     </style>
 </head>
 
@@ -63,7 +61,7 @@
                                     <div class="form-validation">
                                         <!-- Product Information -->
                                         <div class="row">
-                                            
+
                                             <!-- Product ID/SKU -->
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
@@ -71,7 +69,7 @@
                                                         Code <span class="text-danger">*</span></label>
                                                     <!-- <input type="text" class="form-control" id="product_sku_code"
                                                         name="product_sku_code" placeholder="Enter Product SKU Code"> -->
-                                                        <select class="chosen-select form-control" id="product_sku_code"
+                                                    <select class="chosen-select form-control" id="product_sku_code"
                                                         name="product_sku_code">
                                                         <option value=""></option>
                                                         <?php foreach($product_sku_code as $product_sku_code_key => $product_sku_code_row) {?>
@@ -293,8 +291,48 @@
                                             <button type="submit" class="btn btn-primary">Submit</button>
                                         </div>
                                     </div>
+                                </form>
                             </div>
-                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row justify-content-center">
+                    <div class="col-lg-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Excel Upload</h4>
+                            </div>
+                            <div class="card-body">
+                                <form id="productTypeForm">
+                                    <div class="col-lg-6 mb-3">
+                                        <div class="form-group">
+                                            <label class="col-form-label" for="fk_product_types_ids">Product Type
+                                                <span class="text-danger">*</span></label>
+                                            <select class="chosen-select form-control" id="fk_product_types_ids"
+                                                name="fk_product_types_ids">
+                                                <option value=""></option>
+                                                <?php foreach($product_types as $product_types_key => $product_types_row) { ?>
+                                                <option value="<?= $product_types_row['id']?>">
+                                                    <?= $product_types_row['product_type_name']?>
+                                                </option>
+                                                <?php } ?>
+                                            </select>
+                                            <div class="text-danger"><?= form_error('fk_product_types_ids'); ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Submit Button -->
+                                    <div class="form-group">
+                                        <div class="col-lg-8 ml-auto">
+                                            <button type="button" onclick="downloadSampleExcel()"
+                                                class="btn btn-primary">Download Sample Excel</button>
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>

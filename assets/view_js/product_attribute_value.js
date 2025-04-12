@@ -19,7 +19,14 @@ $(document).ready(function () {
             }
         },
         columns: [
-            // { data: "id", title: "ID" },  // ✅ New Column for ID
+			{ 
+				data: null, 
+				title: "Sr No", 
+				render: function (data, type, row, meta) {
+					return meta.row + 1; // Auto-increment Sr No based on row index
+				}
+			},
+            { data: "product_type_name", title: "Attribute Name" },
             { data: "attribute_name", title: "Attribute Name" },
             { data: "attribute_value", title: "Attribute Value" },
             {

@@ -93,9 +93,11 @@
                                 <table id="ProductAttributeValueTable" class="display">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
+                                            <th></th>
+                                            <th>Product Type</th>
                                             <th>Attribute Name</th>
                                             <th>Attribute Value</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                 </table>

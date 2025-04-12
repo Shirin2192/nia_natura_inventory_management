@@ -33,9 +33,10 @@ class Product_attribute_model extends CI_Model
 
     function get_product_attributes_value_detail()
     {
-        $this->db->select('tbl_attribute_values.id,tbl_attribute_values.attribute_value,tbl_attribute_master.attribute_name');
+        $this->db->select('tbl_attribute_values.id,tbl_attribute_values.attribute_value,tbl_attribute_master.attribute_name,tbl_product_types.product_type_name');
         $this->db->from('tbl_attribute_values');
         $this->db->join('tbl_attribute_master', 'tbl_attribute_master.id = tbl_attribute_values.fk_attribute_id', 'left');
+        $this->db->join('tbl_product_types', 'tbl_product_types.id = tbl_attribute_master.fk_product_type_id', 'left');
         $this->db->where('tbl_attribute_values.is_delete', '1');
         $this->db->order_by('tbl_attribute_values.id', 'DESC');
         $query = $this->db->get();

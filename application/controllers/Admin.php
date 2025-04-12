@@ -5,6 +5,13 @@ header("Access-Control-Allow-Origin: *"); // or use a specific domain instead of
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
+// Ensure these use statements are at the top of the file, outside any class or function
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
+
+
+
 class Admin extends CI_Controller
 {
 	public function __construct()
@@ -429,11 +436,7 @@ class Admin extends CI_Controller
 				
 				$product_data = [
 					'product_name' => $product_name,				
-					// 'fk_product_category_id' => $product_category_insert_id,
-					'product_sku_code' => $product_sku_code,
-					// 'fk_bottle_size_id' => $fk_bottle_size_id,
-					// 'fk_bottle_type_id' => $fk_bottle_type_id,
-					// 'fk_sale_channel_id' => $sale_channel,
+					'product_sku_code' => $product_sku_code,					
 					'fk_stock_availability_id' => $stock_availability,
 					'barcode' => $barcode,
 					'batch_no' => $batch_no,
@@ -442,6 +445,7 @@ class Admin extends CI_Controller
 					'purchase_price' => $purchase_price,
 					'MRP' => $mrp,
 					'selling_price' => $selling_price,
+					'fk_product_types_id' => $fk_product_types_id,
 				];
 				//  print_r($product_data);
 				$product_insert_id = $this->model->insertData('tbl_product_master', $product_data);				
@@ -1263,4 +1267,113 @@ public function save_permissions()
 			echo json_encode(['status' => 'error', 'message' => 'Failed to delete SKU Code']);
 		}
 	}	
+
+	
+
+	public function downloadProductSampleExcel()
+    {
+        ini_set('display_errors', 1);
+        error_reporting(E_ALL);
+
+        // Start output buffering to prevent unwanted output before the file is sent
+        ob_start();
+
+        // Load PhpSpreadsheet
+        require_once FCPATH . 'vendor/autoload.php';
+
+        $fk_product_types_id = $this->input->get('fk_product_types_ids');
+        
+        // Base headers for product master/inventory/batch/price
+        $headers = [
+            'product_name', 'product_sku_code', 'fk_stock_availability_id', 'barcode', 'batch_no',
+            'quantity', 'expiry_date', 'manufactured_date', 'images', 'description',
+            'purchase_price', 'MRP', 'selling_price', 'fk_product_types_id', 'add_quantity',
+            'total_quantity', 'used_status', 'channel_type', 'fk_sale_channel_id'
+        ];
+
+        $sampleRow = [
+            'Sample Product', 'SKU123', 1, '987654321', 'BATCH001', 50, '2025-12-31', '2025-01-01',
+            'img1.jpg,img2.jpg', 'Sample description', 60, 120, 100, $fk_product_types_id, 50, 50, 1,
+            'Online', 2
+        ];
+
+        // Fetch attribute names and types for the product type
+        $attributes = $this->model->selectWhereData(
+            'tbl_attribute_master',
+            ['fk_product_type_id' => $fk_product_types_id, 'is_delete' => 1],
+            '*',
+            false, // multiple rows
+            ['id', 'ASC']
+        );
+
+        // Debugging: Check if attributes are fetched correctly
+        // var_dump($attributes); die();
+
+        // Append each attribute as a column
+        if (!empty($attributes)) {
+            foreach ($attributes as $attr) {
+                if (isset($attr['attribute_name'])) {
+                    $headers[] = $attr['attribute_name']; // Add attribute name to headers
+
+                    // Fetch the attribute value based on the attribute type
+                    switch ($attr['attribute_type']) {  // Assuming 'attribute_type' is a column in tbl_attribute_master
+                        case 'dropdown':  // If it's a dropdown, fetch possible values
+                            $attrValue = $this->model->selectWhereData(
+                                'tbl_attribute_values',
+                                ['fk_attribute_id' => $attr['id'], 'is_delete' => 1],
+                                '*',
+                                false,  // multiple values
+                                ['id', 'ASC']
+                            );
+
+                            // Append the dropdown values to sampleRow, use the first option if multiple values exist
+                            $sampleRow[] = isset($attrValue[0]['attribute_value']) ? $attrValue[0]['attribute_value'] : '';
+                            break;
+
+                        case 'text':  // If it's a text-based attribute
+                            // Here you might fetch a default or sample text value for a text-based attribute
+                            $sampleRow[] = "Sample Text Value"; // Change to actual logic if needed
+                            break;
+
+                        case 'checkbox':  // If it's a checkbox (boolean type)
+                            // Provide a sample boolean value (true/false)
+                            $sampleRow[] = 'Yes'; // Change to "No" if you want to simulate unchecked checkbox
+                            break;
+
+                        case 'radio':  // If it's a radio button (single option)
+                            // You may want to provide a sample value, if available
+                            $sampleRow[] = 'Option1'; // Replace with actual logic or a default option
+                            break;
+
+                        default:
+                            $sampleRow[] = '';  // Default case, leave it empty
+                            break;
+                    }
+                }
+            }
+        }
+
+        // Create spreadsheet
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->fromArray($headers, null, 'A1');
+        $sheet->fromArray($sampleRow, null, 'A2');
+
+        // Output file
+        $filename = 'Product_Sample_with_Attributes.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+
+        // Clean output buffer before sending the file to prevent corrupt output
+        ob_end_clean();
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');  // Direct output to the browser
+
+        exit;
+    }
+
+
+
 }
