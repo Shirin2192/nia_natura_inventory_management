@@ -1360,7 +1360,6 @@ public function save_permissions()
                 }
             }
         }
-
         // Create spreadsheet
 		
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();

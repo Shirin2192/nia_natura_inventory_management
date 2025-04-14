@@ -999,5 +999,364 @@ class Inventory_manager extends CI_Controller {
 			echo json_encode(['status' => 'error', 'message' => 'Failed to delete SKU Code']);
 		}
 	}	
+	public function downloadProductSampleExcel()
+    {
+        ini_set('display_errors', 1);
+        error_reporting(E_ALL);
+
+        // Start output buffering to prevent unwanted output before the file is sent
+        ob_start();
+
+        // Load PhpSpreadsheet
+        require_once FCPATH . 'vendor/autoload.php';
+
+        $fk_product_types_id = $this->input->get('fk_product_types_ids');
+        
+        // Base headers for product master/inventory/batch/price
+		$headers = [
+			'Product Name', 'SKU Code', 'Stock Availability', 'Barcode', 'Batch Number',
+			'Quantity', 'Expiry Date', 'Manufactured Date', 'Images', 'Description',
+			'Purchase Price', 'MRP', 'Selling Price', 'Product Type',
+			 'Channel Type', 'Sales Channel'
+		];
+
+        $sampleRow = [
+            'Sample Product', 'SKU123', 'In Stock', '987654321', 'BATCH001', 50, '2025-12-31', '2025-01-01',
+            'C:\Users\user\Downloads\Neem5.jpg,C:\Users\user\Downloads\Neem4.jpg', 'Sample description', 60, 120, 100, 'Honey', 'Online', 'Amazon'
+        ];
+
+        // Fetch attribute names and types for the product type
+        $attributes = $this->model->selectWhereData(
+            'tbl_attribute_master',
+            ['fk_product_type_id' => $fk_product_types_id, 'is_delete' => 1],
+            '*',
+            false, // multiple rows
+            ['id', 'ASC']
+        );
+
+        // Debugging: Check if attributes are fetched correctly
+        // var_dump($attributes); die();
+
+        // Append each attribute as a column
+        if (!empty($attributes)) {
+            foreach ($attributes as $attr) {
+                if (isset($attr['attribute_name'])) {
+                    $headers[] = $attr['attribute_name']; // Add attribute name to headers
+
+                    // Fetch the attribute value based on the attribute type
+                    switch ($attr['attribute_type']) {  // Assuming 'attribute_type' is a column in tbl_attribute_master
+                        case 'dropdown':  // If it's a dropdown, fetch possible values
+                            $attrValue = $this->model->selectWhereData(
+                                'tbl_attribute_values',
+                                ['fk_attribute_id' => $attr['id'], 'is_delete' => 1],
+                                '*',
+                                false,  // multiple values
+                                ['id', 'ASC']
+                            );
+
+                            // Append the dropdown values to sampleRow, use the first option if multiple values exist
+                            $sampleRow[] = isset($attrValue[0]['attribute_value']) ? $attrValue[0]['attribute_value'] : '';
+                            break;
+
+                        case 'text':  // If it's a text-based attribute
+                            // Here you might fetch a default or sample text value for a text-based attribute
+                            $sampleRow[] = "Sample Text Value"; // Change to actual logic if needed
+                            break;
+
+                        case 'checkbox':  // If it's a checkbox (boolean type)
+                            // Provide a sample boolean value (true/false)
+                            $sampleRow[] = 'Yes'; // Change to "No" if you want to simulate unchecked checkbox
+                            break;
+
+                        case 'radio':  // If it's a radio button (single option)
+                            // You may want to provide a sample value, if available
+                            $sampleRow[] = 'Option1'; // Replace with actual logic or a default option
+                            break;
+
+                        default:
+                            $sampleRow[] = '';  // Default case, leave it empty
+                            break;
+                    }
+                }
+            }
+        }
+        // Create spreadsheet
+		
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->fromArray($headers, null, 'A1');
+        $sheet->fromArray($sampleRow, null, 'A2');
+
+        // Output file
+        $filename = 'Product_Sample_with_Attributes.xlsx';
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        header('Cache-Control: max-age=0');
+
+        // Clean output buffer before sending the file to prevent corrupt output
+        ob_end_clean();
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer->save('php://output');  // Direct output to the browser
+
+        exit;
+    }
+
+	public function importProductExcel()
+	{
+		$this->load->library('upload');
+		require_once FCPATH . 'vendor/autoload.php';
+
+		if (!empty($_FILES['product_excel']['name'])) {
+			$tmpPath = $_FILES['product_excel']['tmp_name'];
+			$spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmpPath);
+			$sheet = $spreadsheet->getActiveSheet();
+			$rows = $sheet->toArray();
+
+			$rejected = [];
+			$headers = $rows[1]; // Assuming headers are in 2nd row
+			$headers[] = 'Error Message'; // For rejected export
+
+			for ($i = 2; $i < count($rows); $i++) {
+				$row = $rows[$i];
+				$errorMsg = '';
+
+				$sku = trim($row[1]);
+				$batch_no = trim($row[4]);
+
+				$sku_code = $this->model->countWhereRecord('tbl_sku_code_master', ['sku_code' => $sku, 'is_delete' => 1]);
+				if ($sku_code > 0) {
+					$fk_sku_code_id = $this->model->selectWhereData('tbl_sku_code_master', ['sku_code' => $sku, 'is_delete' => 1], 'id', true);
+				} else {
+					$this->model->insertData('tbl_sku_code_master', ['sku_code' => $sku]);
+					$fk_sku_code_id = $this->model->selectWhereData('tbl_sku_code_master', ['sku_code' => $sku, 'is_delete' => 1], 'id', true);
+				}
+
+				$existing_product = $this->model->selectWhereData('tbl_product_master', ['product_sku_code' => $fk_sku_code_id['id']], '*', true);
+
+				if ($existing_product) {
+					$existing_batch = $this->model->selectWhereData('tbl_product_batches', [
+						'fk_product_id' => $existing_product['id'],
+						'batch_no' => $batch_no
+					], 'id', true);
+
+					if ($existing_batch) {
+						$row[] = 'Duplicate product & batch. Skipped.';
+						$rejected[] = $row;
+						continue;
+					}
+				}
+
+				$fk_stock_availability_id = $this->model->selectWhereData('tbl_stock_availability', ['stock_availability' => $row[2]], 'id', true);
+				$fk_product_types_id = $this->model->selectWhereData('tbl_product_types', ['product_type_name' => $row[13]], 'id', true);
+				$fk_sale_channel_id = $this->model->selectWhereData('tbl_sale_channel', ['sale_channel' => $row[15]], 'id', true);
+				$quantity = $row[5];
+
+				 // Handle the images (comma-separated list of image paths)
+				 $images = trim($row[8]); // Assuming images are in column 8
+
+				 $image_urls = $this->handle_image_upload($images);
+				
+				if (!$existing_product) {
+					$product_data = [
+						'product_name' => $row[0],
+						'product_sku_code' => $fk_sku_code_id['id'],
+						'fk_stock_availability_id' => $fk_stock_availability_id['id'] ?? null,
+						'barcode' => $row[3],
+						'images' => $image_urls,
+						'description' => $row[9],
+						'fk_product_types_id' => $fk_product_types_id['id'] ?? null,
+					];
+					$product_id = $this->model->insertData('tbl_product_master', $product_data);
+				} else {
+					$product_id = $existing_product['id'];
+				}
+
+				$product_batch = [
+					'fk_product_id' => $product_id,
+					'batch_no' => $batch_no,
+					'quantity' => $quantity,
+					'expiry_date' => $row[6],
+					'manufactured_date' => $row[7],
+				];
+				$batch_id = $this->model->insertData('tbl_product_batches', $product_batch);
+
+				$product_price = [
+					'fk_product_id' => $product_id,
+					'fk_batch_id' => $batch_id,
+					'purchase_price' => $row[10],
+					'MRP' => $row[11],
+					'selling_price' => $row[12],
+				];
+				$this->model->insertData('tbl_product_price', $product_price);
+
+				$product_inventory = [
+					'fk_product_id' => $product_id,
+					'fk_batch_id' => $batch_id,
+					'channel_type' => $row[14],
+					'fk_sale_channel_id' => $fk_sale_channel_id['id'] ?? null,
+					'add_quantity' => $quantity,
+					'total_quantity' => $quantity,
+					'used_status' => 1
+				];
+				$this->model->insertData('tbl_product_inventory', $product_inventory);
+
+				// Handle dynamic attributes
+				$headers = $rows[0];
+				$dynamicHeaders = array_slice($headers, 16);
+
+				foreach ($dynamicHeaders as $index => $attrName) {
+					$attrName = trim($attrName);
+					$attrValue = trim($row[16 + $index] ?? '');
+					if ($attrName === '' || $attrValue === '') continue;
+
+					$attribute = $this->model->selectWhereData('tbl_attribute_master', [
+						'attribute_name' => $attrName,
+						'is_delete' => 1
+					], 'id', true);
+
+					$attribute_id = $attribute['id'] ?? null;
+
+					if ($attribute_id) {
+						$attributeValue = $this->model->selectWhereData('tbl_attribute_values', [
+							'attribute_value' => $attrValue,
+							'fk_attribute_id' => $attribute_id
+						], 'id', true);
+
+						if (!empty($attributeValue['id'])) {
+							$exists = $this->model->selectWhereData('tbl_product_attributes', [
+								'fk_product_id' => $product_id,
+								'fk_product_types_id' => $fk_product_types_id['id'] ?? null,
+								'fk_attribute_id' => $attribute_id,
+								'fk_attribute_value_id' => $attributeValue['id'],
+							], 'id', true);
+
+							if (!$exists) {
+								$this->model->insertData('tbl_product_attributes', [
+									'fk_product_id' => $product_id,
+									'fk_product_types_id' => $fk_product_types_id['id'] ?? null,
+									'fk_attribute_id' => $attribute_id,
+									'fk_attribute_value_id' => $attributeValue['id'],
+								]);
+							}
+						}
+					}
+				}
+			}
+
+			if (!empty($rejected)) {
+				$this->load->helper('download');
+				$rejectedFile = FCPATH . 'uploads/rejected_products_' . time() . '.xlsx';
+				$spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+				$sheet = $spreadsheet->getActiveSheet();
+				array_unshift($rejected, $headers);
+				$sheet->fromArray($rejected, null, 'A1');
+				$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+				$writer->save($rejectedFile);
+
+				$this->output
+					->set_content_type('application/json')
+					->set_output(json_encode([
+						'status' => "error",
+						'message' => "Some rows were rejected. Please download the rejected file.",
+						'download_url' => base_url('uploads/' . basename($rejectedFile))
+					]));
+				return;
+			} else {
+				$this->output
+					->set_content_type('application/json')
+					->set_output(json_encode([
+						'status' => "success",
+						'message' => "All rows imported successfully!"
+					]));
+				return;
+			}
+		} else {
+			$this->output
+				->set_content_type('application/json')
+				->set_output(json_encode([
+					'status' => "error",
+					'message' => "No file selected!"
+				]));
+			return;
+		}
+	}
+	// Helper function to handle image uploads
+	private function handle_image_upload($images) {
+		$upload_dir = './uploads/products/';
+		$image_urls = [];
+	
+		// Ensure the directory exists with proper permissions
+		if (!is_dir($upload_dir)) {
+			mkdir($upload_dir, 0777, true);
+		}
+		chmod($upload_dir, 0777);
+	
+		// Skip if images is empty
+		if (empty($images)) {
+			return '';
+		}
+	
+		// Split the comma-separated image URLs
+		$image_paths = explode(',', $images);
+		
+		foreach ($image_paths as $image_path) {
+			$image_path = trim($image_path);
+			
+			// Skip empty URLs
+			if (empty($image_path)) {
+				continue;
+			}
+			
+			// Generate filename
+			$extension = 'jpg'; // default
+			
+			// Try to extract extension from URL
+			$path_parts = pathinfo(parse_url($image_path, PHP_URL_PATH));
+			if (isset($path_parts['extension'])) {
+				$extension = strtolower($path_parts['extension']);
+				// Validate extension
+				if (!in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+					$extension = 'jpg'; // fallback to jpg
+				}
+			}
+			
+			$filename = uniqid('img_') . '.' . $extension;
+			$destination = $upload_dir . $filename;
+			
+			try {
+				// Use simple file_get_contents() instead of cURL
+				$context = stream_context_create([
+					'http' => [
+						'timeout' => 30,
+						'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+					],
+					'ssl' => [
+						'verify_peer' => false,
+						'verify_peer_name' => false
+					]
+				]);
+				
+				$image_content = @file_get_contents($image_path, false, $context);
+				
+				if ($image_content === false) {
+					continue;
+				}
+				
+				// Save the image directly
+				if (file_put_contents($destination, $image_content) !== false) {
+					chmod($destination, 0666); // Make the file readable
+					// $saved_url = base_url('uploads/products/' . $filename);
+					$saved_url = $filename;
+					$image_urls[] = $saved_url;
+				}
+			} catch (Exception $e) {
+				// Just continue with the next image if there's an error
+				continue;
+			}
+		}		
+		// Return comma-separated list of URLs
+		return implode(',', $image_urls);
+	}
 	
 }
