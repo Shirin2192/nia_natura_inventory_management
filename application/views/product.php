@@ -184,7 +184,21 @@
                                                     <div class="text-danger"><?= form_error('description'); ?></div>
                                                 </div>
                                             </div>
-
+                                            <div class="col-lg-6 mb-3">
+                                                <div class="form-group">
+                                                    <label class="col-form-label" for="manufacture_date">Manufacture Date <span class="text-danger">*</span></label>
+                                                    <input type="date" class="form-control" id="manufacture_date" name="manufacture_date" placeholder="Select Manufacture Date">
+                                                    <div class="text-danger"><?= form_error('manufacture_date'); ?></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 mb-3">
+                                                <div class="form-group">
+                                                    <label class="col-form-label" for="expiry_date">Expiry Date <span class="text-danger">*</span></label>
+                                                    <input type="date" class="form-control" id="expiry_date" name="expiry_date" placeholder="Select Expiry Date">
+                                                    <div class="text-danger"><?= form_error('expiry_date'); ?></div>
+                                                </div>
+                                            </div>
+                                            
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
                                                     <label class="col-form-label" for="product_image">Product
@@ -323,6 +337,7 @@
                                             </div>
                                         </div>
                                     </div>
+
                                     <!-- Submit Button -->
                                     <div class="form-group">
                                         <div class="col-lg-8 ml-auto">
@@ -332,6 +347,22 @@
                                     </div>
 
                                 </form>
+                                <form id="excelUploadForm" enctype="multipart/form-data" method="post">
+                                
+                                    <div class="col-lg-6 mb-3">
+                                        <div class="form-group">
+                                            <label class="col-form-label" for="product_excel">Upload Excel File <span class="text-danger">*</span></label>
+                                            <input type="file" class="form-control" id="product_excel" name="product_excel" accept=".xls, .xlsx">
+                                            <small class="text-muted">Only .xls and .xlsx files are allowed</small>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-lg-8 ml-auto">
+                                            <button type="submit" class="btn btn-success">Upload and Import</button>
+                                        </div>
+                                    </div>
+                                </form>
+                                <div id="RejectedExcelDownload"></div>
                             </div>
                         </div>
                     </div>
@@ -354,6 +385,7 @@
                                                 <th></th> <!-- Expand/Collapse Button -->
                                                 <th>ID</th>
                                                 <th>Product Name</th>
+                                                <th>SKU CODE</th>
                                                 <th>Purchase Price</th>
                                                 <th>Total Quantity</th>
                                                 <th>Product Types</th>
@@ -366,8 +398,6 @@
                         </div>
                     </div>
                 </div>
-
-
             </div>
         </div>
     </div>
@@ -417,13 +447,22 @@
                                     <p id="view_batch_no" class="text-muted"></p>
                                 </div>
                                 <div class="mb-3">
-                                    <h6><strong>MRP:</strong></h6>
-                                    <p id="view_mrp" class="text-muted"></p>
+                                    <h6><strong>Manufacture Date:</strong></h6>
+                                    <p id="view_manufacture_date" class="text-muted"></p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6><strong>Expiry Date:</strong></h6>
+                                    <p id="view_expiry_date" class="text-muted"></p>
                                 </div>
                                 <div class="mb-3">
                                     <h6><strong>Purchase Price:</strong></h6>
                                     <p id="view_product_price" class="text-muted"></p>
                                 </div>
+                                <div class="mb-3">
+                                    <h6><strong>MRP:</strong></h6>
+                                    <p id="view_mrp" class="text-muted"></p>
+                                </div>
+                                
                                 <div class="mb-3">
                                     <h6><strong>Selling Price:</strong></h6>
                                     <p id="view_selling_price" class="text-muted"></p>

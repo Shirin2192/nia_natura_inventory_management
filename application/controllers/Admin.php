@@ -8,7 +8,7 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 // Ensure these use statements are at the top of the file, outside any class or function
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 
 
@@ -357,14 +357,11 @@ class Admin extends CI_Controller
 	{
 		if ($this->input->server('REQUEST_METHOD') === 'POST') {
 			$response = ['status' => 'error', 'errors' => []];
-			
 			// Get input values
 			$product_name = $this->input->post('product_name');
 			$product_sku_code = $this->input->post('product_sku_code');
 			$batch_no = $this->input->post('batch_no');
-			// $fk_flavour_id = $this->input->post('fk_flavour_id');
-			// $fk_bottle_size_id = $this->input->post('fk_bottle_size_id');
-			// $fk_bottle_type_id = $this->input->post('fk_bottle_type_id');
+			
 			$barcode = $this->input->post('barcode');
 			$description = $this->input->post('description');
 			$purchase_price = $this->input->post('purchase_price');
@@ -377,6 +374,8 @@ class Admin extends CI_Controller
 			$fk_product_attribute_id = $this->input->post('fk_product_attribute_id'); // Example: [3, 2, 1]
 			$attributes_value = $this->input->post('attributes_value'); // Example: [19, 16, 1]
 			$fk_product_types_id = $this->input->post('fk_product_types_id');
+			$expiry_date = $this->input->post('expiry_date');
+			$manufacture_date = $this->input->post('manufacture_date');
 
 			// Validation Rules
 			$this->form_validation->set_rules('product_name', 'Product Name', 'required|trim');
@@ -392,6 +391,8 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('stock_availability', 'Stock Availability', 'required|trim');
 			$this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim');
 			$this->form_validation->set_rules('channel_type', 'Sale Channel', 'required|trim');
+			$this->form_validation->set_rules('expiry_date', 'Expiry date', 'required|trim');
+			$this->form_validation->set_rules('manufacture_date', 'Manufacture Date', 'required|trim');
 
 			// Check validation
 			if ($this->form_validation->run() == FALSE) {
@@ -439,16 +440,21 @@ class Admin extends CI_Controller
 					'product_sku_code' => $product_sku_code,					
 					'fk_stock_availability_id' => $stock_availability,
 					'barcode' => $barcode,
-					'batch_no' => $batch_no,
 					'images' => implode(",", $product_images), // Store multiple images as JSON
 					'description' => $description,
-					'purchase_price' => $purchase_price,
-					'MRP' => $mrp,
-					'selling_price' => $selling_price,
 					'fk_product_types_id' => $fk_product_types_id,
 				];
 				//  print_r($product_data);
-				$product_insert_id = $this->model->insertData('tbl_product_master', $product_data);				
+				$product_insert_id = $this->model->insertData('tbl_product_master', $product_data);			
+				
+				$product_batch_data = [
+					'fk_product_id' => $product_insert_id,
+					'batch_no' => $batch_no,
+					'expiry_date' => $expiry_date,
+					'manufactured_date' => $manufacture_date,
+					'quantity' => $add_quantity,
+				];	
+				$product_batch_id = $this->model->insertData('tbl_product_batches', $product_batch_data); // Insert batch data
 
 				foreach ($fk_product_attribute_id as $key => $attribute_id) {
 					$product_attribute = [
@@ -462,6 +468,7 @@ class Admin extends CI_Controller
 				// Insert product price and inventory data				
 				$product_price = [
 					'fk_product_id' => $product_insert_id,
+					'fk_batch_id' => $product_batch_id,
 					'purchase_price' => $purchase_price,
 					'MRP' => $mrp,
 					'selling_price' => $selling_price,
@@ -470,6 +477,7 @@ class Admin extends CI_Controller
 				// print_r($product_price);
 				$product_inventory = [
 					'fk_product_id' => $product_insert_id,
+					'fk_batch_id' => $product_batch_id,
 					'add_quantity' => $add_quantity,
 					'total_quantity' => $add_quantity,
 					'used_status' => 1,
@@ -499,6 +507,7 @@ class Admin extends CI_Controller
 			$productDetails = [
 				'id' => $product['id'],
 				'product_name' => $product['product_name'],
+				'sku_code' => $product['sku_code'],
 				'purchase_price' => $product['purchase_price'],
 				'total_quantity' => $product['total_quantity'],
 				'product_types' => array_unique($types),
@@ -1284,17 +1293,16 @@ public function save_permissions()
         $fk_product_types_id = $this->input->get('fk_product_types_ids');
         
         // Base headers for product master/inventory/batch/price
-        $headers = [
-            'product_name', 'product_sku_code', 'fk_stock_availability_id', 'barcode', 'batch_no',
-            'quantity', 'expiry_date', 'manufactured_date', 'images', 'description',
-            'purchase_price', 'MRP', 'selling_price', 'fk_product_types_id', 'add_quantity',
-            'total_quantity', 'used_status', 'channel_type', 'fk_sale_channel_id'
-        ];
+		$headers = [
+			'Product Name', 'SKU Code', 'Stock Availability', 'Barcode', 'Batch Number',
+			'Quantity', 'Expiry Date', 'Manufactured Date', 'Images', 'Description',
+			'Purchase Price', 'MRP', 'Selling Price', 'Product Type',
+			 'Channel Type', 'Sales Channel'
+		];
 
         $sampleRow = [
-            'Sample Product', 'SKU123', 1, '987654321', 'BATCH001', 50, '2025-12-31', '2025-01-01',
-            'img1.jpg,img2.jpg', 'Sample description', 60, 120, 100, $fk_product_types_id, 50, 50, 1,
-            'Online', 2
+            'Sample Product', 'SKU123', 'In Stock', '987654321', 'BATCH001', 50, '2025-12-31', '2025-01-01',
+            'C:\Users\user\Downloads\Neem5.jpg,C:\Users\user\Downloads\Neem4.jpg', 'Sample description', 60, 120, 100, 'Honey', 'Online', 'Amazon'
         ];
 
         // Fetch attribute names and types for the product type
@@ -1354,6 +1362,7 @@ public function save_permissions()
         }
 
         // Create spreadsheet
+		
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->fromArray($headers, null, 'A1');
@@ -1374,6 +1383,293 @@ public function save_permissions()
         exit;
     }
 
+	public function importProductExcel()
+	{
+		$this->load->library('upload');
+		require_once FCPATH . 'vendor/autoload.php';
+
+		if (!empty($_FILES['product_excel']['name'])) {
+			$tmpPath = $_FILES['product_excel']['tmp_name'];
+			$spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmpPath);
+			$sheet = $spreadsheet->getActiveSheet();
+			$rows = $sheet->toArray();
+
+			$rejected = [];
+			$headers = $rows[1]; // Assuming headers are in 2nd row
+			$headers[] = 'Error Message'; // For rejected export
+
+			for ($i = 2; $i < count($rows); $i++) {
+				$row = $rows[$i];
+				$errorMsg = '';
+
+				$sku = trim($row[1]);
+				$batch_no = trim($row[4]);
+
+				$sku_code = $this->model->countWhereRecord('tbl_sku_code_master', ['sku_code' => $sku, 'is_delete' => 1]);
+				if ($sku_code > 0) {
+					$fk_sku_code_id = $this->model->selectWhereData('tbl_sku_code_master', ['sku_code' => $sku, 'is_delete' => 1], 'id', true);
+				} else {
+					$this->model->insertData('tbl_sku_code_master', ['sku_code' => $sku]);
+					$fk_sku_code_id = $this->model->selectWhereData('tbl_sku_code_master', ['sku_code' => $sku, 'is_delete' => 1], 'id', true);
+				}
+
+				$existing_product = $this->model->selectWhereData('tbl_product_master', ['product_sku_code' => $fk_sku_code_id['id']], '*', true);
+
+				if ($existing_product) {
+					$existing_batch = $this->model->selectWhereData('tbl_product_batches', [
+						'fk_product_id' => $existing_product['id'],
+						'batch_no' => $batch_no
+					], 'id', true);
+
+					if ($existing_batch) {
+						$row[] = 'Duplicate product & batch. Skipped.';
+						$rejected[] = $row;
+						continue;
+					}
+				}
+
+				$fk_stock_availability_id = $this->model->selectWhereData('tbl_stock_availability', ['stock_availability' => $row[2]], 'id', true);
+				$fk_product_types_id = $this->model->selectWhereData('tbl_product_types', ['product_type_name' => $row[13]], 'id', true);
+				$fk_sale_channel_id = $this->model->selectWhereData('tbl_sale_channel', ['sale_channel' => $row[15]], 'id', true);
+				$quantity = $row[5];
+
+				 // Handle the images (comma-separated list of image paths)
+				 $images = trim($row[8]); // Assuming images are in column 8
+
+				 $image_urls = $this->handle_image_upload($images);
+				
+				if (!$existing_product) {
+					$product_data = [
+						'product_name' => $row[0],
+						'product_sku_code' => $fk_sku_code_id['id'],
+						'fk_stock_availability_id' => $fk_stock_availability_id['id'] ?? null,
+						'barcode' => $row[3],
+						'images' => $image_urls,
+						'description' => $row[9],
+						'fk_product_types_id' => $fk_product_types_id['id'] ?? null,
+					];
+					$product_id = $this->model->insertData('tbl_product_master', $product_data);
+				} else {
+					$product_id = $existing_product['id'];
+				}
+
+				$product_batch = [
+					'fk_product_id' => $product_id,
+					'batch_no' => $batch_no,
+					'quantity' => $quantity,
+					'expiry_date' => $row[6],
+					'manufactured_date' => $row[7],
+				];
+				$batch_id = $this->model->insertData('tbl_product_batches', $product_batch);
+
+				$product_price = [
+					'fk_product_id' => $product_id,
+					'fk_batch_id' => $batch_id,
+					'purchase_price' => $row[10],
+					'MRP' => $row[11],
+					'selling_price' => $row[12],
+				];
+				$this->model->insertData('tbl_product_price', $product_price);
+
+				$product_inventory = [
+					'fk_product_id' => $product_id,
+					'fk_batch_id' => $batch_id,
+					'channel_type' => $row[14],
+					'fk_sale_channel_id' => $fk_sale_channel_id['id'] ?? null,
+					'add_quantity' => $quantity,
+					'total_quantity' => $quantity,
+					'used_status' => 1
+				];
+				$this->model->insertData('tbl_product_inventory', $product_inventory);
+
+				// Handle dynamic attributes
+				$headers = $rows[0];
+				$dynamicHeaders = array_slice($headers, 16);
+
+				foreach ($dynamicHeaders as $index => $attrName) {
+					$attrName = trim($attrName);
+					$attrValue = trim($row[16 + $index] ?? '');
+					if ($attrName === '' || $attrValue === '') continue;
+
+					$attribute = $this->model->selectWhereData('tbl_attribute_master', [
+						'attribute_name' => $attrName,
+						'is_delete' => 1
+					], 'id', true);
+
+					$attribute_id = $attribute['id'] ?? null;
+
+					if ($attribute_id) {
+						$attributeValue = $this->model->selectWhereData('tbl_attribute_values', [
+							'attribute_value' => $attrValue,
+							'fk_attribute_id' => $attribute_id
+						], 'id', true);
+
+						if (!empty($attributeValue['id'])) {
+							$exists = $this->model->selectWhereData('tbl_product_attributes', [
+								'fk_product_id' => $product_id,
+								'fk_product_types_id' => $fk_product_types_id['id'] ?? null,
+								'fk_attribute_id' => $attribute_id,
+								'fk_attribute_value_id' => $attributeValue['id'],
+							], 'id', true);
+
+							if (!$exists) {
+								$this->model->insertData('tbl_product_attributes', [
+									'fk_product_id' => $product_id,
+									'fk_product_types_id' => $fk_product_types_id['id'] ?? null,
+									'fk_attribute_id' => $attribute_id,
+									'fk_attribute_value_id' => $attributeValue['id'],
+								]);
+							}
+						}
+					}
+				}
+			}
+
+			if (!empty($rejected)) {
+				$this->load->helper('download');
+				$rejectedFile = FCPATH . 'uploads/rejected_products_' . time() . '.xlsx';
+				$spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+				$sheet = $spreadsheet->getActiveSheet();
+				array_unshift($rejected, $headers);
+				$sheet->fromArray($rejected, null, 'A1');
+				$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+				$writer->save($rejectedFile);
+
+				$this->output
+					->set_content_type('application/json')
+					->set_output(json_encode([
+						'status' => "error",
+						'message' => "Some rows were rejected. Please download the rejected file.",
+						'download_url' => base_url('uploads/' . basename($rejectedFile))
+					]));
+				return;
+			} else {
+				$this->output
+					->set_content_type('application/json')
+					->set_output(json_encode([
+						'status' => "success",
+						'message' => "All rows imported successfully!"
+					]));
+				return;
+			}
+		} else {
+			$this->output
+				->set_content_type('application/json')
+				->set_output(json_encode([
+					'status' => "error",
+					'message' => "No file selected!"
+				]));
+			return;
+		}
+	}
+	// Helper function to handle image uploads
+	private function handle_image_upload($images) {
+		$upload_dir = './uploads/products/';
+		$image_urls = [];
+	
+		// Ensure the directory exists with proper permissions
+		if (!is_dir($upload_dir)) {
+			mkdir($upload_dir, 0777, true);
+		}
+		chmod($upload_dir, 0777);
+	
+		// Skip if images is empty
+		if (empty($images)) {
+			return '';
+		}
+	
+		// Split the comma-separated image URLs
+		$image_paths = explode(',', $images);
+		
+		foreach ($image_paths as $image_path) {
+			$image_path = trim($image_path);
+			
+			// Skip empty URLs
+			if (empty($image_path)) {
+				continue;
+			}
+			
+			// Generate filename
+			$extension = 'jpg'; // default
+			
+			// Try to extract extension from URL
+			$path_parts = pathinfo(parse_url($image_path, PHP_URL_PATH));
+			if (isset($path_parts['extension'])) {
+				$extension = strtolower($path_parts['extension']);
+				// Validate extension
+				if (!in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+					$extension = 'jpg'; // fallback to jpg
+				}
+			}
+			
+			$filename = uniqid('img_') . '.' . $extension;
+			$destination = $upload_dir . $filename;
+			
+			try {
+				// Use simple file_get_contents() instead of cURL
+				$context = stream_context_create([
+					'http' => [
+						'timeout' => 30,
+						'user_agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+					],
+					'ssl' => [
+						'verify_peer' => false,
+						'verify_peer_name' => false
+					]
+				]);
+				
+				$image_content = @file_get_contents($image_path, false, $context);
+				
+				if ($image_content === false) {
+					continue;
+				}
+				
+				// Save the image directly
+				if (file_put_contents($destination, $image_content) !== false) {
+					chmod($destination, 0666); // Make the file readable
+					// $saved_url = base_url('uploads/products/' . $filename);
+					$saved_url = $filename;
+					$image_urls[] = $saved_url;
+				}
+			} catch (Exception $e) {
+				// Just continue with the next image if there's an error
+				continue;
+			}
+		}
+		
+		// Return comma-separated list of URLs
+		return implode(',', $image_urls);
+	}
+
+
+
+/**
+ * Debug test function for image upload
+ */
+public function testImageUpload()
+{
+    // Test with some real image URLs
+    $test_urls = "C:\Users\user\Downloads\Neem5.jpg,C:\Users\user\Downloads\Neem4.jpg,C:\Users\user\Downloads\Neem3.jpg,C:\Users\user\Downloads\Neem2.jpg,C:\Users\user\Downloads\Neem.jpg
+";
+    
+    echo "<h2>Image Upload Test</h2>";
+    echo "<p>Testing with URLs: " . htmlspecialchars($test_urls) . "</p>";
+    
+    $result = $this->handle_image_upload($test_urls);
+    
+    echo "<p>Result: " . htmlspecialchars($result) . "</p>";
+    
+    if (!empty($result)) {
+        echo "<h3>Uploaded Images:</h3>";
+        $urls = explode(',', $result);
+        foreach ($urls as $url) {
+            echo "<img src='" . htmlspecialchars($url) . "' style='max-width:300px; margin:10px;'><br>";
+        }
+    } else {
+        echo "<p>No images were uploaded.</p>";
+    }
+}
+	
 
 
 }

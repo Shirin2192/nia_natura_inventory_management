@@ -14,3 +14,10 @@ ALTER TABLE `tbl_product_price`
 
 ALTER TABLE `tbl_product_master`
   DROP `batch_no`;
+
+  ALTER TABLE `tbl_product_master`
+  DROP `purchase_price`,
+  DROP `MRP`,
+  DROP `selling_price`;
+
+  ALTER TABLE `tbl_product_master` ADD `fk_product_types_id` BIGINT NULL DEFAULT NULL AFTER `fk_stock_availability_id`;
