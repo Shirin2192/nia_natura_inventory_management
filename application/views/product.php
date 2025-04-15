@@ -277,7 +277,7 @@
                                         <div class="col-lg-6 mb-3">
                                             <div class="form-group">
                                                 <label class="col-form-label" for="channel_type">Channel
-                                                    Type</label>
+                                                    Type<span class="text-danger">*</span></label>
                                                 <div><select class=" chosen-select form-control" id="channel_type"
                                                         name="channel_type">
                                                         <option value=""></option>
@@ -529,6 +529,7 @@
                     <input type="hidden" id="update_inventory_id" name="update_inventory_id">
                     <input type="hidden" id="fk_product_price_id" name="fk_product_price_id">
                     <input type="hidden" id="update_product_image" name="update_product_image">
+                    <input type="hidden" id="update_batch_id" name="update_batch_id">
                     <div class="modal-body">
 
                         <div class="row">

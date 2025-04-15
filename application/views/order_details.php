@@ -69,28 +69,77 @@
                             <div class="card-body">
                                 <form id="OrderForm">
                                     <div class="row">
+                                        <input type="hidden" name="product_id" id="product_id">
                                         <div class="col-lg-6">
                                             <div class="form-group">
-                                                <label class="col-form-label" for="fk_product_id">Product Name <span
+                                                <label class="col-form-label" for="sku_code">SKU Code <span
                                                         class="text-danger">*</span>
                                                 </label>
-                                                <select class="form-control" id="fk_product_id" name="fk_product_id">
-                                                    <option value="">Select Product</option>
-                                                    <?php foreach ($products as $product) { ?>
-                                                    <option value="<?= $product['id'] ?>"><?= $product['product_name'] ?>
+                                                <select class=" chosen-select form-control" id="sku_code" name="sku_code" data-placeholder="Select SKU Code">  
+                                                    <option value="" >Select SKU Code</option>
+                                                    <?php foreach ($sku_code as $sku_code_row) { ?>
+                                                    <option value="<?= $sku_code_row['id'] ?>"><?= $sku_code_row['sku_code'] ?>
                                                     </option>
                                                     <?php } ?>
                                                 </select>
-                                                <small class="text-danger" id="fk_product_id_error"></small>
+                                                <small class="text-danger" id="sku_code_error"></small>
                                                 <!-- Error message here -->
                                             </div>
                                         </div>
-
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="fk_batch_id">Batch Id <span
+                                                        class="text-danger">*</span>
+                                                </label>
+                                                <select class=" chosen-select form-control" id="fk_batch_id" name="fk_batch_id"  data-placeholder="Select Batch Id">
+                                                    <option value="">Select Product</option>
+                                                   
+                                                </select>
+                                                <small class="text-danger" id="fk_batch_id_error"></small>
+                                                <!-- Error message here -->
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="channel_type">Channel
+                                                    Type<span class="text-danger">*</span></label>
+                                                <div><select class=" chosen-select form-control" id="channel_type"
+                                                        name="channel_type">
+                                                        <option value=""></option>
+                                                        <option value="Online">Online</option>
+                                                        <option value="Offline">Offline</option>
+                                                    </select></div>
+                                                <div class="text-danger"><?= form_error('channel_type'); ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="sale_channel">Sales
+                                                    Channels <span class="text-danger">*</span></label>
+                                                <select class="chosen-select form-control" id="sale_channel"
+                                                    name="sale_channel">
+                                                    <option value=""></option>
+                                                    
+                                                </select>
+                                                <div class="text-danger"><?= form_error('sale_channel'); ?></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="order_quantity">Quantity <span class="text-danger">*</span></label>
+                                                <input type="number" name="order_quantity" id="order_quantity" class="form-control">
+                                                <div class="text-danger"><?= form_error('order_quantity'); ?></div>
+                                            </div>
+                                        </div>
                                     </div>
+
+                                    
                                     <div class="form-group">
                                         <div class="col-lg-8 ml-auto">
                                             <button type="submit" class="btn btn-primary">Submit</button>
                                         </div>
+                                    </div>
                                     </div>
                                 </form>
                             </div>

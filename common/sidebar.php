@@ -105,6 +105,13 @@ $current_controller = $this->router->fetch_class();
                 </a>
             </li>
             <?php endif; ?>
+            <?php if (in_array(10, $accessible_sidebar_ids)) : ?>
+            <li>
+                <a href="<?= base_url() . $current_controller ?>/inventory_details" aria-expanded="false">
+                    <i class="icon-star menu-icon"></i> <span class="nav-text">Inventory Details</span>
+                </a>
+            </li>
+            <?php endif; ?>
         </ul>
     </div>
 </div>

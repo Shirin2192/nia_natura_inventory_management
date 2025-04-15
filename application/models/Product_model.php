@@ -82,4 +82,43 @@ class Product_model extends CI_Model {
         $query = $this->db->get(); // Execute the query
         return $query->row_array(); // Return the result as an array
     }
+
+    public function get_inventory_by_product_and_batch()
+    {
+        $this->db->select('
+            tbl_product_master.id as product_id,
+            tbl_product_master.product_name,
+            tbl_product_master.product_sku_code,
+            tbl_product_batches.batch_no,
+            tbl_product_batches.id as batch_id,
+            tbl_product_inventory.total_quantity,
+            tbl_product_inventory.created_at,
+            tbl_sku_code_master.sku_code,
+
+        ');
+        $this->db->from('tbl_product_master');
+        $this->db->join('tbl_product_inventory', 'tbl_product_master.id = tbl_product_inventory.fk_product_id');
+        $this->db->join('tbl_product_batches', 'tbl_product_inventory.fk_batch_id = tbl_product_batches.id');
+        $this->db->join('tbl_sku_code_master', 'tbl_product_master.product_sku_code = tbl_sku_code_master.id');
+        // $this->db->where('tbl_product_inventory.used_status', 1);
+        $this->db->order_by('tbl_product_master.product_name ASC, tbl_product_batches.batch_no ASC');
+
+        $results = $this->db->get()->result_array();
+
+        // Group the results product-wise
+        $grouped = [];
+        foreach ($results as $row) {
+            $productKey = $row['product_name'] . ' (' . $row['sku_code'] . ')';
+
+            $grouped[$productKey][] = [
+               
+                'batch_no' => $row['batch_no'],
+                'quantity' => $row['total_quantity'],
+                'date' => $row['created_at'],
+            ];
+        }
+
+        return $grouped;
+    }
+
 }

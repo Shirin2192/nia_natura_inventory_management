@@ -535,6 +535,7 @@ $(document).on("click", ".update-product", function () {
 		success: function (response) {
 			const product = response.product;
 			const sale_channel = response.sale_channel;
+			const attribute_master = response.attribute_master;
 
 			// Fill general product fields
 			$("#update_product_id").val(product.id);
@@ -554,6 +555,7 @@ $(document).on("click", ".update-product", function () {
 			$('#attribute_id').val(product.attribute_id);
 			$('#update_manufacture_date').val(product.manufactured_date);
 			$('#update_expiry_date').val(product.expiry_date);
+			$('#update_batch_id').val(product.batch_id);
 			
 
 			// Populate image preview
@@ -603,6 +605,12 @@ $(document).on("click", ".update-product", function () {
 				let attributeValue = attributeValues[index];
 				let attributeValueId = valueIds[index];
 				let Productattribute_ids = Productattribute_id[index];
+
+				let attributeOptions1 = '<option value="" disabled>Select Attribute</option>';
+				$.each(response.attribute_master, function (index, item) {
+					let selected = item.id == attrId ? "selected" : "";
+					attributeOptions1 += `<option value="${item.id}" data-type="${item.attribute_type}" ${selected}>${item.attribute_name}</option>`;
+				});
 				// Create attribute row
 				let attributeRow = `
 				<div class="row attribute-row mb-2" data-index="${attributeIndex}">
@@ -613,9 +621,9 @@ $(document).on("click", ".update-product", function () {
 									${attributeName} <span class="text-danger">*</span>
 								</label>
 								<select id="fk_product_attribute_id_${attributeIndex}" name="edit_fk_product_attribute_id[]" 
-									class="chosen-select form-control fk_product_attribute_id" 
+									class="chosen-select form-control fk_product_attribute_id_edit attribute-dropdown" 
 									data-index="${attributeIndex}" style="width: 100%;">
-									<option value="${attrId}" selected>${attributeName}</option>
+									${attributeOptions1}
 								</select>
 							</div>
 						</div>
@@ -666,6 +674,7 @@ $(document).on("click", ".update-product", function () {
 
 						$(`#attribute_input_${attributeIndex}`).html(inputHtml);
 						$(".chosen-select").chosen({ width: "100%" }).trigger("chosen:updated");
+						disableDuplicateAttributeOptions();
 					}
 				});
 
@@ -733,6 +742,7 @@ $(document).ready(function () {
 				$('#attributes_container_edit').append(newDiv);
 				$(".chosen-select").chosen({ width: "100%" }).trigger("chosen:updated");
 				editAttributeIndex++;
+				disableDuplicateAttributeOptions();
 			},
 			error: function () {
 				alert("Error loading attributes.");
@@ -752,6 +762,36 @@ $(document).ready(function () {
 
 // Handle attribute selection change (Edit Form)
 $(document).on('change', '.fk_product_attribute_id_edit', function () {
+	
+	let selectedAttributeId = $(this).val();
+    let currentIndex = $(this).data('index');
+
+    // Step 1: Collect all selected attribute IDs (except current)
+    let selectedIds = [];
+    $(".fk_product_attribute_id_edit").each(function () {
+        if ($(this).data("index") != currentIndex) {
+            let val = $(this).val();
+            if (val) selectedIds.push(val);
+        }
+    });
+
+    // Step 2: Loop through all selects and disable options already selected
+    $(".fk_product_attribute_id_edit").each(function () {
+        let $select = $(this);
+        let currentVal = $select.val();
+
+        $select.find("option").each(function () {
+            let optionVal = $(this).val();
+            if (selectedIds.includes(optionVal) && optionVal !== currentVal) {
+                $(this).attr("disabled", true);
+            } else {
+                $(this).removeAttr("disabled");
+            }
+        });
+
+        // Refresh chosen
+        $select.trigger("chosen:updated");
+    });
 	let selectedType = $(this).find("option:selected").data("type");
 	let attributeName = $(this).find("option:selected").text();
 	let attributeId = $(this).val();
@@ -787,13 +827,46 @@ $(document).on('change', '.fk_product_attribute_id_edit', function () {
 
 			$(`#attribute_value_container_${attributeIndex}`).html(html);
 			$(".chosen-select").chosen({ width: "100%" }).trigger("chosen:updated");
+			disableDuplicateAttributeOptions();
 		},
 		error: function () {
 			alert("Failed to fetch attribute values.");
 		}
 	});
+	
 });
+function disableDuplicateAttributeOptions() {
+	let selectedValues = [];
 
+	// Step 1: Collect selected attribute values
+	$(".fk_product_attribute_id_edit").each(function () {
+		let val = $(this).val();
+		if (val) selectedValues.push(val);
+	});
+
+	// Step 2: Disable already-selected values in other dropdowns
+	$(".fk_product_attribute_id_edit").each(function () {
+		let $select = $(this);
+		let currentVal = $select.val();
+
+		$select.find("option").each(function () {
+			let optionVal = $(this).val();
+
+			if (optionVal === "" || optionVal === currentVal) {
+				// Leave empty and current selected option enabled
+				$(this).prop("disabled", false);
+			} else if (selectedValues.includes(optionVal)) {
+				// Disable if already selected in another dropdown
+				$(this).prop("disabled", true);
+			} else {
+				$(this).prop("disabled", false);
+			}
+		});
+
+		// Update Chosen dropdown UI
+		$select.trigger("chosen:updated");
+	});
+}
 
 $("#update_channel_type").off("change").on("change", function () {
 	var channel_type = $(this).val(); // Get selected Product Type ID
