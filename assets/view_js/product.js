@@ -496,6 +496,9 @@ $(document).on("click", ".view-product", function () {
 			$('#view_selling_price').text(response.product.selling_price);
 			$('#view_product_quantity').text(response.product.total_quantity);
 			$('#view_description').text(response.product.description.replace(/\r\n/g, '<br>'));
+			$('#view_available_status').text(response.product.stock_availability);
+			$('#view_channel_type').text(response.product.channel_type);
+			$('#view_sale_channel').text(response.product.sale_channel);
 
 			// Handle multiple images
 			var imagesContainer = $("#view_images");
@@ -537,7 +540,7 @@ $(document).on("click", ".update-product", function () {
 			$("#update_product_id").val(product.id);
 			$('#update_inventory_id').val(product.inventory_id);
 			$("#update_product_name").val(product.product_name);
-			$("#update_product_sku_code").val(product.product_sku_code);
+			$("#update_product_sku").text(response.product.sku_code);
 			$("#update_batch_no").val(product.batch_no);
 			$("#update_barcode").val(product.barcode);
 			$("#update_purchase_price").val(product.purchase_price);
@@ -548,8 +551,10 @@ $(document).on("click", ".update-product", function () {
 			$("#update_product_image").val(product.images);
 			$("#update_availability_status").val(product.fk_stock_availability_id).trigger("chosen:updated");
 			$("#update_channel_type").val(product.channel_type).trigger("chosen:updated");
-
 			$('#attribute_id').val(product.attribute_id);
+			$('#update_manufacture_date').val(product.manufactured_date);
+			$('#update_expiry_date').val(product.expiry_date);
+			
 
 			// Populate image preview
 			var imageArray = product.images ? product.images.split(",") : [];
@@ -788,6 +793,8 @@ $(document).on('change', '.fk_product_attribute_id_edit', function () {
 		}
 	});
 });
+
+
 $("#update_channel_type").off("change").on("change", function () {
 	var channel_type = $(this).val(); // Get selected Product Type ID
 

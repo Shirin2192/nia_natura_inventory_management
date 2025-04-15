@@ -542,7 +542,7 @@ class Admin extends CI_Controller
 
 		// Set validation rules
 		$this->form_validation->set_rules('update_product_name', 'Product Name', 'required');
-		$this->form_validation->set_rules('update_product_sku_code', 'Product SKU Code', 'required');
+		
 		$this->form_validation->set_rules('update_description', 'Description', 'required');
 		$this->form_validation->set_rules('update_availability_status', 'Availability Status', 'required');
 		$this->form_validation->set_rules('update_sale_channel', 'Sales Channel', 'required');
@@ -566,7 +566,7 @@ class Admin extends CI_Controller
 		$fk_product_price_id = $this->input->post('fk_product_price_id');
 		$product_name = $this->input->post('update_product_name');
 		$description = $this->input->post('update_description');
-		$product_sku_code = $this->input->post('update_product_sku_code');
+		// $product_sku_code = $this->input->post('update_product_sku_code');
 		$channel_type = $this->input->post('update_channel_type');
 		$sale_channel = $this->input->post('update_sale_channel');
 		$availability_status = $this->input->post('update_availability_status');
@@ -617,14 +617,10 @@ class Admin extends CI_Controller
 		$update_product = array(
 			'product_name' => $product_name,
 			'description' => $description,
-			'product_sku_code' => $product_sku_code,			
+			'fk_product_types_id' => $update_fk_product_types_id,
 			'fk_stock_availability_id' =>$availability_status,
 			'barcode' => $barcode,
-			'batch_no' => $batch_no,
 			'images' => $imagess,
-			'purchase_price' => $purchase_price,
-			'MRP' => $MRP,
-			'selling_price' => $selling_price
 		);
 		$this->model->updateData('tbl_product_master', $update_product, ['id' => $product_id]);
 		

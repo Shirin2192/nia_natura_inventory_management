@@ -186,19 +186,24 @@
                                             </div>
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
-                                                    <label class="col-form-label" for="manufacture_date">Manufacture Date <span class="text-danger">*</span></label>
-                                                    <input type="date" class="form-control" id="manufacture_date" name="manufacture_date" placeholder="Select Manufacture Date">
-                                                    <div class="text-danger"><?= form_error('manufacture_date'); ?></div>
+                                                    <label class="col-form-label" for="manufacture_date">Manufacture
+                                                        Date <span class="text-danger">*</span></label>
+                                                    <input type="date" class="form-control" id="manufacture_date"
+                                                        name="manufacture_date" placeholder="Select Manufacture Date">
+                                                    <div class="text-danger"><?= form_error('manufacture_date'); ?>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
-                                                    <label class="col-form-label" for="expiry_date">Expiry Date <span class="text-danger">*</span></label>
-                                                    <input type="date" class="form-control" id="expiry_date" name="expiry_date" placeholder="Select Expiry Date">
+                                                    <label class="col-form-label" for="expiry_date">Expiry Date <span
+                                                            class="text-danger">*</span></label>
+                                                    <input type="date" class="form-control" id="expiry_date"
+                                                        name="expiry_date" placeholder="Select Expiry Date">
                                                     <div class="text-danger"><?= form_error('expiry_date'); ?></div>
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
                                                     <label class="col-form-label" for="product_image">Product
@@ -348,11 +353,13 @@
 
                                 </form>
                                 <form id="excelUploadForm" enctype="multipart/form-data" method="post">
-                                
+
                                     <div class="col-lg-6 mb-3">
                                         <div class="form-group">
-                                            <label class="col-form-label" for="product_excel">Upload Excel File <span class="text-danger">*</span></label>
-                                            <input type="file" class="form-control" id="product_excel" name="product_excel" accept=".xls, .xlsx">
+                                            <label class="col-form-label" for="product_excel">Upload Excel File <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="file" class="form-control" id="product_excel"
+                                                name="product_excel" accept=".xls, .xlsx">
                                             <small class="text-muted">Only .xls and .xlsx files are allowed</small>
                                         </div>
                                     </div>
@@ -423,8 +430,12 @@
                                     <p id="view_product_name" class="text-muted"></p>
                                 </div>
                                 <div class="mb-3">
-                                    <h6><strong>Product SKU Code:</strong></h6>
-                                    <p id="view_product_sku" class="text-muted"></p>
+                                    <h6><strong>Batch No:</strong></h6>
+                                    <p id="view_batch_no" class="text-muted"></p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6><strong>Expiry Date:</strong></h6>
+                                    <p id="view_expiry_date" class="text-muted"></p>
                                 </div>
                                 <div class="mb-3">
                                     <h6><strong>Product Type:</strong></h6>
@@ -438,22 +449,24 @@
                                     <h6><strong>Barcode:</strong></h6>
                                     <p id="view_barcode" class="text-muted"></p>
                                 </div>
+                                <div class="mb-3">
+                                    <h6><strong>Channel Type:</strong></h6>
+                                    <p id="view_channel_type" class="text-muted"></p>
+                                </div>
                             </div>
 
                             <!-- Right Column -->
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <h6><strong>Batch No:</strong></h6>
-                                    <p id="view_batch_no" class="text-muted"></p>
+                                    <h6><strong>Product SKU Code:</strong></h6>
+                                    <p id="view_product_sku" class="text-muted"></p>
                                 </div>
                                 <div class="mb-3">
                                     <h6><strong>Manufacture Date:</strong></h6>
                                     <p id="view_manufacture_date" class="text-muted"></p>
                                 </div>
-                                <div class="mb-3">
-                                    <h6><strong>Expiry Date:</strong></h6>
-                                    <p id="view_expiry_date" class="text-muted"></p>
-                                </div>
+
+
                                 <div class="mb-3">
                                     <h6><strong>Purchase Price:</strong></h6>
                                     <p id="view_product_price" class="text-muted"></p>
@@ -462,7 +475,7 @@
                                     <h6><strong>MRP:</strong></h6>
                                     <p id="view_mrp" class="text-muted"></p>
                                 </div>
-                                
+
                                 <div class="mb-3">
                                     <h6><strong>Selling Price:</strong></h6>
                                     <p id="view_selling_price" class="text-muted"></p>
@@ -475,6 +488,15 @@
                                     <h6><strong>Description:</strong></h6>
                                     <p id="view_description" class="text-muted"></p>
                                 </div>
+                                <div class="mb-3">
+                                    <h6><strong>Available Status:</strong></h6>
+                                    <p id="view_available_status" class="text-muted"></p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6><strong>Sale Channel:</strong></h6>
+                                    <p id="view_sale_channel" class="text-muted"></p>
+                                </div>
+
                             </div>
 
                             <!-- Images Section -->
@@ -520,10 +542,9 @@
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="update_product_sku_code">Product SKU Code <span
+                                    <label class="col-form-label" for="update_product_sku">Product SKU Code <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="update_product_sku_code"
-                                        name="update_product_sku_code" placeholder="Enter Product SKU Code">
+                                    <p id="update_product_sku" class="text-muted"></p>
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
@@ -532,6 +553,24 @@
                                             class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="update_batch_no" name="update_batch_no"
                                         placeholder="Enter Batch No">
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="update_manufacture_date">Manufacture Date <span
+                                            class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="update_manufacture_date"
+                                        name="update_manufacture_date" placeholder="Select Manufacture Date">
+                                    <div class="text-danger"><?= form_error('update_manufacture_date'); ?></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="update_expiry_date">Expiry Date <span
+                                            class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="update_expiry_date" name="update_expiry_date"
+                                        placeholder="Select Expiry Date">
+                                    <div class="text-danger"><?= form_error('update_expiry_date'); ?></div>
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
