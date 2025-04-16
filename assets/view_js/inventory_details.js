@@ -40,7 +40,7 @@ function format(batchList) {
             <thead>
                 <tr>
                     <th>Batch No</th>
-                    <th>Quantity</th>
+                    <th>Total Quantity</th>
                     <th>Date</th>
                 </tr>
             </thead>

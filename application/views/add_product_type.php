@@ -114,7 +114,7 @@
                                 <table id="productTypeTable" class="display">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
+                                            <th>Sr. No</th>
                                             <th>Product Type</th>
                                             <th>Action</th>
                                         </tr>

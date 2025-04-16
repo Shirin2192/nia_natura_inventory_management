@@ -5,25 +5,34 @@ $(document).ready(function() {
 
 function loadTable() {
     $("#productTypeTable").DataTable({
-        "processing": true,
-        "serverSide": false,
-        "destroy": true,
-        "ajax": {
-            "url": frontend + controllerName+"/fetch_product_type",
-            "type": "POST",
-            "dataSrc": function(data) {
+        processing: true,
+        serverSide: false,
+        destroy: true,
+        ajax: {
+            url: frontend + controllerName + "/fetch_product_type",
+            type: "POST",
+            dataSrc: function (data) {
                 const permissions = data.data.permissions;
                 const currentSidebarId = data.data.current_sidebar_id;
                 currentPermission = permissions[currentSidebarId];
-                return data.response; // Assuming product types are in data.response
+
+                // ✅ Return the actual array of product types
+                return data.response; // <-- Make sure `data.response` contains an array of product types
             }
         },
-        "columns": [
-            { "data": "id" },
-            { "data": "product_type_name" },
+        columns: [
             {
-                "data": "id",
-                "render": function(id, type, row) {
+                data: null,
+                title: "Sr. No",
+                render: function (data, type, row, meta) {
+                    return meta.row + 1;
+                }
+            },
+            { data: "product_type_name", title: "Product Type" },
+            {
+                data: "id",
+                title: "Action",
+                render: function (id, type, row) {
                     let buttons = '';
                     if (currentPermission.can_view === "1") {
                         buttons += `<button class="btn btn-primary btn-sm view_Product_type" data-id="${id}" data-toggle="modal" data-target="#viewProductTypeModal"><i class="icon-eye menu-icon"></i></button> `;
@@ -37,7 +46,10 @@ function loadTable() {
                     return buttons;
                 }
             }
-        ]
+        ],
+        language: {
+            emptyTable: "No product types found"
+        }
     });
 }
 $("#ProductTypeForm").on("submit", function (event) {

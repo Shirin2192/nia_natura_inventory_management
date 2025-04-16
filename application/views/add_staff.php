@@ -152,7 +152,7 @@
                                 <table id="userTable" class="display">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
+                                            <th>Sr. No.</th>
                                             <th>Name</th>
                                             <th>Email</th>
                                             <th>Role</th>

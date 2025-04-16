@@ -74,11 +74,15 @@ $(document).ready(function () {
                 if (!json.data) {
                     json.data = [];
                 }
-                return json.data;
+                return json.data.map((item, index) => {
+                    item.sr_no = index + 1; // Add Sr. No. as an auto-increment field
+                    return item;
+                });
             }
         },
         columns: [
-            { data: "id", title: "ID" },
+            { data: "sr_no", title: "Sr. No." }, // Add Sr. No. column
+            
             { data: "name", title: "Name" },
             { data: "email", title: "Email" },
             { data: "role_name", title: "Role Name" },

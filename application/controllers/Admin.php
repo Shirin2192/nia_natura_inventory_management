@@ -9,45 +9,42 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-
-
-
 class Admin extends CI_Controller
 {
 	public function __construct()
 	{
 		parent::__construct();
 
-		 // Prevent browser caching for all admin pages
-		 $this->output
-		 ->set_header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0")
-		 ->set_header("Cache-Control: post-check=0, pre-check=0", false)
-		 ->set_header("Pragma: no-cache");
+		// Prevent browser caching for all admin pages
+		$this->output
+			->set_header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0")
+			->set_header("Cache-Control: post-check=0, pre-check=0", false)
+			->set_header("Pragma: no-cache");
 
-		$this->load->model('Product_model'); 
-		$this->load->model('user_model'); 
-		$this->load->model('Product_attribute_model'); 
-		$this->load->model('Role_model'); 
-		$this->load->model('model'); 
-		$this->load->library('form_validation'); 
+		$this->load->model('Product_model');
+		$this->load->model('user_model');
+		$this->load->model('Product_attribute_model');
+		$this->load->model('Role_model');
+		$this->load->model('model');
+		$this->load->library('form_validation');
 
 		$admin_session = $this->session->userdata('admin_session');
-        $role_id = $admin_session['role_id'] ?? null;
+		$role_id = $admin_session['role_id'] ?? null;
 		if ($role_id) {
-            $role_permission = $this->Role_model->get_role_permission($role_id);
-            foreach ($role_permission as $role_permission_row) {
-                $sidebar_id = $role_permission_row['fk_sidebar_id'];
-                $this->permissions[$sidebar_id] = [
-                    'can_view' => $role_permission_row['can_view'] ?? 0,
-                    'can_add' => $role_permission_row['can_add'] ?? 0,
-                    'can_edit' => $role_permission_row['can_edit'] ?? 0,
-                    'can_delete' => $role_permission_row['can_delete'] ?? 0,
-                    'has_access' => $role_permission_row['has_access'] ?? 0
-                ];
-            }
-        }
+			$role_permission = $this->Role_model->get_role_permission($role_id);
+			foreach ($role_permission as $role_permission_row) {
+				$sidebar_id = $role_permission_row['fk_sidebar_id'];
+				$this->permissions[$sidebar_id] = [
+					'can_view' => $role_permission_row['can_view'] ?? 0,
+					'can_add' => $role_permission_row['can_add'] ?? 0,
+					'can_edit' => $role_permission_row['can_edit'] ?? 0,
+					'can_delete' => $role_permission_row['can_delete'] ?? 0,
+					'has_access' => $role_permission_row['has_access'] ?? 0
+				];
+			}
+		}
 		$this->controller_name = $this->router->fetch_class();
-        $this->load->vars(['controller_name' => $this->controller_name]);
+		$this->load->vars(['controller_name' => $this->controller_name]);
 	}
 	// Default method for the Admin controller
 	public function index()
@@ -57,12 +54,12 @@ class Admin extends CI_Controller
 			redirect(base_url('common/index')); // Redirect to login page if session is not active
 		} else {
 			$response['total_product_count'] = $this->model->selectWhereData('tbl_product_master', array('is_delete' => 1), "COUNT(id) as product_count", true); // Get total product count
-			$this->load->view('admin/dashboard',$response); // Load the admin dashboard view
+			$this->load->view('admin/dashboard', $response); // Load the admin dashboard view
 		}
 	}
 	public function add_staff()
 	{
-		
+
 		$admin_session = $this->session->userdata('admin_session');
 		if (!$admin_session) {
 			redirect(base_url('common/index'));
@@ -209,7 +206,7 @@ class Admin extends CI_Controller
 		} else {
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 6; // Set the sidebar ID for the current view
-			$this->load->view('add_sales_channel',$response);
+			$this->load->view('add_sales_channel', $response);
 		}
 	}
 	public function fetch_sale_channel()
@@ -335,21 +332,21 @@ class Admin extends CI_Controller
 	public function get_attribute_on_product_types_id()
 	{
 		$fk_product_types_id = $this->input->post('fk_product_types_id'); // Get the product type ID from POST request
-		$response['data'] = $this->model->selectWhereData('tbl_attribute_master', array("fk_product_type_id" => $fk_product_types_id,'is_delete' => 1), "*", false, array('id', "DESC"));
+		$response['data'] = $this->model->selectWhereData('tbl_attribute_master', array("fk_product_type_id" => $fk_product_types_id, 'is_delete' => 1), "*", false, array('id', "DESC"));
 		echo json_encode($response);
 	}
 
 	public function get_attribute_values_on_product_attributes_id()
 	{
 		$fk_product_attributes_id = $this->input->post('attribute_id'); // Get the product attribute ID from POST request
-		$response['data'] = $this->model->selectWhereData('tbl_attribute_values', array("fk_attribute_id" => $fk_product_attributes_id,'is_delete' => 1), "*", false, array('id', "DESC"));
+		$response['data'] = $this->model->selectWhereData('tbl_attribute_values', array("fk_attribute_id" => $fk_product_attributes_id, 'is_delete' => 1), "*", false, array('id', "DESC"));
 		echo json_encode($response);
 	}
 
 	public function get_sales_channel_on_channel_type()
 	{
 		$channel_type = $this->input->post('channel_type'); // Get the product attribute ID from POST request
-		$response['data'] = $this->model->selectWhereData('tbl_sale_channel', array("channel_type" => $channel_type,'is_delete' => 1), "*", false, array('id', "DESC"));
+		$response['data'] = $this->model->selectWhereData('tbl_sale_channel', array("channel_type" => $channel_type, 'is_delete' => 1), "*", false, array('id', "DESC"));
 		echo json_encode($response);
 	}
 
@@ -361,7 +358,7 @@ class Admin extends CI_Controller
 			$product_name = $this->input->post('product_name');
 			$product_sku_code = $this->input->post('product_sku_code');
 			$batch_no = $this->input->post('batch_no');
-			
+
 			$barcode = $this->input->post('barcode');
 			$description = $this->input->post('description');
 			$purchase_price = $this->input->post('purchase_price');
@@ -434,10 +431,10 @@ class Admin extends CI_Controller
 			if ($count == 1) {
 				$response = ["status" => "error", 'product_name_error' => "Already Exist"];
 			} else {
-				
+
 				$product_data = [
-					'product_name' => $product_name,				
-					'product_sku_code' => $product_sku_code,					
+					'product_name' => $product_name,
+					'product_sku_code' => $product_sku_code,
 					'fk_stock_availability_id' => $stock_availability,
 					'barcode' => $barcode,
 					'images' => implode(",", $product_images), // Store multiple images as JSON
@@ -445,15 +442,15 @@ class Admin extends CI_Controller
 					'fk_product_types_id' => $fk_product_types_id,
 				];
 				//  print_r($product_data);
-				$product_insert_id = $this->model->insertData('tbl_product_master', $product_data);			
-				
+				$product_insert_id = $this->model->insertData('tbl_product_master', $product_data);
+
 				$product_batch_data = [
 					'fk_product_id' => $product_insert_id,
 					'batch_no' => $batch_no,
 					'expiry_date' => $expiry_date,
 					'manufactured_date' => $manufacture_date,
 					'quantity' => $add_quantity,
-				];	
+				];
 				$product_batch_id = $this->model->insertData('tbl_product_batches', $product_batch_data); // Insert batch data
 
 				foreach ($fk_product_attribute_id as $key => $attribute_id) {
@@ -530,21 +527,22 @@ class Admin extends CI_Controller
 		$id = $this->input->post('product_id');
 		$data['product'] = $this->Product_model->get_product_by_id($id);
 		$channel_type = $data['product']['channel_type'];
-		$sale_channel = $this->model->selectWhereData('tbl_sale_channel', array('channel_type'=>$channel_type,'is_delete' => 1), "*", false, array('id', "DESC"));
+		$sale_channel = $this->model->selectWhereData('tbl_sale_channel', array('channel_type' => $channel_type, 'is_delete' => 1), "*", false, array('id', "DESC"));
 		$data['sale_channel'] = $sale_channel;
-		$fk_product_types_id = $data['product']['fk_product_types_id']; 
+		$fk_product_types_id = $data['product']['fk_product_types_id'];
 		$product_type_id = explode(',', $fk_product_types_id);
-		$data['attribute_master'] = $this->model->selectWhereData('tbl_attribute_master', array("fk_product_type_id" => $product_type_id[0],'is_delete' => 1), "*", false, array('id', "DESC"));
+		$data['attribute_master'] = $this->model->selectWhereData('tbl_attribute_master', array("fk_product_type_id" => $product_type_id[0], 'is_delete' => 1), "*", false, array('id', "DESC"));
 		echo json_encode($data);
 	}
 
 	public function update_product()
-	{	
-		print_r($_POST);die;
+	{
+		print_r($_POST);
+		die;
 		$this->load->library('form_validation');
 
 		// Set validation rules
-		$this->form_validation->set_rules('update_product_name', 'Product Name', 'required');		
+		$this->form_validation->set_rules('update_product_name', 'Product Name', 'required');
 		$this->form_validation->set_rules('update_description', 'Description', 'required');
 		$this->form_validation->set_rules('update_availability_status', 'Availability Status', 'required');
 		$this->form_validation->set_rules('update_sale_channel', 'Sales Channel', 'required');
@@ -622,7 +620,7 @@ class Admin extends CI_Controller
 			'product_name' => $product_name,
 			'description' => $description,
 			'fk_product_types_id' => $update_fk_product_types_id,
-			'fk_stock_availability_id' =>$availability_status,
+			'fk_stock_availability_id' => $availability_status,
 			'barcode' => $barcode,
 			'images' => $imagess,
 		);
@@ -635,8 +633,8 @@ class Admin extends CI_Controller
 			'quantity' => $total_quantity,
 		);
 		$this->model->updateData('tbl_product_batches', $update_product_batch, ['id' => $update_batch_id, 'fk_product_id' => $product_id]);
-		
-		if(!empty($add_new_fk_product_attribute_id)){
+
+		if (!empty($add_new_fk_product_attribute_id)) {
 			foreach ($add_new_fk_product_attribute_id as $key => $add_attribute_id_row) {
 				$product_attribute = [
 					'fk_product_id' => $product_id,
@@ -647,21 +645,21 @@ class Admin extends CI_Controller
 				$this->model->insertData('tbl_product_attributes', $product_attribute);
 			}
 		}
-		if(!empty($edit_fk_product_attribute_id)){
+		if (!empty($edit_fk_product_attribute_id)) {
 			foreach ($edit_fk_product_attribute_id as $edit_fk_product_attribute_id_key => $edit_fk_product_attribute_id_row) {
-				$update_product_attribute = [	
+				$update_product_attribute = [
 					'fk_attribute_id' => $edit_fk_product_attribute_id_row,
 					'fk_attribute_value_id' => $edit_attributes_value[$edit_fk_product_attribute_id_key],
-				];		
-				 $this->model->updateData('tbl_product_attributes', $update_product_attribute, ['id'=>$product_attribute_id[$edit_fk_product_attribute_id_key],'fk_product_id' => $product_id,'fk_product_types_id' => $update_fk_product_types_id]);
+				];
+				$this->model->updateData('tbl_product_attributes', $update_product_attribute, ['id' => $product_attribute_id[$edit_fk_product_attribute_id_key], 'fk_product_id' => $product_id, 'fk_product_types_id' => $update_fk_product_types_id]);
 			}
-		}		
+		}
 		$update_product_price = array(
 			'purchase_price' => $purchase_price,
 			'MRP' => $MRP,
 			'selling_price' => $selling_price,
 		);
-		$this->model->updateData('tbl_product_price', $update_product_price, ['fk_product_id' => $product_id,'id' => $fk_product_price_id]);	
+		$this->model->updateData('tbl_product_price', $update_product_price, ['fk_product_id' => $product_id, 'id' => $fk_product_price_id]);
 
 		if (!empty($add_new_quantity)) {
 			$update_product_inventory_status = array(
@@ -700,7 +698,7 @@ class Admin extends CI_Controller
 					'fk_sale_channel_id' => $sale_channel,
 				);
 			}
-			$this->model->updateData('tbl_product_inventory', $update_product_inventory, ['id'=> $inventory_id,'fk_product_id' => $product_id, 'used_status' => 1]);
+			$this->model->updateData('tbl_product_inventory', $update_product_inventory, ['id' => $inventory_id, 'fk_product_id' => $product_id, 'used_status' => 1]);
 		}
 		echo json_encode(['status' => 'success', 'message' => 'Product updated successfully']);
 	}
@@ -735,7 +733,7 @@ class Admin extends CI_Controller
 		} else {
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 3; // Set the sidebar ID for the current view
-			$this->load->view('add_product_type',$response);
+			$this->load->view('add_product_type', $response);
 		}
 	}
 	public function fetch_product_type()
@@ -810,7 +808,7 @@ class Admin extends CI_Controller
 	}
 	public function delete_product_type()
 	{
-		$id = $this->input->post('id'); 
+		$id = $this->input->post('id');
 		if (!$id) {
 			echo json_encode(['status' => 'error', 'message' => 'Invalid product type ID']);
 			return;
@@ -823,7 +821,8 @@ class Admin extends CI_Controller
 		}
 	}
 
-	public function add_product_attributes(){
+	public function add_product_attributes()
+	{
 		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
 		if (!$admin_session) {
 			redirect(base_url('common/index')); // Redirect to login page if session is not active
@@ -831,8 +830,8 @@ class Admin extends CI_Controller
 			$response['product_types'] = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 4; // Set the sidebar ID for the current view
-			$this->load->view('add_product_attributes',$response);
-		}		
+			$this->load->view('add_product_attributes', $response);
+		}
 	}
 	public function get_product_attribute_detail()
 	{
@@ -876,7 +875,7 @@ class Admin extends CI_Controller
 	}
 	public function get_product_attribute_detail_id()
 	{
-		$id = $this->input->post('id'); 	
+		$id = $this->input->post('id');
 		$product_attributes = $this->Product_attribute_model->get_product_attribute_detail_id($id);
 		if ($product_attributes) {
 			echo json_encode(["status" => "success", "data" => $product_attributes]);
@@ -906,28 +905,27 @@ class Admin extends CI_Controller
 		$id = $this->input->post('edit_attribute_id');
 		$attribute_name = $this->input->post('edit_attribute_name');
 		$attribute_type = $this->input->post('edit_attribute_type');
-		
-		$count = $this->model->CountWhereRecord('tbl_attribute_master', array('attribute_name' => $attribute_name, 'id !=' => $id, 'is_delete' => 1));	
+
+		$count = $this->model->CountWhereRecord('tbl_attribute_master', array('attribute_name' => $attribute_name, 'id !=' => $id, 'is_delete' => 1));
 		if ($count == 1) {
 			$response = ["status" => "error", 'attribute_type_error' => "Product Attribute Already Exist"];
 			echo json_encode($response);
 			return;
-		}else{
+		} else {
 			$updateData = [
 				'attribute_name' => $attribute_name,
 				'attribute_type' => $attribute_type
 			];
-				
+
 			$updated = $this->model->updateData('tbl_attribute_master', $updateData, ['id' => $id]);
 			// Check if update was successful
-	
+
 			if ($updated) {
 				echo json_encode(["status" => "success", "message" => "Attribute updated successfully."]);
 			} else {
 				echo json_encode(["status" => "error", "message" => "Failed to update attribute."]);
 			}
-
-		}		
+		}
 	}
 	public function delete_product_attribute()
 	{
@@ -946,7 +944,8 @@ class Admin extends CI_Controller
 		}
 	}
 
-	public function add_product_attributes_value(){
+	public function add_product_attributes_value()
+	{
 		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
 		if (!$admin_session) {
 			redirect(base_url('common/index')); // Redirect to login page if session is not active
@@ -954,7 +953,7 @@ class Admin extends CI_Controller
 			$response['product_attributes'] = $this->model->selectWhereData('tbl_attribute_master', array('is_delete' => 1), "*", false, array('id', "DESC"));
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 5; // Set the sidebar ID for the current view
-			$this->load->view('add_product_attributes_value',$response);
+			$this->load->view('add_product_attributes_value', $response);
 		}
 	}
 	public function get_product_attributes_value_detail()
@@ -994,7 +993,7 @@ class Admin extends CI_Controller
 	}
 	public function get_product_attributes_value_detail_id()
 	{
-		$id = $this->input->post('id'); 	
+		$id = $this->input->post('id');
 		$product_attributes_values = $this->Product_attribute_model->get_product_attributes_value_detail_id($id);
 		if ($product_attributes_values) {
 			echo json_encode(["status" => "success", "data" => $product_attributes_values]);
@@ -1020,24 +1019,23 @@ class Admin extends CI_Controller
 		// Get input data
 		$id = $this->input->post('edit_attribute_value_id');
 		$attribute_value = $this->input->post('edit_attribute_value');
-		
-		$count = $this->model->CountWhereRecord('tbl_attribute_values', array('attribute_value' => $attribute_value, 'id !=' => $id, 'is_delete' => 1));	
+
+		$count = $this->model->CountWhereRecord('tbl_attribute_values', array('attribute_value' => $attribute_value, 'id !=' => $id, 'is_delete' => 1));
 		if ($count == 1) {
 			$response = ["status" => "error", 'attribute_type_error' => "Product Attribute Value Already Exist"];
 			echo json_encode($response);
 			return;
-		}else{
+		} else {
 			$updateData = [
 				'attribute_value' => $attribute_value,
 			];
-				
+
 			$updated = $this->model->updateData('tbl_attribute_values', $updateData, ['id' => $id]);
 			if ($updated) {
 				echo json_encode(["status" => "success", "message" => "Attribute Value updated successfully."]);
 			} else {
 				echo json_encode(["status" => "error", "message" => "Failed to update attribute value."]);
 			}
-			
 		}
 	}
 	public function delete_product_attributes_value()
@@ -1063,163 +1061,164 @@ class Admin extends CI_Controller
 			redirect(base_url('common/index'));
 		} else {
 			$response['roles'] = $this->model->selectWhereData('tbl_role', array('is_delete' => 1), "*", false, array('id', "DESC"));
-			$response['modules'] = $this->model->selectWhereData('tbl_sidebar',array(), "*", false, array('id', "ASC"));
-			$this->load->view('role_access',$response); 
+			$response['modules'] = $this->model->selectWhereData('tbl_sidebar', array(), "*", false, array('id', "ASC"));
+			$this->load->view('role_access', $response);
 		}
 	}
 
-// public function save_permissions()
-// {
-//     $this->form_validation->set_rules('role_id', 'Role', 'required');
+	// public function save_permissions()
+	// {
+	//     $this->form_validation->set_rules('role_id', 'Role', 'required');
 
-//     if ($this->form_validation->run() == FALSE) {
-//         echo json_encode([
-//             'status' => false,
-//             'errors' => [
-//                 'role_id_error' => form_error('role_id'),
-//             ]
-//         ]);
-//         return;
-//     }
+	//     if ($this->form_validation->run() == FALSE) {
+	//         echo json_encode([
+	//             'status' => false,
+	//             'errors' => [
+	//                 'role_id_error' => form_error('role_id'),
+	//             ]
+	//         ]);
+	//         return;
+	//     }
 
-//     $role_id = $this->input->post('role_id');
-//     $permissions = $this->input->post('permissions');
+	//     $role_id = $this->input->post('role_id');
+	//     $permissions = $this->input->post('permissions');
 
-//     if (empty($permissions)) {
-//         echo json_encode([
-//             'status' => false,
-//             'message' => "No permissions selected"
-//         ]);
-//         return;
-//     }
+	//     if (empty($permissions)) {
+	//         echo json_encode([
+	//             'status' => false,
+	//             'message' => "No permissions selected"
+	//         ]);
+	//         return;
+	//     }
 
-//     // Check if permissions already exist for the role and module
-//     $role_exist = $this->model->CountWhereRecord('tbl_permissions', array('fk_role_id' => $role_id));
-//     if ($role_exist) {
-//         foreach ($permissions as $module_id => $perm) {
-//             $data = [
-//                 'can_view' => !empty($perm['view']) ? 1 : 0,
-//                 'can_add' => !empty($perm['add']) ? 1 : 0,
-//                 'can_edit' => !empty($perm['edit']) ? 1 : 0,
-//                 'can_delete' => !empty($perm['delete']) ? 1 : 0,
-//                 'has_access' => !empty($perm['access']) ? 1 : 0 // For dashboard only
-//             ];
-//             $this->model->updateData('tbl_permissions', $data, array('fk_role_id' => $role_id, 'fk_sidebar_id' => $module_id));
-//         }
-// 		$response = "Permissions updated successfully";
-//     } else {
-//         foreach ($permissions as $module_id => $perm) {
-//             $existing_permission = $this->model->CountWhereRecord('tbl_permissions', array('fk_role_id' => $role_id, 'fk_sidebar_id' => $module_id));
-//             if (!empty($existing_permission)) {
-//                 echo json_encode([
-//                     'status' => false,
-//                     'message' => "Permissions already exist for this role and module"
-//                 ]);
-//                 return;
-//             } else {
-//                 $data = [
-//                     'fk_role_id' => $role_id,
-//                     'fk_sidebar_id' => $module_id,
-//                     'can_view' => !empty($perm['view']) ? 1 : 0,
-//                     'can_add' => !empty($perm['add']) ? 1 : 0,
-//                     'can_edit' => !empty($perm['edit']) ? 1 : 0,
-//                     'can_delete' => !empty($perm['delete']) ? 1 : 0,
-//                     'has_access' => !empty($perm['access']) ? 1 : 0 // For dashboard only
-//                 ];
-//                 $this->model->insertData('tbl_permissions', $data);
-//             }
-//         }
-// 		$response = "Permissions added successfully";
-//     }
-//     echo json_encode(['status' => true, 'message' => $response]);
-// }
+	//     // Check if permissions already exist for the role and module
+	//     $role_exist = $this->model->CountWhereRecord('tbl_permissions', array('fk_role_id' => $role_id));
+	//     if ($role_exist) {
+	//         foreach ($permissions as $module_id => $perm) {
+	//             $data = [
+	//                 'can_view' => !empty($perm['view']) ? 1 : 0,
+	//                 'can_add' => !empty($perm['add']) ? 1 : 0,
+	//                 'can_edit' => !empty($perm['edit']) ? 1 : 0,
+	//                 'can_delete' => !empty($perm['delete']) ? 1 : 0,
+	//                 'has_access' => !empty($perm['access']) ? 1 : 0 // For dashboard only
+	//             ];
+	//             $this->model->updateData('tbl_permissions', $data, array('fk_role_id' => $role_id, 'fk_sidebar_id' => $module_id));
+	//         }
+	// 		$response = "Permissions updated successfully";
+	//     } else {
+	//         foreach ($permissions as $module_id => $perm) {
+	//             $existing_permission = $this->model->CountWhereRecord('tbl_permissions', array('fk_role_id' => $role_id, 'fk_sidebar_id' => $module_id));
+	//             if (!empty($existing_permission)) {
+	//                 echo json_encode([
+	//                     'status' => false,
+	//                     'message' => "Permissions already exist for this role and module"
+	//                 ]);
+	//                 return;
+	//             } else {
+	//                 $data = [
+	//                     'fk_role_id' => $role_id,
+	//                     'fk_sidebar_id' => $module_id,
+	//                     'can_view' => !empty($perm['view']) ? 1 : 0,
+	//                     'can_add' => !empty($perm['add']) ? 1 : 0,
+	//                     'can_edit' => !empty($perm['edit']) ? 1 : 0,
+	//                     'can_delete' => !empty($perm['delete']) ? 1 : 0,
+	//                     'has_access' => !empty($perm['access']) ? 1 : 0 // For dashboard only
+	//                 ];
+	//                 $this->model->insertData('tbl_permissions', $data);
+	//             }
+	//         }
+	// 		$response = "Permissions added successfully";
+	//     }
+	//     echo json_encode(['status' => true, 'message' => $response]);
+	// }
 
-public function save_permissions()
-{
-    $this->form_validation->set_rules('role_id', 'Role', 'required');
+	public function save_permissions()
+	{
+		$this->form_validation->set_rules('role_id', 'Role', 'required');
 
-    if ($this->form_validation->run() == FALSE) {
-        echo json_encode([
-            'status' => false,
-            'errors' => [
-                'role_id_error' => form_error('role_id'),
-            ]
-        ]);
-        return;
-    }
+		if ($this->form_validation->run() == FALSE) {
+			echo json_encode([
+				'status' => false,
+				'errors' => [
+					'role_id_error' => form_error('role_id'),
+				]
+			]);
+			return;
+		}
 
-    $role_id = $this->input->post('role_id');
-    $permissions = $this->input->post('permissions');
+		$role_id = $this->input->post('role_id');
+		$permissions = $this->input->post('permissions');
 
-    if (empty($permissions)) {
-        echo json_encode([
-            'status' => false,
-            'message' => "No permissions selected"
-        ]);
-        return;
-    }
+		if (empty($permissions)) {
+			echo json_encode([
+				'status' => false,
+				'message' => "No permissions selected"
+			]);
+			return;
+		}
 
-    foreach ($permissions as $module_id => $perm) {
-        $data = [
-            'can_view' => !empty($perm['view']) ? 1 : 0,
-            'can_add' => !empty($perm['add']) ? 1 : 0,
-            'can_edit' => !empty($perm['edit']) ? 1 : 0,
-            'can_delete' => !empty($perm['delete']) ? 1 : 0,
-            'has_access' => !empty($perm['access']) ? 1 : 0 // For dashboard only
-        ];
+		foreach ($permissions as $module_id => $perm) {
+			$data = [
+				'can_view' => !empty($perm['view']) ? 1 : 0,
+				'can_add' => !empty($perm['add']) ? 1 : 0,
+				'can_edit' => !empty($perm['edit']) ? 1 : 0,
+				'can_delete' => !empty($perm['delete']) ? 1 : 0,
+				'has_access' => !empty($perm['access']) ? 1 : 0 // For dashboard only
+			];
 
-        // Check if permission exists for this role and module
-        $existing = $this->model->CountWhereRecord('tbl_permissions', [
-            'fk_role_id' => $role_id,
-            'fk_sidebar_id' => $module_id
-        ]);
+			// Check if permission exists for this role and module
+			$existing = $this->model->CountWhereRecord('tbl_permissions', [
+				'fk_role_id' => $role_id,
+				'fk_sidebar_id' => $module_id
+			]);
 
-        if ($existing) {
-            // Update existing permission
-            $this->model->updateData('tbl_permissions', $data, [
-                'fk_role_id' => $role_id,
-                'fk_sidebar_id' => $module_id
-            ]);
-        } else {
-            // Insert new permission
-            $data['fk_role_id'] = $role_id;
-            $data['fk_sidebar_id'] = $module_id;
-            $this->model->insertData('tbl_permissions', $data);
-        }
-    }
+			if ($existing) {
+				// Update existing permission
+				$this->model->updateData('tbl_permissions', $data, [
+					'fk_role_id' => $role_id,
+					'fk_sidebar_id' => $module_id
+				]);
+			} else {
+				// Insert new permission
+				$data['fk_role_id'] = $role_id;
+				$data['fk_sidebar_id'] = $module_id;
+				$this->model->insertData('tbl_permissions', $data);
+			}
+		}
 
-    echo json_encode(['status' => true, 'message' => 'Permissions saved successfully']);
-}
+		echo json_encode(['status' => true, 'message' => 'Permissions saved successfully']);
+	}
 
 	public function get_role_permissions()
-    {
-        $role_id = $this->input->post('role_id');
-        if (!$role_id) {
-            echo json_encode(['status' => 'error', 'message' => 'Invalid role ID']);
-            return;
-        }
-        // $this->load->model('Role_model');
-        $permissions = $this->Role_model->get_permissions_by_role($role_id);
-        if ($permissions) {
-            echo json_encode(['status' => 'success', 'permissions' => $permissions]);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'No permissions found for this role']);
-        }
-    }
+	{
+		$role_id = $this->input->post('role_id');
+		if (!$role_id) {
+			echo json_encode(['status' => 'error', 'message' => 'Invalid role ID']);
+			return;
+		}
+		// $this->load->model('Role_model');
+		$permissions = $this->Role_model->get_permissions_by_role($role_id);
+		if ($permissions) {
+			echo json_encode(['status' => 'success', 'permissions' => $permissions]);
+		} else {
+			echo json_encode(['status' => 'error', 'message' => 'No permissions found for this role']);
+		}
+	}
 
-	public function sku_code(){
+	public function sku_code()
+	{
 		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
 		if (!$admin_session) {
 			redirect(base_url('common/index')); // Redirect to login page if session is not active
 		} else {
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
-			$this->load->view('sku_code',$response);
+			$this->load->view('sku_code', $response);
 		}
 	}
 	public function get_sku_code_detail()
 	{
-		$response['data'] = $this->model->selectWhereData('tbl_sku_code_master',array('is_delete'=>'1'),'*',false,array('id','DESC')); // Correctly access the model
+		$response['data'] = $this->model->selectWhereData('tbl_sku_code_master', array('is_delete' => '1'), '*', false, array('id', 'DESC')); // Correctly access the model
 		// $response['permissions'] = $this->permissions; // Pass full permissions array
 		// $response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
 		echo json_encode($response);
@@ -1268,7 +1267,7 @@ public function save_permissions()
 			echo json_encode(["status" => "success", "sku_code" => $sku_code]);
 		} else {
 			echo json_encode(["status" => "error", "message" => "SKU Code not found"]);
-		}		
+		}
 	}
 	public function update_sku_code()
 	{
@@ -1293,28 +1292,27 @@ public function save_permissions()
 			echo json_encode($response);
 			return;
 		}
-		
+
 		// Get input data
 		$id = $this->input->post('edit_sku_code_id');
 		$sku_code = $this->input->post('edit_sku_code');
-		
-		$count = $this->model->CountWhereRecord('tbl_sku_code_master', array('sku_code' => $sku_code, 'id !=' => $id, 'is_delete' => 1));	
+
+		$count = $this->model->CountWhereRecord('tbl_sku_code_master', array('sku_code' => $sku_code, 'id !=' => $id, 'is_delete' => 1));
 		if ($count == 1) {
 			$response = ["status" => "error", 'edit_sku_code' => "SKU Code Already Exist"];
 			echo json_encode($response);
 			return;
-		}else{
+		} else {
 			$updateData = [
 				'sku_code' => $sku_code,
 			];
-				
+
 			$updated = $this->model->updateData('tbl_sku_code_master', $updateData, ['id' => $id]);
 			if ($updated) {
 				echo json_encode(["status" => "success", "message" => "SKU Code updated successfully."]);
 			} else {
 				echo json_encode(["status" => "error", "message" => "Failed to update SKU Code."]);
 			}
-			
 		}
 	}
 	public function delete_sku_code()
@@ -1332,112 +1330,138 @@ public function save_permissions()
 		} else {
 			echo json_encode(['status' => 'error', 'message' => 'Failed to delete SKU Code']);
 		}
-	}	
+	}
 
-	
+
 
 	public function downloadProductSampleExcel()
-    {
-        ini_set('display_errors', 1);
-        error_reporting(E_ALL);
+	{
+		ini_set('display_errors', 1);
+		error_reporting(E_ALL);
 
-        // Start output buffering to prevent unwanted output before the file is sent
-        ob_start();
+		// Start output buffering to prevent unwanted output before the file is sent
+		ob_start();
 
-        // Load PhpSpreadsheet
-        require_once FCPATH . 'vendor/autoload.php';
+		// Load PhpSpreadsheet
+		require_once FCPATH . 'vendor/autoload.php';
 
-        $fk_product_types_id = $this->input->get('fk_product_types_ids');
-        
-        // Base headers for product master/inventory/batch/price
+		$fk_product_types_id = $this->input->get('fk_product_types_ids');
+
+		// Base headers for product master/inventory/batch/price
 		$headers = [
-			'Product Name', 'SKU Code', 'Stock Availability', 'Barcode', 'Batch Number',
-			'Quantity', 'Expiry Date', 'Manufactured Date', 'Images', 'Description',
-			'Purchase Price', 'MRP', 'Selling Price', 'Product Type',
-			 'Channel Type', 'Sales Channel'
+			'Product Name',
+			'SKU Code',
+			'Stock Availability',
+			'Barcode',
+			'Batch Number',
+			'Quantity',
+			'Expiry Date',
+			'Manufactured Date',
+			'Images',
+			'Description',
+			'Purchase Price',
+			'MRP',
+			'Selling Price',
+			'Product Type',
+			'Channel Type',
+			'Sales Channel'
 		];
 
-        $sampleRow = [
-            'Sample Product', 'SKU123', 'In Stock', '987654321', 'BATCH001', 50, '2025-12-31', '2025-01-01',
-            'C:\Users\user\Downloads\Neem5.jpg,C:\Users\user\Downloads\Neem4.jpg', 'Sample description', 60, 120, 100, 'Honey', 'Online', 'Amazon'
-        ];
+		$sampleRow = [
+			'Sample Product',
+			'SKU123',
+			'In Stock',
+			'987654321',
+			'BATCH001',
+			50,
+			'2025-12-31',
+			'2025-01-01',
+			'C:\Users\user\Downloads\Neem5.jpg,C:\Users\user\Downloads\Neem4.jpg',
+			'Sample description',
+			60,
+			120,
+			100,
+			'Honey',
+			'Online',
+			'Amazon'
+		];
 
-        // Fetch attribute names and types for the product type
-        $attributes = $this->model->selectWhereData(
-            'tbl_attribute_master',
-            ['fk_product_type_id' => $fk_product_types_id, 'is_delete' => 1],
-            '*',
-            false, // multiple rows
-            ['id', 'ASC']
-        );
+		// Fetch attribute names and types for the product type
+		$attributes = $this->model->selectWhereData(
+			'tbl_attribute_master',
+			['fk_product_type_id' => $fk_product_types_id, 'is_delete' => 1],
+			'*',
+			false, // multiple rows
+			['id', 'ASC']
+		);
 
-        // Debugging: Check if attributes are fetched correctly
-        // var_dump($attributes); die();
+		// Debugging: Check if attributes are fetched correctly
+		// var_dump($attributes); die();
 
-        // Append each attribute as a column
-        if (!empty($attributes)) {
-            foreach ($attributes as $attr) {
-                if (isset($attr['attribute_name'])) {
-                    $headers[] = $attr['attribute_name']; // Add attribute name to headers
+		// Append each attribute as a column
+		if (!empty($attributes)) {
+			foreach ($attributes as $attr) {
+				if (isset($attr['attribute_name'])) {
+					$headers[] = $attr['attribute_name']; // Add attribute name to headers
 
-                    // Fetch the attribute value based on the attribute type
-                    switch ($attr['attribute_type']) {  // Assuming 'attribute_type' is a column in tbl_attribute_master
-                        case 'dropdown':  // If it's a dropdown, fetch possible values
-                            $attrValue = $this->model->selectWhereData(
-                                'tbl_attribute_values',
-                                ['fk_attribute_id' => $attr['id'], 'is_delete' => 1],
-                                '*',
-                                false,  // multiple values
-                                ['id', 'ASC']
-                            );
+					// Fetch the attribute value based on the attribute type
+					switch ($attr['attribute_type']) {  // Assuming 'attribute_type' is a column in tbl_attribute_master
+						case 'dropdown':  // If it's a dropdown, fetch possible values
+							$attrValue = $this->model->selectWhereData(
+								'tbl_attribute_values',
+								['fk_attribute_id' => $attr['id'], 'is_delete' => 1],
+								'*',
+								false,  // multiple values
+								['id', 'ASC']
+							);
 
-                            // Append the dropdown values to sampleRow, use the first option if multiple values exist
-                            $sampleRow[] = isset($attrValue[0]['attribute_value']) ? $attrValue[0]['attribute_value'] : '';
-                            break;
+							// Append the dropdown values to sampleRow, use the first option if multiple values exist
+							$sampleRow[] = isset($attrValue[0]['attribute_value']) ? $attrValue[0]['attribute_value'] : '';
+							break;
 
-                        case 'text':  // If it's a text-based attribute
-                            // Here you might fetch a default or sample text value for a text-based attribute
-                            $sampleRow[] = "Sample Text Value"; // Change to actual logic if needed
-                            break;
+						case 'text':  // If it's a text-based attribute
+							// Here you might fetch a default or sample text value for a text-based attribute
+							$sampleRow[] = "Sample Text Value"; // Change to actual logic if needed
+							break;
 
-                        case 'checkbox':  // If it's a checkbox (boolean type)
-                            // Provide a sample boolean value (true/false)
-                            $sampleRow[] = 'Yes'; // Change to "No" if you want to simulate unchecked checkbox
-                            break;
+						case 'checkbox':  // If it's a checkbox (boolean type)
+							// Provide a sample boolean value (true/false)
+							$sampleRow[] = 'Yes'; // Change to "No" if you want to simulate unchecked checkbox
+							break;
 
-                        case 'radio':  // If it's a radio button (single option)
-                            // You may want to provide a sample value, if available
-                            $sampleRow[] = 'Option1'; // Replace with actual logic or a default option
-                            break;
+						case 'radio':  // If it's a radio button (single option)
+							// You may want to provide a sample value, if available
+							$sampleRow[] = 'Option1'; // Replace with actual logic or a default option
+							break;
 
-                        default:
-                            $sampleRow[] = '';  // Default case, leave it empty
-                            break;
-                    }
-                }
-            }
-        }
-        // Create spreadsheet
-		
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->fromArray($headers, null, 'A1');
-        $sheet->fromArray($sampleRow, null, 'A2');
+						default:
+							$sampleRow[] = '';  // Default case, leave it empty
+							break;
+					}
+				}
+			}
+		}
+		// Create spreadsheet
 
-        // Output file
-        $filename = 'Product_Sample_with_Attributes.xlsx';
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-        header('Cache-Control: max-age=0');
+		$spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+		$sheet = $spreadsheet->getActiveSheet();
+		$sheet->fromArray($headers, null, 'A1');
+		$sheet->fromArray($sampleRow, null, 'A2');
 
-        // Clean output buffer before sending the file to prevent corrupt output
-        ob_end_clean();
+		// Output file
+		$filename = 'Product_Sample_with_Attributes.xlsx';
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"$filename\"");
+		header('Cache-Control: max-age=0');
 
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $writer->save('php://output');  // Direct output to the browser
+		// Clean output buffer before sending the file to prevent corrupt output
+		ob_end_clean();
 
-        exit;
-    }
+		$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+		$writer->save('php://output');  // Direct output to the browser
+
+		exit;
+	}
 
 	public function importProductExcel()
 	{
@@ -1489,11 +1513,11 @@ public function save_permissions()
 				$fk_sale_channel_id = $this->model->selectWhereData('tbl_sale_channel', ['sale_channel' => $row[15]], 'id', true);
 				$quantity = $row[5];
 
-				 // Handle the images (comma-separated list of image paths)
-				 $images = trim($row[8]); // Assuming images are in column 8
+				// Handle the images (comma-separated list of image paths)
+				$images = trim($row[8]); // Assuming images are in column 8
 
-				 $image_urls = $this->handle_image_upload($images);
-				
+				$image_urls = $this->handle_image_upload($images);
+
 				if (!$existing_product) {
 					$product_data = [
 						'product_name' => $row[0],
@@ -1619,35 +1643,36 @@ public function save_permissions()
 		}
 	}
 	// Helper function to handle image uploads
-	private function handle_image_upload($images) {
+	private function handle_image_upload($images)
+	{
 		$upload_dir = './uploads/products/';
 		$image_urls = [];
-	
+
 		// Ensure the directory exists with proper permissions
 		if (!is_dir($upload_dir)) {
 			mkdir($upload_dir, 0777, true);
 		}
 		chmod($upload_dir, 0777);
-	
+
 		// Skip if images is empty
 		if (empty($images)) {
 			return '';
 		}
-	
+
 		// Split the comma-separated image URLs
 		$image_paths = explode(',', $images);
-		
+
 		foreach ($image_paths as $image_path) {
 			$image_path = trim($image_path);
-			
+
 			// Skip empty URLs
 			if (empty($image_path)) {
 				continue;
 			}
-			
+
 			// Generate filename
 			$extension = 'jpg'; // default
-			
+
 			// Try to extract extension from URL
 			$path_parts = pathinfo(parse_url($image_path, PHP_URL_PATH));
 			if (isset($path_parts['extension'])) {
@@ -1657,10 +1682,10 @@ public function save_permissions()
 					$extension = 'jpg'; // fallback to jpg
 				}
 			}
-			
+
 			$filename = uniqid('img_') . '.' . $extension;
 			$destination = $upload_dir . $filename;
-			
+
 			try {
 				// Use simple file_get_contents() instead of cURL
 				$context = stream_context_create([
@@ -1673,13 +1698,13 @@ public function save_permissions()
 						'verify_peer_name' => false
 					]
 				]);
-				
+
 				$image_content = @file_get_contents($image_path, false, $context);
-				
+
 				if ($image_content === false) {
 					continue;
 				}
-				
+
 				// Save the image directly
 				if (file_put_contents($destination, $image_content) !== false) {
 					chmod($destination, 0666); // Make the file readable
@@ -1692,44 +1717,53 @@ public function save_permissions()
 				continue;
 			}
 		}
-		
+
 		// Return comma-separated list of URLs
 		return implode(',', $image_urls);
 	}
 
 
 
-/**
- * Debug test function for image upload
- */
-public function testImageUpload()
-{
-    // Test with some real image URLs
-    $test_urls = "C:\Users\user\Downloads\Neem5.jpg,C:\Users\user\Downloads\Neem4.jpg,C:\Users\user\Downloads\Neem3.jpg,C:\Users\user\Downloads\Neem2.jpg,C:\Users\user\Downloads\Neem.jpg
+	/**
+	 * Debug test function for image upload
+	 */
+	public function testImageUpload()
+	{
+		// Test with some real image URLs
+		$test_urls = "C:\Users\user\Downloads\Neem5.jpg,C:\Users\user\Downloads\Neem4.jpg,C:\Users\user\Downloads\Neem3.jpg,C:\Users\user\Downloads\Neem2.jpg,C:\Users\user\Downloads\Neem.jpg
 ";
-    
-    echo "<h2>Image Upload Test</h2>";
-    echo "<p>Testing with URLs: " . htmlspecialchars($test_urls) . "</p>";
-    
-    $result = $this->handle_image_upload($test_urls);
-    
-    echo "<p>Result: " . htmlspecialchars($result) . "</p>";
-    
-    if (!empty($result)) {
-        echo "<h3>Uploaded Images:</h3>";
-        $urls = explode(',', $result);
-        foreach ($urls as $url) {
-            echo "<img src='" . htmlspecialchars($url) . "' style='max-width:300px; margin:10px;'><br>";
-        }
-    } else {
-        echo "<p>No images were uploaded.</p>";
-    }
-}
-public function order_details(){
-	$data['sku_code'] = $this->model->selectWhereData('tbl_sku_code_master', array('is_delete' => 1), "id,sku_code", false, array('id', "DESC"));
-	$this->load->view('order_details',$data);
-}
-public function get_product_id_on_sku_code(){
+
+		echo "<h2>Image Upload Test</h2>";
+		echo "<p>Testing with URLs: " . htmlspecialchars($test_urls) . "</p>";
+
+		$result = $this->handle_image_upload($test_urls);
+
+		echo "<p>Result: " . htmlspecialchars($result) . "</p>";
+
+		if (!empty($result)) {
+			echo "<h3>Uploaded Images:</h3>";
+			$urls = explode(',', $result);
+			foreach ($urls as $url) {
+				echo "<img src='" . htmlspecialchars($url) . "' style='max-width:300px; margin:10px;'><br>";
+			}
+		} else {
+			echo "<p>No images were uploaded.</p>";
+		}
+	}
+	public function order_details()
+	{
+		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
+		if (!$admin_session) {
+			redirect(base_url('common/index'));
+		} else {
+			$data['sku_code'] = $this->model->selectWhereData('tbl_sku_code_master', array('is_delete' => 1), "id,sku_code", false, array('id', "DESC"));
+			$data['permissions'] = $this->permissions; // Pass full permissions array
+			$data['current_sidebar_id'] = 8; // Set the sidebar ID for the current view
+			$this->load->view('order_details', $data);
+		}
+	}
+	public function get_product_id_on_sku_code()
+	{
 		$sku_code = $this->input->post('sku_code'); // Get the SKU code from AJAX
 		if (!$sku_code) {
 			echo json_encode(['status' => 'error', 'message' => 'Invalid SKU code']);
@@ -1741,10 +1775,11 @@ public function get_product_id_on_sku_code(){
 		} else {
 			echo json_encode(['status' => 'error', 'message' => 'Failed to fetch Product ID']);
 		}
-}
-public function get_batch_no_on_product_id(){
+	}
+	public function get_batch_no_on_product_id()
+	{
 		$product_id = $this->input->post('product_id'); // Get the SKU code from AJAX
-		
+
 		if (!$product_id) {
 			echo json_encode(['status' => 'error', 'message' => 'Invalid Product ID']);
 			return;
@@ -1788,7 +1823,7 @@ public function get_batch_no_on_product_id(){
 		$last_quantity = $this->model->selectWhereData('tbl_product_inventory', ['fk_product_id' => $product_id, 'fk_batch_id' => $fk_batch_id, 'used_status' => 1], 'total_quantity,id', true);
 		$previous_quantity = $last_quantity['total_quantity'];
 		$inventory_id = $last_quantity['id'];
-		
+
 		$total_quantity = $previous_quantity - $quantity;
 
 		$update_data = array(
@@ -1806,7 +1841,7 @@ public function get_batch_no_on_product_id(){
 			'total_quantity' => $total_quantity,
 			'used_status' => 1
 		);
-		// print_r($order_data); die();
+		
 		$inserted = $this->model->insertData('tbl_product_inventory', $order_data);
 		if ($inserted) {
 			$response = ["status" => "success", "message" => "Order submitted successfully"];
@@ -1816,37 +1851,373 @@ public function get_batch_no_on_product_id(){
 		echo json_encode($response); // Return response as JSON
 	}
 
-	public function inventory_details(){
+	public function inventory_details()
+	{
 		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
 		if (!$admin_session) {
 			redirect(base_url('common/index')); // Redirect to login page if session is not active
 		} else {
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
-			$this->load->view('inventory_details',$response);
+			$this->load->view('inventory_details', $response);
 		}
 	}
 
 	public function get_inventory_by_product_and_batch()
-{
-    $this->load->model('Product_model');
+	{
+		$this->load->model('Product_model');
+		$data = $this->Product_model->get_inventory_by_product_and_batch();
+		if (!empty($data)) {
+			echo json_encode([
+				'status' => 'success',
+				'data' => $data
+			]);
+		} else {
+			echo json_encode([
+				'status' => 'error',
+				'message' => 'No inventory data found.'
+			]);
+		}
+	}
 
-    $data = $this->Product_model->get_inventory_by_product_and_batch();
+	public function get_all_orders()
+	{
+		$start = $this->input->post('start');
+		$length = $this->input->post('length');
 
-    if (!empty($data)) {
-        echo json_encode([
-            'status' => 'success',
-            'data' => $data
-        ]);
-    } else {
-        echo json_encode([
-            'status' => 'error',
-            'message' => 'No inventory data found.'
-        ]);
-    }
-}
+		$orders = $this->Product_model->get_orders($start, $length);
+		$totalRecords = $this->Product_model->get_total_orders();
 
+		echo json_encode([
+			"draw" => intval($this->input->post('draw')),
+			"recordsTotal" => $totalRecords,
+			"recordsFiltered" => $totalRecords,
+			"data" => $orders
+		]);
+	}
+	
+	// public function upload_order_excel()
+	// {
+	// 	require_once FCPATH . 'vendor/autoload.php';
 
+	// 	$uploadPath = FCPATH . 'uploads/rejected_excels/';
+
+	// 	if (!is_dir($uploadPath)) {
+	// 		mkdir($uploadPath, 0777, true);
+	// 	}
+
+	// 	if (isset($_FILES['excel_file']['name']) && $_FILES['excel_file']['name'] != '') {
+	// 		$fileTmpPath = $_FILES['excel_file']['tmp_name'];
+
+	// 		try {
+	// 			$spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($fileTmpPath);
+	// 			$sheet = $spreadsheet->getActiveSheet();
+	// 			$data = $sheet->toArray();
+
+	// 			$insertData = [];
+	// 			$rejectedData = [];
+
+	// 			for ($i = 2; $i < count($data); $i++) {
+	// 				$sku_code     = trim($data[$i][0]);
+	// 				$batch_no     = trim($data[$i][1]);
+	// 				$channel_type = trim($data[$i][2]);
+	// 				$sale_channel = trim($data[$i][3]);
+	// 				$quantity     = trim($data[$i][4]);
+
+	// 				// Validate SKU code
+	// 				$skuValid = $this->model->selectWhereData('tbl_sku_code_master', [
+	// 					'sku_code' => $sku_code,
+	// 					'is_delete' => 1
+	// 				], 'id', true);
+
+	// 				if (!$skuValid) {
+	// 					$rejectedData[] = $data[$i];
+	// 					continue;
+	// 				}
+
+	// 				// Validate product
+	// 				$product = $this->model->selectWhereData('tbl_product_master', [
+	// 					'product_sku_code' => $skuValid['id'],
+	// 					'is_delete' => 1
+	// 				], 'id', true);
+
+	// 				if (!$product) {
+	// 					$rejectedData[] = $data[$i];
+	// 					continue;
+	// 				}
+
+	// 				$product_id = $product['id'];
+
+	// 				// Validate batch
+	// 				$batchValid = $this->model->selectWhereData('tbl_product_batches', [
+	// 					'batch_no' => $batch_no,
+	// 					'fk_product_id' => $product_id
+	// 				], 'id', true);
+
+	// 				if (!$batchValid) {
+	// 					$rejectedData[] = $data[$i];
+	// 					continue;
+	// 				}
+
+	// 				// Validate sale channel
+	// 				$sale_channel_id = $this->model->selectWhereData('tbl_sale_channel', [
+	// 					'sale_channel' => $sale_channel,
+	// 					'is_delete' => 1
+	// 				], 'id', true);
+
+	// 				if (!$product_id || !$batchValid['id'] || !$sale_channel_id || !is_numeric($quantity)) {
+	// 					$rejectedData[] = $data[$i];
+	// 					continue;
+	// 				}
+
+	// 				// Get last inventory quantity
+	// 				$last_quantity = $this->model->selectWhereData('tbl_product_inventory', [
+	// 					'fk_product_id' => $product_id,
+	// 					'fk_batch_id' => $batchValid['id'],
+	// 					'used_status' => 1
+	// 				], 'total_quantity,id', true,array('id','DESC'));
+					
+	// 				if (!empty($last_quantity)) {			
+						
+	// 					$previous_quantity = $last_quantity['total_quantity'];
+	// 					$inventory_id = $last_quantity['id'];
+	// 					$total_quantity = $previous_quantity - $quantity;
+	// 					// Check if the resulting quantity would be zero or negative
+	// 					if ($total_quantity <= 0) {
+	// 						// Reject this record if it would result in zero or negative quantity
+	// 						$rejectedData[] = $data[$i];
+	// 						continue;
+	// 					}
+	// 					// Only update previous inventory if found
+	// 					$this->model->updateData('tbl_product_inventory', [
+	// 						'used_status' => 0,
+	// 						'is_delete' => '0'
+	// 					], ['fk_product_id' => $product_id,'fk_batch_id' => $batchValid['id'],]);					
+					 
+
+	// 					// // Prepare insert data
+	// 					$insertData = [
+	// 						'fk_product_id'       => $product_id,
+	// 						'fk_batch_id'         => $batchValid['id'],
+	// 						'channel_type'        => $channel_type,
+	// 						'fk_sale_channel_id'  => $sale_channel_id['id'],
+	// 						'deduct_quantity'     => $quantity,
+	// 						'total_quantity'      => $total_quantity,
+	// 						'used_status'         => 1
+	// 					];
+	// 					$this->model->insertData('tbl_product_inventory', $insertData);
+	// 				}else {
+	// 					// If no previous record with quantity exists, reject this record
+	// 					$rejectedData[] = $data[$i];
+	// 					continue;
+	// 				}
+	// 			}
+
+	// 			if (!empty($rejectedData)) {
+	// 				$rejectedSheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+	// 				$sheet = $rejectedSheet->getActiveSheet();
+
+	// 				$sheet->fromArray($data[0], NULL, 'A1');
+	// 				$sheet->fromArray($rejectedData, NULL, 'A2');
+
+	// 				$fileName = 'rejected_orders_' . time() . '.xlsx';
+	// 				$filePath = $uploadPath . $fileName;
+
+	// 				$writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($rejectedSheet, 'Xlsx');
+	// 				$writer->save($filePath);
+
+	// 				$downloadUrl = base_url('uploads/rejected_excels/' . $fileName);
+
+	// 				echo json_encode([
+	// 					'status'       => 'partial',
+	// 					'message'      => 'Some rows were invalid and have been rejected.',
+	// 					'rejected_url' => $downloadUrl
+	// 				]);
+	// 				return;
+	// 			}
+
+	// 			echo json_encode([
+	// 				'status'  => 'success',
+	// 				'message' => 'All order data uploaded successfully.'
+	// 			]);
+
+	// 		} catch (Exception $e) {
+	// 			echo json_encode([
+	// 				'status'  => 'error',
+	// 				'message' => 'Invalid Excel file or unexpected error: ' . $e->getMessage()
+	// 			]);
+	// 		}
+	// 	} else {
+	// 		echo json_encode([
+	// 			'status'  => 'error',
+	// 			'message' => 'No file selected.'
+	// 		]);
+	// 	}
+	// }
+	public function upload_order_excel()
+	{
+		require_once FCPATH . 'vendor/autoload.php';
+
+		$uploadPath = FCPATH . 'uploads/rejected_excels/';
+
+		if (!is_dir($uploadPath)) {
+			mkdir($uploadPath, 0777, true);
+		}
+
+		if (isset($_FILES['excel_file']['name']) && $_FILES['excel_file']['name'] != '') {
+			$fileTmpPath = $_FILES['excel_file']['tmp_name'];
+
+			try {
+				$spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($fileTmpPath);
+				$sheet = $spreadsheet->getActiveSheet();
+				$data = $sheet->toArray();
+
+				// $insertData = []; 
+				$rejectedData = [];
+
+				// Add headers + rejection reason header
+				$headers = $data[0];
+				$headers[] = 'Rejection Reason';
+
+				for ($i = 2; $i < count($data); $i++) {
+					$row = $data[$i];
+					$sku_code     = trim($row[0]);
+					$batch_no     = trim($row[1]);
+					$channel_type = trim($row[2]);
+					$sale_channel = trim($row[3]);
+					$quantity     = trim($row[4]);
+
+					// Validate SKU
+					$skuValid = $this->model->selectWhereData('tbl_sku_code_master', [
+						'sku_code' => $sku_code,
+						'is_delete' => 1
+					], 'id', true);
+
+					if (!$skuValid) {
+						$row[] = 'Invalid SKU Code';
+						$rejectedData[] = $row;
+						continue;
+					}
+
+					// Validate product
+					$product = $this->model->selectWhereData('tbl_product_master', [
+						'product_sku_code' => $skuValid['id'],
+						'is_delete' => 1
+					], 'id', true);
+
+					if (!$product) {
+						$row[] = 'Product not found for SKU';
+						$rejectedData[] = $row;
+						continue;
+					}
+
+					$product_id = $product['id'];
+
+					// Validate batch
+					$batchValid = $this->model->selectWhereData('tbl_product_batches', [
+						'batch_no' => $batch_no,
+						'fk_product_id' => $product_id
+					], 'id', true);
+
+					if (!$batchValid) {
+						$row[] = 'Invalid batch for product';
+						$rejectedData[] = $row;
+						continue;
+					}
+
+					// Validate sale channel
+					$sale_channel_id = $this->model->selectWhereData('tbl_sale_channel', [
+						'sale_channel' => $sale_channel,
+						'is_delete' => 1
+					], 'id', true);
+
+					if (!$product_id || !$batchValid['id'] || !$sale_channel_id || !is_numeric($quantity)) {
+						$row[] = 'Invalid data or quantity not numeric';
+						$rejectedData[] = $row;
+						continue;
+					}
+
+					// Get last inventory quantity
+					$last_quantity = $this->model->selectWhereData('tbl_product_inventory', [
+						'fk_product_id' => $product_id,
+						'fk_batch_id' => $batchValid['id'],
+						'used_status' => 1
+					], 'total_quantity,id', true, ['id' => 'DESC']);
+
+					if (!empty($last_quantity)) {
+						$previous_quantity = $last_quantity['total_quantity'];
+						$inventory_id = $last_quantity['id'];
+						$total_quantity = $previous_quantity - $quantity;
+
+						if ($total_quantity < 0) {
+							$row[] = 'Resulting quantity would be zero or negative';
+							$rejectedData[] = $row;
+							continue;
+						}
+						
+						$this->model->updateData('tbl_product_inventory', [
+							'used_status' => 0,
+							'is_delete' => '0'
+						], ['fk_product_id' => $product_id,'fk_batch_id' => $batchValid['id'],]);
+
+						// Prepare insert data
+							$insertData = [
+								'fk_product_id'       => $product_id,
+								'fk_batch_id'         => $batchValid['id'],
+								'channel_type'        => $channel_type,
+								'fk_sale_channel_id'  => $sale_channel_id['id'],
+								'deduct_quantity'     => $quantity,
+								'total_quantity'      => $total_quantity,
+								'used_status'         => 1
+							];
+							$this->model->insertData('tbl_product_inventory', $insertData);
+					} else {
+						$row[] = 'No previous inventory found';
+						$rejectedData[] = $row;
+						continue;
+					}
+				}
+				// Generate rejection Excel
+				if (!empty($rejectedData)) {
+					$rejectedSheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+					$sheet = $rejectedSheet->getActiveSheet();
+
+					$sheet->fromArray($headers, NULL, 'A1');
+					$sheet->fromArray($rejectedData, NULL, 'A2');
+
+					$fileName = 'rejected_orders_' . time() . '.xlsx';
+					$filePath = $uploadPath . $fileName;
+
+					$writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($rejectedSheet, 'Xlsx');
+					$writer->save($filePath);
+
+					$downloadUrl = base_url('uploads/rejected_excels/' . $fileName);
+
+					echo json_encode([
+						'status'       => 'partial',
+						'message'      => 'Some rows were rejected.',
+						'rejected_url' => $downloadUrl
+					]);
+					return;
+				}
+
+				echo json_encode([
+					'status'  => 'success',
+					'message' => 'All order data uploaded successfully.'
+				]);
+			} catch (Exception $e) {
+				echo json_encode([
+					'status'  => 'error',
+					'message' => 'Invalid Excel file or error: ' . $e->getMessage()
+				]);
+			}
+		} else {
+			echo json_encode([
+				'status'  => 'error',
+				'message' => 'No file selected.'
+			]);
+		}
+	}
 
 
 

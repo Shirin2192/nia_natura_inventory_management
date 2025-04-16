@@ -24,6 +24,7 @@ $(document).ready(function () {
                     destroy: true, // Ensure it gets reinitialized
                     data: data.data ? data.data : [], // Fallback for empty data
                     columns: [
+                        { data: null, title: "Sr. No", render: function (data, type, row, meta) { return meta.row + 1; } },
                         { data: "sku_code" },
                         {
                             data: "id",

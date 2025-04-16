@@ -5,59 +5,83 @@ $(".chosen-select").chosen({
 
 $(document).ready(function () {
     loadSaleChannel();
-    let currentPermission = null; // Define it globally inside ready()
+    let currentPermission = null;
 
     // Load DataTable
     function loadSaleChannel() {
         $.ajax({
-            url: frontend + controllerName+"/fetch_sale_channel",
+            url: frontend + controllerName + "/fetch_sale_channel",
             type: "POST",
             dataType: "json",
             success: function (data) {
                 const permissions = data.data.permissions;
                 const currentSidebarId = data.data.current_sidebar_id;
                 currentPermission = permissions[currentSidebarId];
+    
                 if ($.fn.DataTable.isDataTable("#SalechannelTable")) {
                     $("#SalechannelTable").DataTable().destroy(); // Destroy previous instance
                 }
+    
                 $("#SalechannelTable").DataTable({
-                    destroy: true, // Ensure it gets reinitialized
-                    data: data.response,
+                    destroy: true,
+                    data: data.response, // Provide data directly
                     columns: [
-                        { data: "channel_type" },
-                        { data: "sale_channel" },
+                        {
+                            data: null,
+                            title: "Sr. No",
+                            orderable: false,
+                            searchable: false,
+                            render: function (data, type, row, meta) {
+                                return meta.row + 1;
+                            }
+                        },
+                        {
+                            data: "channel_type",
+                            title: "Channel Type"
+                        },
+                        {
+                            data: "sale_channel",
+                            title: "Sale Channel"
+                        },
                         {
                             data: "id",
+                            title: "Action",
+                            orderable: false,
+                            searchable: false,
                             render: function (data) {
                                 let actions = '';
                                 if (currentPermission) {
                                     if (currentPermission.can_view === "1") {
-                                        actions += `<button class="btn btn-info btn-sm view-sale-channel" data-id="${data}" data-target="#sale_channelModal">
-                                            <i class="icon-eye menu-icon"></i>
-                                        </button>`;
+                                        actions += `<button class="btn btn-info btn-sm view-sale-channel me-1" data-id="${data}" data-target="#sale_channelModal">
+                                                        <i class="icon-eye menu-icon"></i>
+                                                    </button>`;
                                     }
                                     if (currentPermission.can_edit === "1") {
-                                        actions += `<button class="btn btn-warning btn-sm edit-sale-channel" data-id="${data}" data-target="#edit_sale_channel_modal">
-                                            <i class="icon-pencil menu-icon"></i>
-                                        </button>`;
+                                        actions += `<button class="btn btn-warning btn-sm edit-sale-channel me-1" data-id="${data}" data-target="#edit_sale_channel_modal">
+                                                        <i class="icon-pencil menu-icon"></i>
+                                                    </button>`;
                                     }
                                     if (currentPermission.can_delete === "1") {
                                         actions += `<button class="btn btn-danger btn-sm" onclick="deleteSaleChannel(${data})">
-                                            <i class="icon-trash menu-icon"></i>
-                                        </button>`;
+                                                        <i class="icon-trash menu-icon"></i>
+                                                    </button>`;
                                     }
                                 }
                                 return actions || '-';
                             }
                         }
-                    ]
+                    ],
+                    language: {
+                        emptyTable: "No Sale Channels found"
+                    }
                 });
             },
             error: function () {
-                console.error("Error fetching Bottle Size.");
+                console.error("Error fetching Sale Channels.");
             }
         });
     }
+    
 
     $("#SaleChannelForm").on("submit", function (event) {
         event.preventDefault(); // Prevent page reload

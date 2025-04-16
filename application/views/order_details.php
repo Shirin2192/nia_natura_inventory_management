@@ -57,10 +57,16 @@
                 <div class="col p-md-0">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="<?=base_url()?><?= $controller_name ?>">Dashboard</a></li>
-                        <li class="breadcrumb-item active"><a href="<?=base_url()?><?= $controller_name ?>/order_details">Order Details</a></li>
+                        <li class="breadcrumb-item active"><a
+                                href="<?=base_url()?><?= $controller_name ?>/order_details">Order Details</a></li>
                     </ol>
                 </div>
             </div>
+            <?php
+                $sidebar_id = $current_sidebar_id;            
+                $can_add = isset($permissions[$sidebar_id]['can_add']) && $permissions[$sidebar_id]['can_add'] == 1;
+            ?>
+            <?php if ($can_add): ?>
             <!-- row -->
             <div class="container-fluid">
                 <div class="row justify-content-center">
@@ -75,10 +81,12 @@
                                                 <label class="col-form-label" for="sku_code">SKU Code <span
                                                         class="text-danger">*</span>
                                                 </label>
-                                                <select class=" chosen-select form-control" id="sku_code" name="sku_code" data-placeholder="Select SKU Code">  
-                                                    <option value="" >Select SKU Code</option>
+                                                <select class=" chosen-select form-control" id="sku_code"
+                                                    name="sku_code" data-placeholder="Select SKU Code">
+                                                    <option value="">Select SKU Code</option>
                                                     <?php foreach ($sku_code as $sku_code_row) { ?>
-                                                    <option value="<?= $sku_code_row['id'] ?>"><?= $sku_code_row['sku_code'] ?>
+                                                    <option value="<?= $sku_code_row['id'] ?>">
+                                                        <?= $sku_code_row['sku_code'] ?>
                                                     </option>
                                                     <?php } ?>
                                                 </select>
@@ -91,9 +99,10 @@
                                                 <label class="col-form-label" for="fk_batch_id">Batch Id <span
                                                         class="text-danger">*</span>
                                                 </label>
-                                                <select class=" chosen-select form-control" id="fk_batch_id" name="fk_batch_id"  data-placeholder="Select Batch Id">
+                                                <select class=" chosen-select form-control" id="fk_batch_id"
+                                                    name="fk_batch_id" data-placeholder="Select Batch Id">
                                                     <option value="">Select Product</option>
-                                                   
+
                                                 </select>
                                                 <small class="text-danger" id="fk_batch_id_error"></small>
                                                 <!-- Error message here -->
@@ -120,26 +129,25 @@
                                                 <select class="chosen-select form-control" id="sale_channel"
                                                     name="sale_channel">
                                                     <option value=""></option>
-                                                    
+
                                                 </select>
                                                 <div class="text-danger"><?= form_error('sale_channel'); ?></div>
                                             </div>
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <div class="form-group">
-                                                <label class="col-form-label" for="order_quantity">Quantity <span class="text-danger">*</span></label>
-                                                <input type="number" name="order_quantity" id="order_quantity" class="form-control">
+                                                <label class="col-form-label" for="order_quantity">Quantity <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="number" name="order_quantity" id="order_quantity"
+                                                    class="form-control">
                                                 <div class="text-danger"><?= form_error('order_quantity'); ?></div>
                                             </div>
                                         </div>
                                     </div>
-
-                                    
                                     <div class="form-group">
                                         <div class="col-lg-8 ml-auto">
                                             <button type="submit" class="btn btn-primary">Submit</button>
                                         </div>
-                                    </div>
                                     </div>
                                 </form>
                             </div>
@@ -147,108 +155,158 @@
                     </div>
                 </div>
             </div>
-            <!-- Row for DataTable -->
+
             <div class="container-fluid">
                 <div class="row justify-content-center">
                     <div class="col-lg-12">
                         <div class="card">
                             <div class="card-body">
-                                <h5>Sale Channel List</h5>
-                                <table id="OrderTable" class="display">
-                                    <thead>
-                                        <tr>
-                                            <th>Order Details</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-        </div>
-    </div>
-    <!-- #/ container -->
-    </div>
-    <!--**********************************
-         Content body end
-         ***********************************-->
-    <!-- View Sale Channel Details Modal -->
-    <div class="modal fade" id="sale_channelModal" tabindex="-1" role="dialog" aria-labelledby="sale_channelModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="sale_channelModalLabel">Sale Channel Details</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="sale_channelContent">
-                    <!-- Flavour details will be loaded here -->
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Edit Sale Channel Modal -->
-    <div class="modal fade" id="edit_sale_channel_modal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">Edit Sale Channel</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="edit_sale_channel_form">
-                    <div class="modal-body">
+                                <!-- Excel Upload Section -->
+                                <div class="row mb-4">
+                                    <div class="col-lg-6">
+                                        <form id="ExcelOrderUploadForm" enctype="multipart/form-data">
+                                            <div class="form-group">
+                                                <label for="excel_file">Upload Excel File <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="file" class="form-control" name="excel_file"
+                                                    id="excel_file" accept=".xls,.xlsx">
+                                                <small class="text-danger" id="excel_file_error"></small>
+                                            </div>
+                                            <button type="submit" class="btn btn-success">Upload Orders</button>
 
-                        <div class="row">
-                            <div class="col-lg-6 mb-3">
-                                <div class="form-group">
-                                    <input type="hidden" name="edit_sale_channel_id" id="edit_sale_channel_id">
-                                    <label class="col-form-label" for="edit_sale_channel">Sale Channel <span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="edit_sale_channel"
-                                        name="edit_sale_channel" placeholder="Enter Sale Channel">
-                                    <small class="text-danger" id="edit_sale_channel_error"></small>
-                                    <!-- Error message here -->
+                                        </form>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="alert alert-info" role="alert">
+                                            <strong>Note:</strong> Please ensure that the Excel file contains the
+                                            correct
+                                            format and data before uploading.
+                                        </div>
+                                        <div class="alert alert-warning" role="alert">
+                                            <strong>Download Sample Excel:</strong> <a
+                                                href="<?= base_url('assets/sample_excel/order_details_sample.xlsx') ?>"
+                                                class="btn btn-primary btn-sm">Download</a>
+
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
+
+                    <?php endif ?>
+                    <!-- Row for DataTable -->
+                    <div class="container-fluid">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5>Order List</h5>
+                                        <table id="OrderTable" class="display">
+                                            <thead>
+                                                <tr>
+                                                    <th>Sr. No</th>
+                                                    <th>Product Name</th>
+                                                    <th>SKU CODE</th>
+                                                    <th>Batch No</th>
+                                                    <th>Channel Type</th>
+                                                    <th>Sales Channel</th>
+                                                    <th>Deducted Quantity</th>
+                                                    <th>Total Quantity</th>
+                                                    <th>Date</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <!-- #/ container -->
+        </div>
+        <!--**********************************
+         Content body end
+         ***********************************-->
+        <!-- View Sale Channel Details Modal -->
+        <div class="modal fade" id="sale_channelModal" tabindex="-1" role="dialog"
+            aria-labelledby="sale_channelModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="sale_channelModalLabel">Sale Channel Details</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body" id="sale_channelContent">
+                        <!-- Flavour details will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Edit Sale Channel Modal -->
+        <div class="modal fade" id="edit_sale_channel_modal" tabindex="-1" aria-labelledby="editModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalLabel">Edit Sale Channel</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form id="edit_sale_channel_form">
+                        <div class="modal-body">
+
+                            <div class="row">
+                                <div class="col-lg-6 mb-3">
+                                    <div class="form-group">
+                                        <input type="hidden" name="edit_sale_channel_id" id="edit_sale_channel_id">
+                                        <label class="col-form-label" for="edit_sale_channel">Sale Channel <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="edit_sale_channel"
+                                            name="edit_sale_channel" placeholder="Enter Sale Channel">
+                                        <small class="text-danger" id="edit_sale_channel_error"></small>
+                                        <!-- Error message here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteModalLabel">Delete Sale Channel</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete this Sale Channel?
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirm-delete">Delete</button>
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <!-- Delete Confirmation Modal -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Delete Sale Channel</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Are you sure you want to delete this Sale Channel?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirm-delete">Delete</button>
                 </div>
             </div>
         </div>
-    </div>
-    <!--**********************************
+        <!--**********************************
          Footer start
          ***********************************-->
-    <?php include('common/footer.php')?>
-    <!--**********************************
+        <?php include('common/footer.php')?>
+        <!--**********************************
          Footer end
          ***********************************-->
     </div>

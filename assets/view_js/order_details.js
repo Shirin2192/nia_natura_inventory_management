@@ -164,11 +164,109 @@ $("#OrderForm").submit(function (e) {
                 // Clear Chosen-select dropdowns
                 $(".chosen-select").val('').trigger('chosen:updated');
 
-                $('#product_table').DataTable().ajax.reload(); // Refresh DataTable
+                $('#OrderTable').DataTable().ajax.reload(); // Refresh DataTable
             }
         },
         error: function () {
             alert("Something went wrong. Please try again.");
+        }
+    });
+});
+
+// Initialize DataTable
+$(document).ready(function () {
+   $('#OrderTable').DataTable({
+    processing: true,
+    serverSide: true,
+    ajax: {
+        url: frontend + controllerName + "/get_all_orders",
+        type: "POST"
+    },
+    columns: [
+        {
+            data: null,
+            title: "Sr. No",
+            render: function (data, type, row, meta) {
+                return meta.row + meta.settings._iDisplayStart + 1;
+            }
+        },
+        { data: "product_name", title: "Product Name" },
+        { data: "sku_code", title: "SKU CODE" },
+        { data: "batch_no", title: "Batch No" },
+        { data: "channel_type", title: "Channel Type" },
+        { data: "sale_channel", title: "Sales Channel" },
+        { data: "deduct_quantity", title: "Deducted Quantity" },
+        { data: "total_quantity", title: "Total Quantity" },
+        { data: "created_at", title: "Date" }
+    ],
+    order: [[7, "desc"]],
+    responsive: true,
+    language: {
+        emptyTable: "No orders available",
+        processing: "Loading..."
+    }
+});
+
+});
+$('#ExcelOrderUploadForm').on('submit', function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+
+    $.ajax({
+        url: frontend + controllerName + "/upload_order_excel",
+        type: "POST",
+        data: formData,
+        dataType: "json",
+        contentType: false,
+        processData: false,
+        success: function (response) {
+            if (response.status === "success") {
+                swal({
+                    icon: "success",
+                    title: "Added!",
+                    text: response.message,
+                    button: false, // ✅ Use "button" instead of "showConfirmButton"
+                    timer: 2000
+                });
+                $('#ExcelOrderUploadForm')[0].reset();
+            } else if (response.status === "partial") {
+                swal({
+                    icon: "warning",
+                    title: "Warning!",
+                    text: response.message,
+                    button: false, // ✅ Use "button" instead of "showConfirmButton"
+                    timer: 2000
+                });
+        
+                if (response.rejected_url) {
+                    const link = document.createElement("a");
+                    link.href = response.rejected_url;
+                    link.download = response.rejected_url.split("/").pop();
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+        
+            } else {
+                swal({
+                    icon: "error",
+                    title: "Error!",
+                    text: response.message,
+                    button: false, // ✅ Use "button" instead of "showConfirmButton"
+                    timer: 2000
+                });
+            }
+        },
+        
+        error: function () {
+            swal({
+                icon: "error",
+                title: "Error!",
+                text: response.message,
+                button: false, // ✅ Use "button" instead of "showConfirmButton"
+                timer: 2000
+            });
         }
     });
 });

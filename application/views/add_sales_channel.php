@@ -126,6 +126,7 @@
                                 <table id="SalechannelTable" class="display">
                                     <thead>
                                         <tr>
+                                            <th>Sr. No</th>
                                             <th>Channel Type</th>
                                             <th>Sale Channel</th>
                                             <th>Action</th>
