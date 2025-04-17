@@ -19,6 +19,7 @@ const table = $('#productInventoryTable').DataTable({
             }
         }
     },
+
     columns: [
         {
             className: 'dt-control',
@@ -26,14 +27,70 @@ const table = $('#productInventoryTable').DataTable({
             data: null,
             defaultContent: '',
         },
-        { data: 'id' },
-        { data: 'product_name' },
-        { data: 'sku_code' },
+        { data: 'id', title: "ID" },
+        { data: 'product_name', title: "Product Name" },
+        { data: 'sku_code', title: "SKU Code" },
     ],
+
     order: [[1, 'asc']],
+    pageLength: 10,
+    responsive: true,
+
+    dom: 'Bfrtip',
+    buttons: [
+        {
+            extend: 'excelHtml5',
+            text: 'Export to Excel',
+            title: 'Product Inventory',
+
+            customizeData: function (data) {
+                let newBody = [];
+
+                table.rows({ search: 'applied' }).every(function () {
+                    const rowData = this.data();
+
+                    // Push parent (product) row
+                    newBody.push([
+                        '', // control
+                        rowData.id,
+                        rowData.product_name,
+                        rowData.sku_code
+                    ]);
+
+                    // Push each batch as nested row
+                    rowData.batches.forEach(batch => {
+                        newBody.push([
+                            '', // control
+                            '', // id empty for nested
+                            "↳ Batch: " + batch.batch_no,
+                            `Qty: ${batch.quantity}`, `Date: ${batch.date}`
+                        ]);
+                    });
+                });
+
+                data.body = newBody;
+            }
+        }
+    ]
 });
 
-// Function to format nested (child) row
+// ✅ Expand/collapse manually when clicked
+$('#productInventoryTable tbody').on('click', 'td.dt-control', function () {
+    const tr = $(this).closest('tr');
+    const row = table.row(tr);
+
+    if (row.child.isShown()) {
+        row.child.hide();
+        tr.removeClass('shown');
+        $(this).html('');
+    } else {
+        row.child(format(row.data().batches)).show();
+        tr.addClass('shown');
+        $(this).html('<b>-</b>');
+    }
+});
+
+// ✅ Format nested (child) batch table
 function format(batchList) {
     let html = `
         <table class="table table-sm table-bordered mb-0">
@@ -60,19 +117,3 @@ function format(batchList) {
     html += `</tbody></table>`;
     return html;
 }
-
-// Toggle child rows
-$('#productInventoryTable tbody').on('click', 'td.dt-control', function () {
-    const tr = $(this).closest('tr');
-    const row = table.row(tr);
-
-    if (row.child.isShown()) {
-        row.child.hide();
-        tr.removeClass('shown');
-        $(this).html('');
-    } else {
-        row.child(format(row.data().batches)).show();
-        tr.addClass('shown');
-        $(this).html('<b>-</b>');
-    }
-});

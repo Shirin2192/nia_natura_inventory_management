@@ -67,28 +67,74 @@ $(document).ready(function () {
 			'</tr>' +
 			'</thead>' +
 			'<tbody>';
-		// attributeTable += '<tr><th>Attribute</th><th>Value</th></tr>';
+	
 		d.attributes.forEach(attr => {
 			attributeTable += `<tr><td>${attr.name}</td><td>${attr.value}</td></tr>`;
 		});
-		attributeTable += '</table>';
-
+		attributeTable += '</tbody></table>';
+	
 		let productTypes = d.product_types.join(", ");
-
+	
 		return `<b>Product Types:</b> ${productTypes}<br><br>` + attributeTable;
 	}
+	
 	let currentPermission = {};
 	let table = $('#product_table').DataTable({
+	
+		dom: 'Bfrtip', // ✅ Add buttons
+		buttons: [
+			{
+				extend: 'excelHtml5',
+				text: 'Export Nested Excel',
+				title: 'Product with Attributes',
+				exportOptions: {
+					columns: [1, 2, 3, 4, 5, 6] // exporting only visible main columns
+				},
+				customizeData: function (data) {
+					let newBody = [];
+	
+					table.rows({ search: 'applied' }).every(function () {
+						let rowData = this.data();
+	
+						// Parent row
+						newBody.push([
+							rowData.id,
+							rowData.product_name,
+							rowData.sku_code,
+							rowData.purchase_price,
+							rowData.total_quantity,
+							rowData.product_types.join(", ")
+						]);
+	
+						// Child Attributes (Nested rows)
+						if (rowData.attributes && rowData.attributes.length > 0) {
+							rowData.attributes.forEach(attr => {
+								newBody.push([
+									'', // ID empty
+									"↳ " + attr.name, // Attribute name with arrow
+									attr.value, // Attribute value
+									'', '', '', '' // Empty other columns
+								]);
+							});
+						}
+					});
+	
+					data.body = newBody;
+				}
+			}
+		],
+	
 		ajax: {
 			url: frontend + controllerName + "/fetch_product_details",
 			dataSrc: function (json) {
 				const permissions = json.permissions;
 				const currentSidebarId = json.current_sidebar_id;
 				currentPermission = permissions[currentSidebarId]; // store for global access
-
+	
 				return json.data; // return product details to datatable
 			}
 		},
+	
 		columns: [
 			{
 				className: 'details-control',
@@ -111,7 +157,7 @@ $(document).ready(function () {
 				data: 'id',
 				render: function (id, type, row, meta) {
 					let buttons = '';
-
+	
 					if (currentPermission?.can_view === "1") {
 						buttons += `<button class="btn btn-primary btn-sm view-product" data-id="${id}" data-toggle="modal" data-target="#viewProductModal">
 							<i class="icon-eye menu-icon"></i>
@@ -131,25 +177,28 @@ $(document).ready(function () {
 				}
 			}
 		],
+	
 		order: [[1, 'asc']]
 	});
-
-	// Handle row expansion with plus/minus toggle
+	
+	// ✅ Handle Row Expansion (Plus/Minus toggle)
 	$('#product_table tbody').on('click', 'td.details-control .toggle-details', function () {
 		let tr = $(this).closest('tr');
 		let row = table.row(tr);
 		let button = $(this);
-
+	
 		if (row.child.isShown()) {
 			row.child.hide();
 			tr.removeClass('shown');
-			button.text('+').removeClass('btn-danger').addClass('btn-info'); // Change to plus sign
+			button.text('+').removeClass('btn-danger').addClass('btn-info'); // plus
 		} else {
 			row.child(formatDetails(row.data())).show();
 			tr.addClass('shown');
-			button.text('-').removeClass('btn-info').addClass('btn-danger'); // Change to minus sign
+			button.text('-').removeClass('btn-info').addClass('btn-danger'); // minus
 		}
 	});
+	
+	
 });
 $(document).ready(function () {
 	// Initialize chosen-select
@@ -542,7 +591,7 @@ $(document).on("click", ".update-product", function () {
 			$('#update_inventory_id').val(product.inventory_id);
 			$("#update_product_name").val(product.product_name);
 			$("#update_product_sku").text(response.product.sku_code);
-			$("#update_batch_no").val(product.batch_no);
+			$("#update_batch_no").text(response.product.batch_no);
 			$("#update_barcode").val(product.barcode);
 			$("#update_purchase_price").val(product.purchase_price);
 			$("#update_mrp").val(product.MRP);
@@ -904,6 +953,46 @@ $("#update_channel_type").off("change").on("change", function () {
 		$("#update_sale_channel").html('<option value="">Select Sale Channel</option>');
 		if ($("#update_sale_channel").data('chosen')) {
 			$("#update_sale_channel").trigger("chosen:updated");
+		}
+	}
+
+});
+$("#add_new_channel_type").off("change").on("change", function () {
+	var add_new_channel_type = $(this).val(); // Get selected Product Type ID
+
+	if (add_new_channel_type) {
+		$.ajax({
+			url: frontend + controllerName + "/get_sales_channel_on_channel_type", // API to get attributes
+			type: "POST",
+			data: { channel_type: add_new_channel_type },
+			dataType: "json",
+			success: function (response) {
+				var add_new_options = '<option value="" disabled>Select Sale Channel</option>';
+
+				if (response.data.length === 0) {
+					add_new_options += '<option value="" disabled>No Sale Channel available</option>';
+				}
+
+				$.each(response.data, function (_, item) {
+					add_new_options += `<option value="${item.id}">${item.sale_channel}</option>`;
+				});
+
+				$("#add_new_sale_channel").html(add_new_options);
+
+				const preselectedValue = "3"; // Replace with your dynamic value
+				$("#add_new_sale_channel").val(preselectedValue); // Set selected value here
+
+				if ($("#add_new_sale_channel").data('chosen')) {
+					$("#add_new_sale_channel").trigger("chosen:updated");
+				} else {
+					$("#add_new_sale_channel").chosen({ width: "100%" });
+				}
+			}
+		});
+	} else {
+		$("#add_new_sale_channel").html('<option value="">Select Sale Channel</option>');
+		if ($("#add_new_sale_channel").data('chosen')) {
+			$("#add_new_sale_channel").trigger("chosen:updated");
 		}
 	}
 

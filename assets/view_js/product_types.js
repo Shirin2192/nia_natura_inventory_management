@@ -5,6 +5,11 @@ $(document).ready(function() {
 
 function loadTable() {
     $("#productTypeTable").DataTable({
+        dom: 'Bfrtip',  // B = Buttons, f = filter, r = process info, t = table, i = info, p = paginate
+        buttons: [
+            'csv', 'excel'
+        ],
+        responsive: true,
         processing: true,
         serverSide: false,
         destroy: true,

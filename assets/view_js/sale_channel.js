@@ -23,6 +23,11 @@ $(document).ready(function () {
                 }
     
                 $("#SalechannelTable").DataTable({
+                    dom: 'Bfrtip',  // B = Buttons, f = filter, r = process info, t = table, i = info, p = paginate
+                    buttons: [
+                        'csv', 'excel'
+                    ],
+                    responsive: true,
                     destroy: true,
                     data: data.response, // Provide data directly
                     columns: [

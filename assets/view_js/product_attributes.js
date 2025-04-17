@@ -3,39 +3,158 @@ $(".chosen-select").chosen({
     heigth: '100%'
 });
 
+// $(document).ready(function () { 
+//     let currentPermission = null; // Define it globally inside ready()
+//     var table = $("#ProductAttributeTable").DataTable({
+       
+//         processing: true,
+//         serverSide: false, // ✅ Change to false (since JSON is pre-processed)
+//         ajax: {
+//             url: frontend + controllerName+"/get_product_attribute_detail",
+//             type: "POST",
+//             dataSrc: function(data) {              
+//                 const permissions = data.permissions;
+//                 const currentSidebarId = data.current_sidebar_id; // Hardcoded to 4 as per the response               
+//                 currentPermission = permissions[currentSidebarId];
+//                 return data.data; // Assuming product types are in data.data
+//             }
+//         },
+//         columns: [
+//             {
+//                 className: "dt-control", // Expand button column
+//                 orderable: false,
+//                 data: null,
+//                 defaultContent: ''
+//             },
+//             { data: "product_type_name", title: "Product Type" }
+//         ],
+//         order: [[1, "asc"]],
+//         pageLength: 10,
+//         responsive: true
+//     });
+//     // ✅ Handle row expansion for nested table
+//     $("#ProductAttributeTable tbody").on("click", "td.dt-control", function () {
+//         var tr = $(this).closest("tr");
+//         var row = table.row(tr);
+
+//         if (row.child.isShown()) {
+//             row.child.hide();
+//             tr.removeClass("shown");
+//         } else {
+//             var attributes = row.data().attribute_names.split(",");
+//             var attribute_types = row.data().attribute_types.split(",");
+//             var attribute_ids = row.data().attribute_id.split(",");
+
+//             row.child(formatChildTable(attributes, attribute_types, attribute_ids)).show();
+//             tr.addClass("shown");
+//         }
+//     });
+//     // ✅ Function to create child table
+//     function formatChildTable(attributes, attribute_types, attribute_ids) {
+//         var html = '<table class="table table-bordered"><thead><tr>' +
+//                    '<th>Attribute Name</th><th>Attribute Type</th>' +
+//                    '<th>Action</th>' +
+//                    '</tr></thead><tbody>';
+
+//         attributes.forEach(function (attr, index) {
+//             html += "<tr><td>" + attr + "</td><td>" + attribute_types[index] + "</td>";
+
+//             if (currentPermission && currentPermission.can_view === "1") {
+//                 html += '<td><button class="btn btn-sm btn-primary view-attribute" data-attribute="' + attr + 
+//                         '" data-type="' + attribute_types[index] + '" data-id="' + attribute_ids[index] + 
+//                         '" data-toggle="modal" data-target="#viewProductAttributeModal"><i class="icon-eye menu-icon"></i></button>';
+//             }
+//             if (currentPermission && currentPermission.can_edit === "1") {
+//                 html += '<button class="btn btn-sm btn-warning edit-attribute" data-attribute="' + attr + 
+//                         '" data-type="' + attribute_types[index] + '" data-id="' + attribute_ids[index] + 
+//                         '" data-toggle="modal" data-target="#editProductAttributeModal"><i class="icon-pencil menu-icon"></i></button>';
+//             }
+//             if (currentPermission && currentPermission.can_delete === "1") {
+//                 html += '<button class="btn btn-sm btn-danger delete-attribute" data-attribute="' + attr + 
+//                         '" data-type="' + attribute_types[index] + '" data-id="' + attribute_ids[index] + 
+//                         '" data-toggle="modal" data-target="#deleteProductAttributeModal"><i class="icon-trash menu-icon"></i></button>';
+//             }
+//             html += "</td></tr>";
+//         });
+
+//         html += "</tbody></table>";
+//         return html;
+//     }
+// });
 $(document).ready(function () { 
-    let currentPermission = null; // Define it globally inside ready()
-    var table = $("#ProductAttributeTable").DataTable({
+    let currentPermission = null;
+
+    const table = $("#ProductAttributeTable").DataTable({
         processing: true,
-        serverSide: false, // ✅ Change to false (since JSON is pre-processed)
+        serverSide: false,
+    
         ajax: {
-            url: frontend + controllerName+"/get_product_attribute_detail",
+            url: frontend + controllerName + "/get_product_attribute_detail",
             type: "POST",
-            dataSrc: function(data) {              
+            dataSrc: function (data) {
                 const permissions = data.permissions;
-                const currentSidebarId = data.current_sidebar_id; // Hardcoded to 4 as per the response               
+                const currentSidebarId = data.current_sidebar_id;
                 currentPermission = permissions[currentSidebarId];
-                return data.data; // Assuming product types are in data.data
+                return data.data;
             }
         },
+    
         columns: [
             {
-                className: "dt-control", // Expand button column
+                className: "dt-control",
                 orderable: false,
                 data: null,
                 defaultContent: ''
             },
             { data: "product_type_name", title: "Product Type" }
         ],
+    
         order: [[1, "asc"]],
         pageLength: 10,
-        responsive: true
+        responsive: true,
+    
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'excelHtml5',
+                text: 'Export to Excel',
+                title: 'Product Attributes',
+    
+                customizeData: function (data) {
+                    let newBody = [];
+    
+                    table.rows({ search: 'applied' }).every(function () {
+                        let rowData = this.data();
+    
+                        // Push parent row first
+                        newBody.push([
+                            '', // Control column
+                            rowData.product_type_name
+                        ]);
+    
+                        // Then push nested attribute rows
+                        const attributes = rowData.attribute_names.split(",");
+                        const attribute_types = rowData.attribute_types.split(",");
+    
+                        attributes.forEach((attr, index) => {
+                            newBody.push([
+                                '', // control column
+                                "↳ " + attr + " (" + attribute_types[index] + ")"
+                            ]);
+                        });
+                    });
+    
+                    data.body = newBody;
+                }
+            }
+        ]
     });
-    // ✅ Handle row expansion for nested table
+    
+    // ✅ Expand/collapse manually when clicked
     $("#ProductAttributeTable tbody").on("click", "td.dt-control", function () {
         var tr = $(this).closest("tr");
         var row = table.row(tr);
-
+    
         if (row.child.isShown()) {
             row.child.hide();
             tr.removeClass("shown");
@@ -43,43 +162,49 @@ $(document).ready(function () {
             var attributes = row.data().attribute_names.split(",");
             var attribute_types = row.data().attribute_types.split(",");
             var attribute_ids = row.data().attribute_id.split(",");
-
+    
             row.child(formatChildTable(attributes, attribute_types, attribute_ids)).show();
             tr.addClass("shown");
         }
     });
-    // ✅ Function to create child table
+    
+    // ✅ Format nested child table HTML
     function formatChildTable(attributes, attribute_types, attribute_ids) {
-        var html = '<table class="table table-bordered"><thead><tr>' +
-                   '<th>Attribute Name</th><th>Attribute Type</th>' +
-                   '<th>Action</th>' +
+        let html = '<table class="table table-bordered"><thead><tr>' +
+                   '<th>Attribute Name</th><th>Attribute Type</th><th>Action</th>' +
                    '</tr></thead><tbody>';
-
+    
         attributes.forEach(function (attr, index) {
-            html += "<tr><td>" + attr + "</td><td>" + attribute_types[index] + "</td>";
-
-            if (currentPermission && currentPermission.can_view === "1") {
-                html += '<td><button class="btn btn-sm btn-primary view-attribute" data-attribute="' + attr + 
+            html += "<tr><td>" + attr + "</td><td>" + attribute_types[index] + "</td><td>";
+    
+            if (currentPermission?.can_view === "1") {
+                html += '<button class="btn btn-sm btn-primary view-attribute" data-attribute="' + attr + 
                         '" data-type="' + attribute_types[index] + '" data-id="' + attribute_ids[index] + 
-                        '" data-toggle="modal" data-target="#viewProductAttributeModal"><i class="icon-eye menu-icon"></i></button>';
+                        '" data-toggle="modal" data-target="#viewProductAttributeModal">' +
+                        '<i class="icon-eye menu-icon"></i></button> ';
             }
-            if (currentPermission && currentPermission.can_edit === "1") {
+            if (currentPermission?.can_edit === "1") {
                 html += '<button class="btn btn-sm btn-warning edit-attribute" data-attribute="' + attr + 
                         '" data-type="' + attribute_types[index] + '" data-id="' + attribute_ids[index] + 
-                        '" data-toggle="modal" data-target="#editProductAttributeModal"><i class="icon-pencil menu-icon"></i></button>';
+                        '" data-toggle="modal" data-target="#editProductAttributeModal">' +
+                        '<i class="icon-pencil menu-icon"></i></button> ';
             }
-            if (currentPermission && currentPermission.can_delete === "1") {
+            if (currentPermission?.can_delete === "1") {
                 html += '<button class="btn btn-sm btn-danger delete-attribute" data-attribute="' + attr + 
                         '" data-type="' + attribute_types[index] + '" data-id="' + attribute_ids[index] + 
-                        '" data-toggle="modal" data-target="#deleteProductAttributeModal"><i class="icon-trash menu-icon"></i></button>';
+                        '" data-toggle="modal" data-target="#deleteProductAttributeModal">' +
+                        '<i class="icon-trash menu-icon"></i></button>';
             }
+    
             html += "</td></tr>";
         });
-
+    
         html += "</tbody></table>";
         return html;
     }
+    
 });
+
 $("#productAttributeForm").on("submit", function (event) {
     event.preventDefault(); // Prevent page reload
     $.ajax({

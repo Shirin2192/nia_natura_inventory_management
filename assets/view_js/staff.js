@@ -61,6 +61,11 @@ $("#userForm").submit(function (e) {
 $(document).ready(function () {
     let currentPermission = null; // ✅ define it globally inside ready()
     var userTable = $("#userTable").DataTable({
+        dom: 'Bfrtip',  // B = Buttons, f = filter, r = process info, t = table, i = info, p = paginate
+        buttons: [
+            'csv', 'excel'
+        ],
+        responsive: true,
         processing: true,
         serverSide: true,
         ajax: {

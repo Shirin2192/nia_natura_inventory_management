@@ -6,6 +6,11 @@ $(".chosen-select").chosen({
 $(document).ready(function () { 
     let currentPermission = null; // Define it globally inside ready()
     var table = $("#ProductAttributeValueTable").DataTable({
+        dom: 'Bfrtip',  // B = Buttons, f = filter, r = process info, t = table, i = info, p = paginate
+        buttons: [
+            'csv', 'excel'
+        ],
+        responsive: true,
         processing: false, // No server-side processing
         serverSide: false, // Fetch data locally
         ajax: {

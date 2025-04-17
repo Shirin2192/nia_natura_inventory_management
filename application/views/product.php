@@ -548,32 +548,7 @@
                                     <p id="update_product_sku" class="text-muted"></p>
                                 </div>
                             </div>
-                            <div class="col-lg-6 mb-3">
-                                <div class="form-group">
-                                    <label class="col-form-label" for="update_batch_no">Batch No <span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="update_batch_no" name="update_batch_no"
-                                        placeholder="Enter Batch No">
-                                </div>
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <div class="form-group">
-                                    <label class="col-form-label" for="update_manufacture_date">Manufacture Date <span
-                                            class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" id="update_manufacture_date"
-                                        name="update_manufacture_date" placeholder="Select Manufacture Date">
-                                    <div class="text-danger"><?= form_error('update_manufacture_date'); ?></div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <div class="form-group">
-                                    <label class="col-form-label" for="update_expiry_date">Expiry Date <span
-                                            class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" id="update_expiry_date" name="update_expiry_date"
-                                        placeholder="Select Expiry Date">
-                                    <div class="text-danger"><?= form_error('update_expiry_date'); ?></div>
-                                </div>
-                            </div>
+                            
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
                                     <label class="col-form-label" for="update_fk_product_types_id">Product Type<span
@@ -632,12 +607,52 @@
                                 </div>
 
                             </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="update_availability_status">Availability
+                                        Status</label>
+                                    <div><select class=" chosen-select form-control" id="update_availability_status"
+                                            name="update_availability_status">
+                                            <option value=""></option>
+                                            <?php foreach($stock_availability as $stock_availability_key => $stock_availability_row) {?>
+                                            <option value="<?= $stock_availability_row['id']?>">
+                                                <?= $stock_availability_row['stock_availability']?></option>
+                                            <?php } ?>
+                                        </select></div>
+                                </div>
+                            </div>
                             <div class="col-lg-12">
                                 <div id="update_images"></div>
                             </div>
                         </div>
                         <!-- Pricing and Cost Information -->
+                         <hr>
                         <div class="row">
+                        <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="update_batch_no">Batch No <span
+                                            class="text-danger">*</span></label>
+                                    <p class="form-control text-muted" id="update_batch_no"></p>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="update_manufacture_date">Manufacture Date <span
+                                            class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="update_manufacture_date"
+                                        name="update_manufacture_date" placeholder="Select Manufacture Date">
+                                    <div class="text-danger"><?= form_error('update_manufacture_date'); ?></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="update_expiry_date">Expiry Date <span
+                                            class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="update_expiry_date"
+                                        name="update_expiry_date" placeholder="Select Expiry Date">
+                                    <div class="text-danger"><?= form_error('update_expiry_date'); ?></div>
+                                </div>
+                            </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
                                     <label class="col-form-label" for="update_purchase_price">Purchase Price</label>
@@ -666,32 +681,7 @@
                                     <input type="number" class="form-control" id="update_total_quantity"
                                         name="update_total_quantity" placeholder="Enter Stock Quantity">
                                 </div>
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <div class="form-group">
-                                    <label class="col-form-label" for="add_new_quantity">Add New Stock
-                                        Quantity</label>
-                                    <input type="number" class="form-control" id="add_new_quantity"
-                                        name="add_new_quantity" placeholder="Enter Add New Stock Quantity">
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Availability and Product Features -->
-                        <div class="row">
-                            <div class="col-lg-6 mb-3">
-                                <div class="form-group">
-                                    <label class="col-form-label" for="update_availability_status">Availability
-                                        Status</label>
-                                    <div><select class=" chosen-select form-control" id="update_availability_status"
-                                            name="update_availability_status">
-                                            <option value=""></option>
-                                            <?php foreach($stock_availability as $stock_availability_key => $stock_availability_row) {?>
-                                            <option value="<?= $stock_availability_row['id']?>">
-                                                <?= $stock_availability_row['stock_availability']?></option>
-                                            <?php } ?>
-                                        </select></div>
-                                </div>
-                            </div>
+                            </div>                      
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
                                     <label class="col-form-label" for="update_channel_type">Channel Type</label>
@@ -714,7 +704,87 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Add New Batch Section -->
+                        <hr>
+                        <h5>Add New Batch</h5>
+                        <div class="row">
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="add_new_batch_no">Add New Batch No <span
+                                            class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="add_new_batch_no"
+                                        name="add_new_batch_no" placeholder="Enter Add New Batch No">
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="add_new_quantity">Add New Stock
+                                        Quantity</label>
+                                    <input type="number" class="form-control" id="add_new_quantity"
+                                        name="add_new_quantity" placeholder="Enter Add New Stock Quantity">
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="add_new_manufacture_date">Manufacture Date <span
+                                            class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="add_new_manufacture_date"
+                                        name="add_new_manufacture_date" placeholder="Select Manufacture Date">
+                                    <div class="text-danger"><?= form_error('add_new_manufacture_date'); ?></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="add_new_expiry_date">Expiry Date <span
+                                            class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="add_new_expiry_date"
+                                        name="add_new_expiry_date" placeholder="Select Expiry Date">
+                                    <div class="text-danger"><?= form_error('add_new_expiry_date'); ?></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="add_new_purchase_price">Purchase Price</label>
+                                    <input type="number" class="form-control" id="add_new_purchase_price"
+                                        name="add_new_purchase_price" placeholder="Enter Purchase Price">
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="add_new_mrp">MRP</label>
+                                    <input type="number" class="form-control" id="add_new_mrp" name="add_new_mrp"
+                                        placeholder="Enter MRP">
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="add_new_selling_price">Selling Price</label>
+                                    <input type="number" class="form-control" id="add_new_selling_price"
+                                        name="add_new_selling_price" placeholder="Enter Selling Price">
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="add_new_channel_type">Channel Type</label>
+                                    <div><select class="chosen-select form-control" id="add_new_channel_type"
+                                            name="add_new_channel_type">
+                                            <option value=""></option>
+                                            <option value="Online">Online</option>
+                                            <option value="Offline">Offline</option>
 
+                                        </select></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="add_new_sale_channel">Sales Channels</label>
+                                    <div><select class=" chosen-select form-control" id="add_new_sale_channel"
+                                            name="add_new_sale_channel">
+
+                                        </select></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

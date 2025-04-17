@@ -176,6 +176,11 @@ $("#OrderForm").submit(function (e) {
 // Initialize DataTable
 $(document).ready(function () {
    $('#OrderTable').DataTable({
+    dom: 'Bfrtip',  // B = Buttons, f = filter, r = process info, t = table, i = info, p = paginate
+    buttons: [
+        'csv', 'excel'
+    ],
+    responsive: true,
     processing: true,
     serverSide: true,
     ajax: {
