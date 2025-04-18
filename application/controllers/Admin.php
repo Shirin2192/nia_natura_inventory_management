@@ -16,8 +16,7 @@ class Admin extends CI_Controller
 		parent::__construct();
 
 		// Prevent browser caching for all admin pages
-		$this->output
-			->set_header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0")
+		$this->output->set_header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0")
 			->set_header("Cache-Control: post-check=0, pre-check=0", false)
 			->set_header("Pragma: no-cache");
 
@@ -156,11 +155,9 @@ class Admin extends CI_Controller
 		}
 		echo json_encode($response);
 	}
-
 	public function get_users()
 	{
 		$this->load->model("User_model");
-
 		$draw = $this->input->post("draw");
 		$start = $this->input->post("start");
 		$length = $this->input->post("length");
@@ -390,6 +387,9 @@ class Admin extends CI_Controller
 	{
 		if ($this->input->server('REQUEST_METHOD') === 'POST') {
 			$response = ['status' => 'error', 'errors' => []];
+			
+			$admin_session = $this->session->userdata('admin_session');
+			$login_id = $admin_session['id'];
 			// Get input values
 			$product_name = $this->input->post('product_name');
 			$product_sku_code = $this->input->post('product_sku_code');
@@ -510,6 +510,7 @@ class Admin extends CI_Controller
 				// print_r($product_price);
 				$product_inventory = [
 					'fk_product_id' => $product_insert_id,
+					'fk_login_id' =>$login_id,
 					'fk_batch_id' => $product_batch_id,
 					'add_quantity' => $add_quantity,
 					'total_quantity' => $add_quantity,
@@ -517,7 +518,6 @@ class Admin extends CI_Controller
 					'channel_type' => $_POST['channel_type'],
 					'fk_sale_channel_id' => $sale_channel,
 				];
-				// print_r($product_inventory);
 				$product_inventory_insert_id = $this->model->insertData('tbl_product_inventory', $product_inventory);
 			}
 			if ($product_inventory_insert_id) {
@@ -562,8 +562,9 @@ class Admin extends CI_Controller
 	{
 		$id = $this->input->post('product_id');
 		$data['product'] = $this->Product_model->get_product_by_id($id);
-		$channel_type = $data['product']['channel_type'];
-		$sale_channel = $this->model->selectWhereData('tbl_sale_channel', array('channel_type' => $channel_type, 'is_delete' => 1), "*", false, array('id', "DESC"));
+		$channel_type = explode(",",$data['product']['channel_type']);
+
+		$sale_channel = $this->model->selectWhereData('tbl_sale_channel', array('channel_type' => $channel_type[0], 'is_delete' => 1), "*", false, array('id', "DESC"));
 		$data['sale_channel'] = $sale_channel;
 		$fk_product_types_id = $data['product']['fk_product_types_id'];
 		$product_type_id = explode(',', $fk_product_types_id);
@@ -574,7 +575,9 @@ class Admin extends CI_Controller
 	public function update_product()
 	{
 		$this->load->library('form_validation');
-
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['id'];
+		
 		$product_id = $this->input->post('update_product_id');
 		$fk_product_price_id = $this->input->post('fk_product_price_id');
 		$product_name = $this->input->post('update_product_name');
@@ -611,6 +614,8 @@ class Admin extends CI_Controller
 		$add_new_mrp = $this->input->post('add_new_mrp');
 		$add_new_selling_price = $this->input->post('add_new_selling_price');
 		$add_new_quantity = $this->input->post('add_new_quantity');
+		$add_new_reason = $this->input->post('add_new_reason');
+		$update_reason = $this->input->post('update_reason');			
 
 		// Set validation rules
 		$this->form_validation->set_rules('update_product_name', 'Product Name', 'required');
@@ -621,6 +626,11 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('update_mrp', 'MRP', 'required|numeric');
 		$this->form_validation->set_rules('update_selling_price', 'Selling Price', 'required|numeric');
 		$this->form_validation->set_rules('update_total_quantity', 'Stock Quantity', 'required|numeric');
+		$this->form_validation->set_rules('update_reason', 'Reason', 'required');
+		$this->form_validation->set_rules('update_manufacture_date', 'Manufacture Date', 'required');
+		$this->form_validation->set_rules('update_expiry_date', 'Expiry Date', 'required');
+		$this->form_validation->set_rules('update_fk_product_types_id', 'Product Type', 'required');
+		
 
 		if(!empty($add_new_batch_no)){
 			$this->form_validation->set_rules('add_new_batch_no', 'New Batch No', 'required');
@@ -630,6 +640,7 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('add_new_quantity', 'Stock Quantity', 'required|numeric');
 			$this->form_validation->set_rules('add_new_manufacture_date', 'Manufacture Date', 'required');
 			$this->form_validation->set_rules('add_new_expiry_date', 'Expiry Date', 'required');
+			$this->form_validation->set_rules('add_new_reason', 'Reason', 'required');
 		}
 
 		if ($this->form_validation->run() == FALSE) {
@@ -742,31 +753,36 @@ class Admin extends CI_Controller
 
 			$update_product_inventory = array(
 				'fk_product_id' => $product_id,
+				'fk_login_id' =>$login_id,
 				'fk_batch_id' => $new_batch_inserted_id,
 				'add_quantity' => $add_new_quantity,
 				'total_quantity' => $add_new_quantity,
 				'channel_type' => $channel_type,
 				'fk_sale_channel_id' => $sale_channel,
+				'reason' =>$add_new_reason,
 				'used_status' => 1
 			);
-
 			$this->model->insertData('tbl_product_inventory', $update_product_inventory);
 		} else {
 			$get_last_quantity = $this->model->selectWhereData('tbl_product_inventory', ['fk_product_id' => $product_id, 'used_status' => 1], array('add_quantity', 'total_quantity'), true);
 			$last_quantity = $get_last_quantity['total_quantity'];
 			if ($last_quantity == $total_quantity) {
 				$update_product_inventory = array(
+					'fk_login_id' =>$login_id,
 					'add_quantity' => $get_last_quantity['add_quantity'],
 					'total_quantity' => $total_quantity,
 					'channel_type' => $channel_type,
 					'fk_sale_channel_id' => $sale_channel,
+					'reason'=>$update_reason
 				);
 			} else {
 				$update_product_inventory = array(
+					'fk_login_id' =>$login_id,
 					'add_quantity' => $total_quantity,
 					'total_quantity' => $total_quantity,
 					'channel_type' => $channel_type,
 					'fk_sale_channel_id' => $sale_channel,
+					'reason'=>$update_reason
 				);
 			}
 			$this->model->updateData('tbl_product_inventory', $update_product_inventory, ['id' => $inventory_id, 'fk_product_id' => $product_id, 'used_status' => 1]);

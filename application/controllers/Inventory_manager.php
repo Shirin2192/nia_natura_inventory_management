@@ -4,6 +4,9 @@ header("Access-Control-Allow-Origin: *"); // or use a specific domain instead of
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 class Inventory_manager extends CI_Controller {
 
 	public function __construct()
@@ -48,7 +51,44 @@ class Inventory_manager extends CI_Controller {
 		if (!$inventory_session) {
 			redirect(base_url('common/index')); // Redirect to login page if session is not active
 		} else {
-			$this->load->view('inventory_manager/dashboard');
+			$this->load->model('Dashboard_model');
+			$response['total_product_count'] = $this->model->selectWhereData('tbl_product_master', array('is_delete' => 1), "COUNT(id) as product_count", true); // Get total product count
+			$response['total_order_count'] = $this->model->selectWhereData(
+				'tbl_product_inventory',
+				array('deduct_quantity !=' => NULL),
+				"COUNT(deduct_quantity) as order_count",
+				true, // fetch single row
+				array(),
+				array() // no group by
+			);
+			// Total Stock
+			$response['total_stock'] = $this->model->selectWhereData(
+				'tbl_product_inventory',
+				array('used_status' => 1, 'is_delete' => '1'),
+				"SUM(total_quantity) as stock",
+				true
+			);
+			
+			// 2. Stock Levels
+			$stock_data = $this->Dashboard_model->fetch_stock_levels();
+			$response['stock_product_names'] = array_column($stock_data, 'product_name');
+			$response['stock_quantities'] = array_column($stock_data, 'total_quantity');
+		// echo "<pre>";print_r($response);die;
+			  // 3. Batch Expiry - Fetch product wise expiry summary
+			  $batch_expiry = $this->Dashboard_model->getProductBatchExpirySummary(30); // 30 days
+			  $response['batch_expiry_near'] = $batch_expiry['near_expiry']; // Near Expiry batches
+			  $response['batch_expiry_healthy'] = $batch_expiry['healthy'];  // Healthy batches
+		
+			// 4. Top 5 Products
+			$top5 = $this->Dashboard_model->getTop5Products();
+			$response['top5_product_names'] = array_column($top5, 'product_name');
+			$response['top5_quantities'] = array_column($top5, 'total_quantity');
+		
+			// 5. Out of Stock Trends
+			$trend = $this->Dashboard_model->getOutOfStockTrends();
+			$response['trend_weeks_or_months'] = array_column($trend, 'period_label'); // Week1, Week2...
+			$response['out_of_stock_counts'] = array_column($trend, 'out_of_stock_count');
+			$this->load->view('inventory_manager/dashboard',$response);
 		}
 	}
 	public function add_product_type()

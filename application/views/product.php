@@ -422,6 +422,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="container-fluid">
+                        <!-- Inside your modal-body -->
                         <div class="row">
                             <!-- Left Column -->
                             <div class="col-md-6">
@@ -430,29 +431,14 @@
                                     <p id="view_product_name" class="text-muted"></p>
                                 </div>
                                 <div class="mb-3">
-                                    <h6><strong>Batch No:</strong></h6>
-                                    <p id="view_batch_no" class="text-muted"></p>
-                                </div>
-                                <div class="mb-3">
-                                    <h6><strong>Expiry Date:</strong></h6>
-                                    <p id="view_expiry_date" class="text-muted"></p>
-                                </div>
-                                <div class="mb-3">
-                                    <h6><strong>Product Type:</strong></h6>
-                                    <p id="view_product_type" class="text-muted"></p>
-                                </div>
-                                <div class="mb-3">
                                     <h6><strong>Attributes:</strong></h6>
-                                    <p id="view_product_attributes" class="text-muted"></p>
+                                    <div id="view_product_attributes"></div> <!-- Changed to div -->
                                 </div>
                                 <div class="mb-3">
                                     <h6><strong>Barcode:</strong></h6>
                                     <p id="view_barcode" class="text-muted"></p>
                                 </div>
-                                <div class="mb-3">
-                                    <h6><strong>Channel Type:</strong></h6>
-                                    <p id="view_channel_type" class="text-muted"></p>
-                                </div>
+
                             </div>
 
                             <!-- Right Column -->
@@ -462,44 +448,29 @@
                                     <p id="view_product_sku" class="text-muted"></p>
                                 </div>
                                 <div class="mb-3">
-                                    <h6><strong>Manufacture Date:</strong></h6>
-                                    <p id="view_manufacture_date" class="text-muted"></p>
-                                </div>
-
-
-                                <div class="mb-3">
-                                    <h6><strong>Purchase Price:</strong></h6>
-                                    <p id="view_product_price" class="text-muted"></p>
-                                </div>
-                                <div class="mb-3">
-                                    <h6><strong>MRP:</strong></h6>
-                                    <p id="view_mrp" class="text-muted"></p>
-                                </div>
-
-                                <div class="mb-3">
-                                    <h6><strong>Selling Price:</strong></h6>
-                                    <p id="view_selling_price" class="text-muted"></p>
-                                </div>
-                                <div class="mb-3">
-                                    <h6><strong>Total Quantity:</strong></h6>
-                                    <p id="view_product_quantity" class="text-muted"></p>
-                                </div>
-                                <div class="mb-3">
-                                    <h6><strong>Description:</strong></h6>
-                                    <p id="view_description" class="text-muted"></p>
+                                    <h6><strong>Product Types:</strong></h6>
+                                    <p id="view_product_type" class="text-muted"></p>
                                 </div>
                                 <div class="mb-3">
                                     <h6><strong>Available Status:</strong></h6>
                                     <p id="view_available_status" class="text-muted"></p>
                                 </div>
                                 <div class="mb-3">
-                                    <h6><strong>Sale Channel:</strong></h6>
-                                    <p id="view_sale_channel" class="text-muted"></p>
+                                    <h6><strong>Description:</strong></h6>
+                                    <p id="view_description" class="text-muted"></p>
                                 </div>
-
                             </div>
+                            <div class="col-md-12">
+                                <h6><strong>Batch Details:</strong></h6>
+                                <div id="view_batches"></div> <!-- New Div for batch list -->
+                            </div>
+                            <!-- <div class="mb-3">
+                                    <h6><strong>Channel & Pricing Info:</strong></h6>
+                                    <div id="view_channels"></div> 
+                                </div> -->
 
-                            <!-- Images Section -->
+
+                            <!-- Full Width Images -->
                             <div class="col-md-12">
                                 <div class="mb-3">
                                     <h6><strong>Images:</strong></h6>
@@ -548,7 +519,7 @@
                                     <p id="update_product_sku" class="text-muted"></p>
                                 </div>
                             </div>
-                            
+
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
                                     <label class="col-form-label" for="update_fk_product_types_id">Product Type<span
@@ -594,14 +565,15 @@
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
                                     <label class="col-form-label" for="update_description">Product
-                                        Description</label>
+                                        Description <span class="text-danger">*</span></label>
                                     <textarea class="form-control" id="update_description" name="update_description"
                                         placeholder="Enter Product Description"></textarea>
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="update_product_images">Product Image</label>
+                                    <label class="col-form-label" for="update_product_images">Product Image <span
+                                            class="text-danger">*</span></label>
                                     <input type="file" class="form-control" id="update_product_images"
                                         name="update_product_images[]" multiple>
                                 </div>
@@ -610,7 +582,7 @@
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
                                     <label class="col-form-label" for="update_availability_status">Availability
-                                        Status</label>
+                                        Status <span class="text-danger">*</span></label>
                                     <div><select class=" chosen-select form-control" id="update_availability_status"
                                             name="update_availability_status">
                                             <option value=""></option>
@@ -626,9 +598,12 @@
                             </div>
                         </div>
                         <!-- Pricing and Cost Information -->
-                         <hr>
+                        <hr>
                         <div class="row">
-                        <div class="col-lg-6 mb-3">
+                            <div id="batch_fields_container_edit"></div>
+                        </div>
+                        <!-- <div class="row">
+                            <div class="col-lg-6 mb-3">
                                 <div class="form-group">
                                     <label class="col-form-label" for="update_batch_no">Batch No <span
                                             class="text-danger">*</span></label>
@@ -655,21 +630,24 @@
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="update_purchase_price">Purchase Price</label>
+                                    <label class="col-form-label" for="update_purchase_price">Purchase Price <span
+                                            class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="update_purchase_price"
                                         name="update_purchase_price" placeholder="Enter Purchase Price">
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="update_mrp">MRP</label>
+                                    <label class="col-form-label" for="update_mrp">MRP <span
+                                            class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="update_mrp" name="update_mrp"
                                         placeholder="Enter MRP">
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="update_selling_price">Selling Price</label>
+                                    <label class="col-form-label" for="update_selling_price">Selling Price <span
+                                            class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="update_selling_price"
                                         name="update_selling_price" placeholder="Enter Selling Price">
                                 </div>
@@ -677,14 +655,15 @@
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
                                     <label class="col-form-label" for="update_total_quantity">Current Stock
-                                        Quantity</label>
+                                        Quantity <span class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="update_total_quantity"
                                         name="update_total_quantity" placeholder="Enter Stock Quantity">
                                 </div>
-                            </div>                      
+                            </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="update_channel_type">Channel Type</label>
+                                    <label class="col-form-label" for="update_channel_type">Channel Type <span
+                                            class="text-danger">*</span></label>
                                     <div><select class=" chosen-select form-control" id="update_channel_type"
                                             name="update_channel_type">
                                             <option value=""></option>
@@ -696,14 +675,23 @@
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="update_sale_channel">Sales Channels</label>
+                                    <label class="col-form-label" for="update_sale_channel">Sales Channels <span
+                                            class="text-danger">*</span></label>
                                     <div><select class=" chosen-select form-control" id="update_sale_channel"
                                             name="update_sale_channel">
 
                                         </select></div>
                                 </div>
                             </div>
-                        </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="update_reason">Reason <span
+                                            class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="update_reason" name="update_reason"
+                                        placeholder="Enter Reason">
+                                </div>
+                            </div>
+                        </div> -->
                         <!-- Add New Batch Section -->
                         <hr>
                         <h5>Add New Batch</h5>
@@ -719,7 +707,7 @@
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
                                     <label class="col-form-label" for="add_new_quantity">Add New Stock
-                                        Quantity</label>
+                                        Quantity <span class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="add_new_quantity"
                                         name="add_new_quantity" placeholder="Enter Add New Stock Quantity">
                                 </div>
@@ -744,28 +732,40 @@
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="add_new_purchase_price">Purchase Price</label>
+                                    <label class="col-form-label" for="add_new_purchase_price">Purchase Price <span
+                                            class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="add_new_purchase_price"
                                         name="add_new_purchase_price" placeholder="Enter Purchase Price">
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="add_new_mrp">MRP</label>
+                                    <label class="col-form-label" for="add_new_mrp">MRP <span
+                                            class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="add_new_mrp" name="add_new_mrp"
                                         placeholder="Enter MRP">
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="add_new_selling_price">Selling Price</label>
+                                    <label class="col-form-label" for="add_new_selling_price">Selling Price <span
+                                            class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="add_new_selling_price"
                                         name="add_new_selling_price" placeholder="Enter Selling Price">
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="add_new_channel_type">Channel Type</label>
+                                    <label class="col-form-label" for="add_new_reason">Reason <span
+                                            class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="add_new_reason" name="add_new_reason"
+                                        placeholder="Enter Reason">
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="add_new_channel_type">Channel Type <span
+                                            class="text-danger">*</span></label>
                                     <div><select class="chosen-select form-control" id="add_new_channel_type"
                                             name="add_new_channel_type">
                                             <option value=""></option>
@@ -777,7 +777,8 @@
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="add_new_sale_channel">Sales Channels</label>
+                                    <label class="col-form-label" for="add_new_sale_channel">Sales Channels <span
+                                            class="text-danger">*</span></label>
                                     <div><select class=" chosen-select form-control" id="add_new_sale_channel"
                                             name="add_new_sale_channel">
 
