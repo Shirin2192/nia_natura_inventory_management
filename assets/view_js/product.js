@@ -888,6 +888,9 @@ $(document).on("click", ".update-product", function () {
 			$('#update_manufacture_date').val(product.manufactured_date);
 			$('#update_expiry_date').val(product.expiry_date);
 			$('#update_batch_id').val(product.batch_id);
+			$('#product_price_id').val(product.product_price_id);
+			$('#update_reason').val(product.reason);
+			
 
 
 			// Populate image preview
@@ -1013,7 +1016,6 @@ if ($("#update_sale_channel").data('chosen')) {
 			const channelTypeOptions = [
 				{ value: 'Online', label: 'Online' },
 				{ value: 'Offline', label: 'Offline' },
-				{ value: 'Both', label: 'Both' }
 			];
 			
 			// Add console logs for debugging
@@ -1042,7 +1044,7 @@ if ($("#update_sale_channel").data('chosen')) {
 				<div class="card mb-3 batch-card" data-index="${index + 1}">
 					<div class="card-body">
 						<div class="row">
-							<input type="hidden" name="batch_id[]" value="${batchId}">
+							<input type="hidden" name="update_batch_id[]" value="${batchId}">
 	
 							<div class="col-md-4">
 								<div class="form-group">
@@ -1050,52 +1052,46 @@ if ($("#update_sale_channel").data('chosen')) {
 									<input type="text" name="batch_no[]" class="form-control" value="${batchNos[index] || ''}" readonly>
 								</div>
 							</div>
-	
 							<div class="col-md-4">
 								<div class="form-group">
 									<label>Manufacture Date</label>
 									<input type="date" name="update_manufacture_date[]" class="form-control" value="${manufacturedDates[index] || ''}">
 								</div>
 							</div>
-	
 							<div class="col-md-4">
 								<div class="form-group">
 									<label>Expiry Date</label>
-									<input type="date" name="expiry_date[]" class="form-control" value="${expiryDates[index] || ''}">
+									<input type="date" name="update_expiry_date[]" class="form-control" value="${expiryDates[index] || ''}">
 								</div>
-							</div>
-	
+							</div>	
 							<div class="col-md-4 mt-2">
 								<div class="form-group">
 									<label>Quantity</label>
-									<input type="number" name="batch_quantity[]" class="form-control" value="${quantities[index] || '0'}">
+									<input type="number" name="update_total_quantity[]" class="form-control" value="${quantities[index] || '0'}">
 								</div>
-							</div>
-	
+							</div>	
 							<div class="col-md-4 mt-2">
 								<div class="form-group">
 									<label>Purchase Price</label>
-									<input type="text" name="batch_purchase_price[]" class="form-control" value="${purchasePrices[index] || '0'}">
+									<input type="text" name="update_purchase_price[]" class="form-control" value="${purchasePrices[index] || '0'}">
 								</div>
-							</div>
-	
+							</div>	
 							<div class="col-md-4 mt-2">
 								<div class="form-group">
 									<label>MRP</label>
-									<input type="text" name="batch_mrp[]" class="form-control" value="${mrpPrices[index] || '0'}">
+									<input type="text" name="update_mrp[]" class="form-control" value="${mrpPrices[index] || '0'}">
 								</div>
-							</div>
-	
+							</div>	
 							<div class="col-md-4 mt-2">
 								<div class="form-group">
 									<label>Selling Price</label>
-									<input type="text" name="batch_selling_price[]" class="form-control" value="${sellingPrices[index] || '0'}">
+									<input type="text" name="update_selling_price[]" class="form-control" value="${sellingPrices[index] || '0'}">
 								</div>
 							</div>
 							<div class="col-md-4 mt-2">
 								<div class="form-group">
 									<label>Channel Type</label>
-									<select name="batch_channel_type[]" class="form-control batch-channel-type">
+									<select name="update_channel_type[]" class="form-control batch-channel-type">
 										<option value="">Select Channel Type</option>
 										${channelTypeOptionsHtml}
 									</select>
@@ -1104,7 +1100,7 @@ if ($("#update_sale_channel").data('chosen')) {
 							<div class="col-md-4 mt-2">
 								<div class="form-group">
 									<label>Sale Channel</label>
-									<select name="batch_sale_channel[]" class="form-control batch-sale-channel">
+									<select name="update_sale_channel[]" class="form-control batch-sale-channel">
 										<option value="">Select Sale Channel</option>
 										${saleChannelOptionsHtml}
 									</select>

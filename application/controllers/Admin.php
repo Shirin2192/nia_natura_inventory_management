@@ -412,7 +412,7 @@ class Admin extends CI_Controller
 
 			// Validation Rules
 			$this->form_validation->set_rules('product_name', 'Product Name', 'required|trim');
-			$this->form_validation->set_rules('product_sku_code', 'Product SKU Code', 'required|trim|is_unique[tbl_product_type.product_sku_code]');
+			$this->form_validation->set_rules('product_sku_code', 'Product SKU Code', 'required|trim');
 			$this->form_validation->set_rules('fk_product_types_id', 'Product Type', 'required|trim');
 			// $this->form_validation->set_rules('fk_bottle_size_id', 'Bottle Size', 'required|trim');
 			// $this->form_validation->set_rules('fk_bottle_type_id', 'Bottle Type', 'required|trim');
@@ -463,7 +463,7 @@ class Admin extends CI_Controller
 					}
 				}
 			}
-			$count = $this->model->CountWhereRecord('tbl_product_master', array('product_name' => $product_name, 'is_delete' => 1));
+			$count = $this->model->CountWhereRecord('tbl_product_master', array('product_name' => $product_name,'product_sku_code' => $product_sku_code,'is_delete' => 1));
 			if ($count == 1) {
 				$response = ["status" => "error", 'product_name_error' => "Already Exist"];
 			} else {
@@ -519,6 +519,29 @@ class Admin extends CI_Controller
 					'fk_sale_channel_id' => $sale_channel,
 				];
 				$product_inventory_insert_id = $this->model->insertData('tbl_product_inventory', $product_inventory);
+
+				$CI =& get_instance();
+
+       // Create the dynamic body
+	   $sku_code = $this->model->selectWhereData('tbl_sku_code_master',array('id'=>$product_sku_code),'sku_code',true);
+        $dynamic_body = '
+            <h2>Inventory Details!</h2>
+            <p>Product: <strong>' . $product_name.'('.$sku_code['sku_code'].')' . '</strong></p>
+            <p>Quantity Added: <strong>' . $add_quantity . '</strong></p>
+            <p>Batch No: <strong>' . $batch_no . '</strong></p>
+        ';
+
+        // Load the email template
+        $email_message = $this->load->view('email_template', [
+            'dynamic_body_content' => $dynamic_body,
+            'subject' => 'New Stock Added - ' . $product_name.'('.$product_sku_code.')',
+        ], true);  // true = return as string
+
+        // Now send the email using your helper
+        $to_email = "shirin@sda-zone.com"; // Replace with actual receiver
+        $subject = 'New Stock Added - ' . $product_name.'('.$product_sku_code.')';
+
+        $send = send_inventory_email($to_email, $subject, $email_message);
 			}
 			if ($product_inventory_insert_id) {
 				echo json_encode(['status' => 'success', 'message' => 'Product added successfully!']);
@@ -526,6 +549,9 @@ class Admin extends CI_Controller
 				echo json_encode(['status' => 'error', 'message' => 'Failed to insert product!']);
 			}
 		}
+	}
+	function email_templete(){
+		$this->load->view('email_template');
 	}
 	public function fetch_product_details()
 	{
@@ -574,39 +600,48 @@ class Admin extends CI_Controller
 
 	public function update_product()
 	{
+		
 		$this->load->library('form_validation');
 		$admin_session = $this->session->userdata('admin_session');
 		$login_id = $admin_session['id'];
 		
 		$product_id = $this->input->post('update_product_id');
-		$fk_product_price_id = $this->input->post('fk_product_price_id');
+		
 		$product_name = $this->input->post('update_product_name');
 		$description = $this->input->post('update_description');
 		// $product_sku_code = $this->input->post('update_product_sku_code');
-		$channel_type = $this->input->post('update_channel_type');
-		$sale_channel = $this->input->post('update_sale_channel');
+		
 		$availability_status = $this->input->post('update_availability_status');
 		$barcode = $this->input->post('update_barcode');
-		// $batch_no = $this->input->post('update_batch_no');
-		$purchase_price =  $this->input->post('update_purchase_price');
-		$MRP = $this->input->post('update_mrp');
-		$selling_price = $this->input->post('update_selling_price');
-		$inventory_id = $this->input->post('update_inventory_id');
-		$update_manufacture_date = $this->input->post('update_manufacture_date');
-		$update_expiry_date = $this->input->post('update_expiry_date');
+		
+		
 		$edit_fk_product_attribute_id = $this->input->post('edit_fk_product_attribute_id'); // Example: [3, 2, 1]
 		$edit_attributes_value = $this->input->post('edit_attributes_value'); // Example: [19, 16, 1]
 		$add_new_fk_product_attribute_id = $this->input->post('add_new_fk_product_attribute_id'); // Example: [3, 2, 1]
 		$add_new_attributes_value = $this->input->post('add_new_attributes_value'); // Example: [19, 16, 1]
 		$update_fk_product_types_id = $this->input->post('update_fk_product_types_id');
-		$product_attribute_id = $this->input->post('attribute_id');
+		$product_attribute_id = $this->input->post('attribute_id')
+		;
+		$inventory_id1 = $this->input->post('update_inventory_id');
+		$inventory_id = explode(',', $inventory_id1);
+		$batch_no = $this->input->post('batch_no');	
+		$purchase_price =  $this->input->post('update_purchase_price');
+		$MRP = $this->input->post('update_mrp');
+		$selling_price = $this->input->post('update_selling_price');	
+		$update_manufacture_date = $this->input->post('update_manufacture_date');
+		$update_expiry_date = $this->input->post('update_expiry_date');
+		$channel_type = $this->input->post('update_channel_type');
+		$sale_channel = $this->input->post('update_sale_channel');
 		$total_quantity = $this->input->post('update_total_quantity');
+		$product_price_id1 = $this->input->post('product_price_id');
+		$product_price_id = explode(',', $product_price_id1);
 		
 		$update_batch_id = $this->input->post('update_batch_id');
 		// Handling image upload
 		$existing_images = $this->input->post('update_product_image');
 		$images = explode(',', $existing_images);
 
+		//New Batch POST
 		$add_new_batch_no = $this->input->post('add_new_batch_no');
 		$add_new_manufacture_date = $this->input->post('add_new_manufacture_date');
 		$add_new_expiry_date = $this->input->post('add_new_expiry_date');
@@ -616,19 +651,19 @@ class Admin extends CI_Controller
 		$add_new_quantity = $this->input->post('add_new_quantity');
 		$add_new_reason = $this->input->post('add_new_reason');
 		$update_reason = $this->input->post('update_reason');			
-
+		
 		// Set validation rules
 		$this->form_validation->set_rules('update_product_name', 'Product Name', 'required');
 		$this->form_validation->set_rules('update_description', 'Description', 'required');
 		$this->form_validation->set_rules('update_availability_status', 'Availability Status', 'required');
-		$this->form_validation->set_rules('update_sale_channel', 'Sales Channel', 'required');
-		$this->form_validation->set_rules('update_purchase_price', 'Purchase Price', 'required|numeric');
-		$this->form_validation->set_rules('update_mrp', 'MRP', 'required|numeric');
-		$this->form_validation->set_rules('update_selling_price', 'Selling Price', 'required|numeric');
-		$this->form_validation->set_rules('update_total_quantity', 'Stock Quantity', 'required|numeric');
+		// $this->form_validation->set_rules('update_sale_channel', 'Sales Channel', 'required');
+		// $this->form_validation->set_rules('update_purchase_price', 'Purchase Price', 'required|numeric');
+		// $this->form_validation->set_rules('update_mrp', 'MRP', 'required|numeric');
+		// $this->form_validation->set_rules('update_selling_price', 'Selling Price', 'required|numeric');
+		// $this->form_validation->set_rules('update_total_quantity', 'Stock Quantity', 'required|numeric');
 		$this->form_validation->set_rules('update_reason', 'Reason', 'required');
-		$this->form_validation->set_rules('update_manufacture_date', 'Manufacture Date', 'required');
-		$this->form_validation->set_rules('update_expiry_date', 'Expiry Date', 'required');
+		// $this->form_validation->set_rules('update_manufacture_date', 'Manufacture Date', 'required');
+		// $this->form_validation->set_rules('update_expiry_date', 'Expiry Date', 'required');
 		$this->form_validation->set_rules('update_fk_product_types_id', 'Product Type', 'required');
 		
 
@@ -652,9 +687,7 @@ class Admin extends CI_Controller
 			}
 			echo json_encode($response);
 			return;
-		}
-
-	
+		}	
 		if (!empty($_FILES['update_product_images']['name'][0])) {
 			$config['upload_path'] = './uploads/products/';
 			$config['allowed_types'] = 'jpg|jpeg|png';
@@ -690,13 +723,15 @@ class Admin extends CI_Controller
 		);
 		$this->model->updateData('tbl_product_master', $update_product, ['id' => $product_id]);
 
-		$update_product_batch = array(
-			// 'batch_no' => $batch_no,
-			'expiry_date' => $update_expiry_date,
-			'manufactured_date' => $update_manufacture_date,
-			'quantity' => $total_quantity,
-		);
-		$this->model->updateData('tbl_product_batches', $update_product_batch, ['id' => $update_batch_id, 'fk_product_id' => $product_id]);
+		foreach ($batch_no as $batch_no_key => $batch_no_row) {
+			$update_product_batch = array(
+				// 'batch_no' => $batch_no,
+				'expiry_date' => $update_expiry_date[$batch_no_key],
+				'manufactured_date' => $update_manufacture_date[$batch_no_key],
+				// 'quantity' => $total_quantity[$batch_no_key],
+			);
+			$this->model->updateData('tbl_product_batches', $update_product_batch, ['id' => $update_batch_id[$batch_no_key], 'fk_product_id' => $product_id]);
+		}
 
 		if (!empty($add_new_fk_product_attribute_id)) {
 			foreach ($add_new_fk_product_attribute_id as $key => $add_attribute_id_row) {
@@ -718,13 +753,16 @@ class Admin extends CI_Controller
 				$this->model->updateData('tbl_product_attributes', $update_product_attribute, ['id' => $product_attribute_id[$edit_fk_product_attribute_id_key], 'fk_product_id' => $product_id, 'fk_product_types_id' => $update_fk_product_types_id]);
 			}
 		}
-		$update_product_price = array(
-			'purchase_price' => $purchase_price,
-			'MRP' => $MRP,
-			'selling_price' => $selling_price,
-		);
-		$this->model->updateData('tbl_product_price', $update_product_price, ['fk_product_id' => $product_id, 'id' => $fk_product_price_id]);
-
+		
+		foreach ($purchase_price as $purchase_price_key => $purchase_price_row) {
+			
+			$update_product_price = array(
+				'purchase_price' => $purchase_price_row,
+				'MRP' => $MRP[$purchase_price_key],
+				'selling_price' => $selling_price[$purchase_price_key],
+			);
+			$this->model->updateData('tbl_product_price', $update_product_price, ['fk_product_id' => $product_id, 'id' => $product_price_id[$purchase_price_key]]);
+		}
 		if (!empty($add_new_quantity)) {
 			$update_product_inventory_status = array(
 				'used_status' => 0,
@@ -751,7 +789,7 @@ class Admin extends CI_Controller
 			);
 			$this->model->insertData('tbl_product_price',$new_batch_wise_product_price);
 
-			$update_product_inventory = array(
+			$add_new_product_inventory = array(
 				'fk_product_id' => $product_id,
 				'fk_login_id' =>$login_id,
 				'fk_batch_id' => $new_batch_inserted_id,
@@ -762,30 +800,34 @@ class Admin extends CI_Controller
 				'reason' =>$add_new_reason,
 				'used_status' => 1
 			);
-			$this->model->insertData('tbl_product_inventory', $update_product_inventory);
+			$this->model->insertData('tbl_product_inventory', $add_new_product_inventory);
 		} else {
 			$get_last_quantity = $this->model->selectWhereData('tbl_product_inventory', ['fk_product_id' => $product_id, 'used_status' => 1], array('add_quantity', 'total_quantity'), true);
 			$last_quantity = $get_last_quantity['total_quantity'];
-			if ($last_quantity == $total_quantity) {
-				$update_product_inventory = array(
-					'fk_login_id' =>$login_id,
-					'add_quantity' => $get_last_quantity['add_quantity'],
-					'total_quantity' => $total_quantity,
-					'channel_type' => $channel_type,
-					'fk_sale_channel_id' => $sale_channel,
-					'reason'=>$update_reason
-				);
-			} else {
-				$update_product_inventory = array(
-					'fk_login_id' =>$login_id,
-					'add_quantity' => $total_quantity,
-					'total_quantity' => $total_quantity,
-					'channel_type' => $channel_type,
-					'fk_sale_channel_id' => $sale_channel,
-					'reason'=>$update_reason
-				);
+			foreach($inventory_id as $inventory_id_key => $inventory_id_row ){
+				if ($last_quantity == $total_quantity[$inventory_id_key]) {
+					$update_product_inventory = array(
+						'fk_login_id' =>$login_id,
+						'add_quantity' => $get_last_quantity['add_quantity'],
+						'total_quantity' => $total_quantity[$inventory_id_key],
+						'channel_type' => $channel_type[$inventory_id_key],
+						'fk_sale_channel_id' => $sale_channel[$inventory_id_key],
+						'reason'=>$update_reason
+					);
+				} else {
+					$update_product_inventory = array(
+						'fk_login_id' =>$login_id,
+						'add_quantity' => $total_quantity[$inventory_id_key],
+						'total_quantity' => $total_quantity[$inventory_id_key],
+						'channel_type' => $channel_type[$inventory_id_key],
+						'fk_sale_channel_id' => $sale_channel[$inventory_id_key],
+						'reason'=>$update_reason
+					);
+				}
+				$this->model->updateData('tbl_product_inventory', $update_product_inventory, ['id' => $inventory_id_row, 'fk_product_id' => $product_id, 'used_status' => 1]);
+
 			}
-			$this->model->updateData('tbl_product_inventory', $update_product_inventory, ['id' => $inventory_id, 'fk_product_id' => $product_id, 'used_status' => 1]);
+			
 		}
 		echo json_encode(['status' => 'success', 'message' => 'Product updated successfully']);
 	}
@@ -798,8 +840,7 @@ class Admin extends CI_Controller
 
 		if (!empty($product_id)) {
 			$update_product_status = $this->model->updateData('tbl_product', ['is_delete' => '0'], ['id' => $product_id]); // Soft delete
-			$update_product_category_status = $this->model->updateData('tbl_product_category', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
-			$update_product_type_status = $this->model->updateData('tbl_product_type', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
+			
 			$update_product_price_status = $this->model->updateData('tbl_product_price', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
 			$update_product_inventory_status = $this->model->updateData('tbl_product_inventory', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
 

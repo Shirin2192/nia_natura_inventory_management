@@ -498,7 +498,7 @@
                 <form id="UpdateProductForm" enctype="multipart/form-data">
                     <input type="hidden" id="update_product_id" name="update_product_id">
                     <input type="hidden" id="update_inventory_id" name="update_inventory_id">
-                    <input type="hidden" id="fk_product_price_id" name="fk_product_price_id">
+                    <input type="hidden" id="product_price_id" name="product_price_id">
                     <input type="hidden" id="update_product_image" name="update_product_image">
                     <input type="hidden" id="update_batch_id" name="update_batch_id">
                     <div class="modal-body">
@@ -538,11 +538,7 @@
                             </div>
                         </div>
                         <!-- Dynamic Attribute Fields -->
-
-
                         <div id="attribute_fields_container_edit"></div>
-
-
                         <!-- Add More Attributes (dropdown + button) – move this BELOW -->
                         <div id="attributes_container_edit"></div>
                         <!-- Add More Attributes Button -->
@@ -553,7 +549,6 @@
                                 </button>
                             </div>
                         </div>
-
                         <div class="row">
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
@@ -591,6 +586,12 @@
                                                 <?= $stock_availability_row['stock_availability']?></option>
                                             <?php } ?>
                                         </select></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="update_reason">Reason <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" name="update_reason" id="update_reason" placeholder="Enter Reason"></textarea>
                                 </div>
                             </div>
                             <div class="col-lg-12">
