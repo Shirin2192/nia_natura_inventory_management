@@ -1,9 +1,11 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 header("Access-Control-Allow-Origin: *"); // or use a specific domain instead of '*'
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
+// Ensure these use statements are at the top of the file, outside any class or function
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -728,20 +730,83 @@ class Inventory_manager extends CI_Controller {
 	}
 
 	public function update_product()
-	{	
-		
+	{
+
 		$this->load->library('form_validation');
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['id'];
+
+		$product_id = $this->input->post('update_product_id');
+
+		$product_name = $this->input->post('update_product_name');
+		$description = $this->input->post('update_description');
+		// $product_sku_code = $this->input->post('update_product_sku_code');
+
+		$availability_status = $this->input->post('update_availability_status');
+		$barcode = $this->input->post('update_barcode');
+
+
+		$edit_fk_product_attribute_id = $this->input->post('edit_fk_product_attribute_id'); // Example: [3, 2, 1]
+		$edit_attributes_value = $this->input->post('edit_attributes_value'); // Example: [19, 16, 1]
+		$add_new_fk_product_attribute_id = $this->input->post('add_new_fk_product_attribute_id'); // Example: [3, 2, 1]
+		$add_new_attributes_value = $this->input->post('add_new_attributes_value'); // Example: [19, 16, 1]
+		$update_fk_product_types_id = $this->input->post('update_fk_product_types_id');
+		$product_attribute_id = $this->input->post('attribute_id');
+		$inventory_id1 = $this->input->post('update_inventory_id');
+		$inventory_id = explode(',', $inventory_id1);
+		$batch_no = $this->input->post('batch_no');
+		$purchase_price =  $this->input->post('update_purchase_price');
+		$MRP = $this->input->post('update_mrp');
+		$selling_price = $this->input->post('update_selling_price');
+		$update_manufacture_date = $this->input->post('update_manufacture_date');
+		$update_expiry_date = $this->input->post('update_expiry_date');
+		$channel_type = $this->input->post('update_channel_type');
+		$sale_channel = $this->input->post('update_sale_channel');
+		$total_quantity = $this->input->post('update_total_quantity');
+		$product_price_id1 = $this->input->post('product_price_id');
+		$product_price_id = explode(',', $product_price_id1);
+
+		$update_batch_id = $this->input->post('update_batch_id');
+		// Handling image upload
+		$existing_images = $this->input->post('update_product_image');
+		$images = explode(',', $existing_images);
+
+		//New Batch POST
+		$add_new_batch_no = $this->input->post('add_new_batch_no');
+		$add_new_manufacture_date = $this->input->post('add_new_manufacture_date');
+		$add_new_expiry_date = $this->input->post('add_new_expiry_date');
+		$add_new_purchase_price = $this->input->post('add_new_purchase_price');
+		$add_new_mrp = $this->input->post('add_new_mrp');
+		$add_new_selling_price = $this->input->post('add_new_selling_price');
+		$add_new_quantity = $this->input->post('add_new_quantity');
+		$add_new_reason = $this->input->post('add_new_reason');
+		$update_reason = $this->input->post('update_reason');
 
 		// Set validation rules
 		$this->form_validation->set_rules('update_product_name', 'Product Name', 'required');
-		$this->form_validation->set_rules('update_product_sku_code', 'Product SKU Code', 'required');
 		$this->form_validation->set_rules('update_description', 'Description', 'required');
 		$this->form_validation->set_rules('update_availability_status', 'Availability Status', 'required');
-		$this->form_validation->set_rules('update_sale_channel', 'Sales Channel', 'required');
-		$this->form_validation->set_rules('update_purchase_price', 'Purchase Price', 'required|numeric');
-		$this->form_validation->set_rules('update_mrp', 'MRP', 'required|numeric');
-		$this->form_validation->set_rules('update_selling_price', 'Selling Price', 'required|numeric');
-		$this->form_validation->set_rules('update_total_quantity', 'Stock Quantity', 'required|numeric');
+		// $this->form_validation->set_rules('update_sale_channel', 'Sales Channel', 'required');
+		// $this->form_validation->set_rules('update_purchase_price', 'Purchase Price', 'required|numeric');
+		// $this->form_validation->set_rules('update_mrp', 'MRP', 'required|numeric');
+		// $this->form_validation->set_rules('update_selling_price', 'Selling Price', 'required|numeric');
+		// $this->form_validation->set_rules('update_total_quantity', 'Stock Quantity', 'required|numeric');
+		$this->form_validation->set_rules('update_reason', 'Reason', 'required');
+		// $this->form_validation->set_rules('update_manufacture_date', 'Manufacture Date', 'required');
+		// $this->form_validation->set_rules('update_expiry_date', 'Expiry Date', 'required');
+		$this->form_validation->set_rules('update_fk_product_types_id', 'Product Type', 'required');
+
+
+		if (!empty($add_new_batch_no)) {
+			$this->form_validation->set_rules('add_new_batch_no', 'New Batch No', 'required');
+			$this->form_validation->set_rules('add_new_purchase_price', 'Purchase Price', 'required|numeric');
+			$this->form_validation->set_rules('add_new_mrp', 'MRP', 'required|numeric');
+			$this->form_validation->set_rules('add_new_selling_price', 'Selling Price', 'required|numeric');
+			$this->form_validation->set_rules('add_new_quantity', 'Stock Quantity', 'required|numeric');
+			$this->form_validation->set_rules('add_new_manufacture_date', 'Manufacture Date', 'required');
+			$this->form_validation->set_rules('add_new_expiry_date', 'Expiry Date', 'required');
+			$this->form_validation->set_rules('add_new_reason', 'Reason', 'required');
+		}
 
 		if ($this->form_validation->run() == FALSE) {
 			$response = ['status' => 'error', 'errors' => []];
@@ -753,33 +818,6 @@ class Inventory_manager extends CI_Controller {
 			echo json_encode($response);
 			return;
 		}
-		$product_id = $this->input->post('update_product_id');
-		$fk_product_price_id = $this->input->post('fk_product_price_id');
-		$product_name = $this->input->post('update_product_name');
-		$description = $this->input->post('update_description');
-		$product_sku_code = $this->input->post('update_product_sku_code');
-		$channel_type = $this->input->post('update_channel_type');
-		$sale_channel = $this->input->post('update_sale_channel');
-		$availability_status = $this->input->post('update_availability_status');
-		$barcode = $this->input->post('update_barcode');
-		$batch_no = $this->input->post('update_batch_no');
-		$purchase_price =  $this->input->post('update_purchase_price');
-		$MRP = $this->input->post('update_mrp');
-		$selling_price = $this->input->post('update_selling_price');
-		$inventory_id = $this->input->post('update_inventory_id');
-
-
-		$edit_fk_product_attribute_id = $this->input->post('edit_fk_product_attribute_id'); // Example: [3, 2, 1]
-		$edit_attributes_value = $this->input->post('edit_attributes_value'); // Example: [19, 16, 1]
-		$add_new_fk_product_attribute_id = $this->input->post('add_new_fk_product_attribute_id'); // Example: [3, 2, 1]
-		$add_new_attributes_value = $this->input->post('add_new_attributes_value'); // Example: [19, 16, 1]
-		$update_fk_product_types_id = $this->input->post('update_fk_product_types_id');
-		$product_attribute_id = $this->input->post('attribute_id');
-
-		// Handling image upload
-		$existing_images = $this->input->post('update_product_image');
-		$images = explode(',', $existing_images);
-
 		if (!empty($_FILES['update_product_images']['name'][0])) {
 			$config['upload_path'] = './uploads/products/';
 			$config['allowed_types'] = 'jpg|jpeg|png';
@@ -808,47 +846,53 @@ class Inventory_manager extends CI_Controller {
 		$update_product = array(
 			'product_name' => $product_name,
 			'description' => $description,
-			'product_sku_code' => $product_sku_code,			
-			'fk_stock_availability_id' =>$availability_status,
+			'fk_product_types_id' => $update_fk_product_types_id,
+			'fk_stock_availability_id' => $availability_status,
 			'barcode' => $barcode,
-			'batch_no' => $batch_no,
 			'images' => $imagess,
-			'purchase_price' => $purchase_price,
-			'MRP' => $MRP,
-			'selling_price' => $selling_price
 		);
 		$this->model->updateData('tbl_product_master', $update_product, ['id' => $product_id]);
-		
-		if(!empty($add_new_fk_product_attribute_id)){
+
+		foreach ($batch_no as $batch_no_key => $batch_no_row) {
+			$update_product_batch = array(
+				// 'batch_no' => $batch_no,
+				'expiry_date' => $update_expiry_date[$batch_no_key],
+				'manufactured_date' => $update_manufacture_date[$batch_no_key],
+				// 'quantity' => $total_quantity[$batch_no_key],
+			);
+			$this->model->updateData('tbl_product_batches', $update_product_batch, ['id' => $update_batch_id[$batch_no_key], 'fk_product_id' => $product_id]);
+		}
+
+		if (!empty($add_new_fk_product_attribute_id)) {
 			foreach ($add_new_fk_product_attribute_id as $key => $add_attribute_id_row) {
 				$product_attribute = [
 					'fk_product_id' => $product_id,
 					'fk_product_types_id' => $update_fk_product_types_id,
 					'fk_attribute_id' => $add_attribute_id_row,
-					'fk_attribute_value_id' => $edit_attributes_value[$key],
+					'fk_attribute_value_id' => $add_new_attributes_value[$key],
 				];
 				$this->model->insertData('tbl_product_attributes', $product_attribute);
 			}
 		}
-		if(!empty($edit_fk_product_attribute_id)){
+		if (!empty($edit_fk_product_attribute_id)) {
 			foreach ($edit_fk_product_attribute_id as $edit_fk_product_attribute_id_key => $edit_fk_product_attribute_id_row) {
-				$update_product_attribute = [	
+				$update_product_attribute = [
 					'fk_attribute_id' => $edit_fk_product_attribute_id_row,
 					'fk_attribute_value_id' => $edit_attributes_value[$edit_fk_product_attribute_id_key],
-				];		
-				 $this->model->updateData('tbl_product_attributes', $update_product_attribute, ['id'=>$product_attribute_id[$edit_fk_product_attribute_id_key],'fk_product_id' => $product_id,'fk_product_types_id' => $update_fk_product_types_id]);
+				];
+				$this->model->updateData('tbl_product_attributes', $update_product_attribute, ['id' => $product_attribute_id[$edit_fk_product_attribute_id_key], 'fk_product_id' => $product_id, 'fk_product_types_id' => $update_fk_product_types_id]);
 			}
-		}		
-		$update_product_price = array(
-			'purchase_price' => $purchase_price,
-			'MRP' => $MRP,
-			'selling_price' => $selling_price,
-		);
-		$this->model->updateData('tbl_product_price', $update_product_price, ['fk_product_id' => $product_id]);
+		}
 
-		$total_quantity = $this->input->post('update_total_quantity');
-		$add_new_quantity = $this->input->post('add_new_quantity');
+		foreach ($purchase_price as $purchase_price_key => $purchase_price_row) {
 
+			$update_product_price = array(
+				'purchase_price' => $purchase_price_row,
+				'MRP' => $MRP[$purchase_price_key],
+				'selling_price' => $selling_price[$purchase_price_key],
+			);
+			$this->model->updateData('tbl_product_price', $update_product_price, ['fk_product_id' => $product_id, 'id' => $product_price_id[$purchase_price_key]]);
+		}
 		if (!empty($add_new_quantity)) {
 			$update_product_inventory_status = array(
 				'used_status' => 0,
@@ -856,37 +900,62 @@ class Inventory_manager extends CI_Controller {
 			);
 			$this->model->updateData('tbl_product_inventory', $update_product_inventory_status, ['fk_product_id' => $product_id]);
 
-			$new_total_quantity = $total_quantity + $add_new_quantity;
-
-			$update_product_inventory = array(
+			// $new_total_quantity = $total_quantity + $add_new_quantity;
+			$add_new_batch_wise_quantity = array(
 				'fk_product_id' => $product_id,
+				'batch_no' => $add_new_batch_no,
+				'quantity' => $add_new_quantity,
+				'manufactured_date' => $add_new_manufacture_date,
+				'expiry_date' => $add_new_expiry_date
+			);
+			$new_batch_inserted_id = $this->model->insertData('tbl_product_batches', $add_new_batch_wise_quantity);
+
+			$new_batch_wise_product_price = array(
+				'fk_product_id' => $product_id,
+				'fk_batch_id' => $new_batch_inserted_id,
+				'purchase_price' => $add_new_purchase_price,
+				'MRP' => $add_new_mrp,
+				'selling_price' => $add_new_selling_price
+			);
+			$this->model->insertData('tbl_product_price', $new_batch_wise_product_price);
+
+			$add_new_product_inventory = array(
+				'fk_product_id' => $product_id,
+				'fk_login_id' => $login_id,
+				'fk_batch_id' => $new_batch_inserted_id,
 				'add_quantity' => $add_new_quantity,
-				'total_quantity' => $new_total_quantity,
+				'total_quantity' => $add_new_quantity,
 				'channel_type' => $channel_type,
 				'fk_sale_channel_id' => $sale_channel,
+				'reason' => $add_new_reason,
 				'used_status' => 1
 			);
-
-			$this->model->insertData('tbl_product_inventory', $update_product_inventory);
+			$this->model->insertData('tbl_product_inventory', $add_new_product_inventory);
 		} else {
 			$get_last_quantity = $this->model->selectWhereData('tbl_product_inventory', ['fk_product_id' => $product_id, 'used_status' => 1], array('add_quantity', 'total_quantity'), true);
 			$last_quantity = $get_last_quantity['total_quantity'];
-			if ($last_quantity == $total_quantity) {
-				$update_product_inventory = array(
-					'add_quantity' => $get_last_quantity['add_quantity'],
-					'total_quantity' => $total_quantity,
-					'channel_type' => $channel_type,
-					'fk_sale_channel_id' => $sale_channel,
-				);
-			} else {
-				$update_product_inventory = array(
-					'add_quantity' => $total_quantity,
-					'total_quantity' => $total_quantity,
-					'channel_type' => $channel_type,
-					'fk_sale_channel_id' => $sale_channel,
-				);
+			foreach ($inventory_id as $inventory_id_key => $inventory_id_row) {
+				if ($last_quantity == $total_quantity[$inventory_id_key]) {
+					$update_product_inventory = array(
+						'fk_login_id' => $login_id,
+						'add_quantity' => $get_last_quantity['add_quantity'],
+						'total_quantity' => $total_quantity[$inventory_id_key],
+						'channel_type' => $channel_type[$inventory_id_key],
+						'fk_sale_channel_id' => $sale_channel[$inventory_id_key],
+						'reason' => $update_reason
+					);
+				} else {
+					$update_product_inventory = array(
+						'fk_login_id' => $login_id,
+						'add_quantity' => $total_quantity[$inventory_id_key],
+						'total_quantity' => $total_quantity[$inventory_id_key],
+						'channel_type' => $channel_type[$inventory_id_key],
+						'fk_sale_channel_id' => $sale_channel[$inventory_id_key],
+						'reason' => $update_reason
+					);
+				}
+				$this->model->updateData('tbl_product_inventory', $update_product_inventory, ['id' => $inventory_id_row, 'fk_product_id' => $product_id, 'used_status' => 1]);
 			}
-			$this->model->updateData('tbl_product_inventory', $update_product_inventory, ['id'=> $inventory_id,'fk_product_id' => $product_id, 'used_status' => 1]);
 		}
 		echo json_encode(['status' => 'success', 'message' => 'Product updated successfully']);
 	}
@@ -899,10 +968,11 @@ class Inventory_manager extends CI_Controller {
 
 		if (!empty($product_id)) {
 			$update_product_status = $this->model->updateData('tbl_product', ['is_delete' => '0'], ['id' => $product_id]); // Soft delete
-			$update_product_category_status = $this->model->updateData('tbl_product_category', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
-			$update_product_type_status = $this->model->updateData('tbl_product_type', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
-			$update_product_price_status = $this->model->updateData('tbl_product_price', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
-			$update_product_inventory_status = $this->model->updateData('tbl_product_inventory', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
+			$this->model->updateData('tbl_product_price', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
+			$this->model->updateData('tbl_product_inventory', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
+			$this->model->updateData('tbl_product_batches', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
+			$this->model->updateData('tbl_product_attributes', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
+
 
 			if ($update_product_status) {
 				echo json_encode(["success" => true, "message" => "Product deleted successfully."]);
@@ -1040,112 +1110,320 @@ class Inventory_manager extends CI_Controller {
 		}
 	}	
 	public function downloadProductSampleExcel()
-    {
-        ini_set('display_errors', 1);
-        error_reporting(E_ALL);
+	{
+		ini_set('display_errors', 1);
+		error_reporting(E_ALL);
 
-        // Start output buffering to prevent unwanted output before the file is sent
-        ob_start();
+		// Start output buffering to prevent unwanted output before the file is sent
+		ob_start();
 
-        // Load PhpSpreadsheet
-        require_once FCPATH . 'vendor/autoload.php';
+		// Load PhpSpreadsheet
+		require_once FCPATH . 'vendor/autoload.php';
 
-        $fk_product_types_id = $this->input->get('fk_product_types_ids');
-        
-        // Base headers for product master/inventory/batch/price
+		$fk_product_types_id = $this->input->get('fk_product_types_ids');
+
+		// Base headers for product master/inventory/batch/price
 		$headers = [
-			'Product Name', 'SKU Code', 'Stock Availability', 'Barcode', 'Batch Number',
-			'Quantity', 'Expiry Date', 'Manufactured Date', 'Images', 'Description',
-			'Purchase Price', 'MRP', 'Selling Price', 'Product Type',
-			 'Channel Type', 'Sales Channel'
+			'Product Name',
+			'SKU Code',
+			'Stock Availability',
+			'Barcode',
+			'Batch Number',
+			'Quantity',
+			'Expiry Date',
+			'Manufactured Date',
+			'Images',
+			'Description',
+			'Purchase Price',
+			'MRP',
+			'Selling Price',
+			'Product Type',
+			'Channel Type',
+			'Sales Channel'
 		];
 
-        $sampleRow = [
-            'Sample Product', 'SKU123', 'In Stock', '987654321', 'BATCH001', 50, '2025-12-31', '2025-01-01',
-            'C:\Users\user\Downloads\Neem5.jpg,C:\Users\user\Downloads\Neem4.jpg', 'Sample description', 60, 120, 100, 'Honey', 'Online', 'Amazon'
-        ];
+		$sampleRow = [
+			'Sample Product',
+			'SKU123',
+			'In Stock',
+			'987654321',
+			'BATCH001',
+			50,
+			'2025-12-31',
+			'2025-01-01',
+			'C:\Users\user\Downloads\Neem5.jpg,C:\Users\user\Downloads\Neem4.jpg',
+			'Sample description',
+			60,
+			120,
+			100,
+			'Honey',
+			'Online',
+			'Amazon'
+		];
 
-        // Fetch attribute names and types for the product type
-        $attributes = $this->model->selectWhereData(
-            'tbl_attribute_master',
-            ['fk_product_type_id' => $fk_product_types_id, 'is_delete' => 1],
-            '*',
-            false, // multiple rows
-            ['id', 'ASC']
-        );
+		// Fetch attribute names and types for the product type
+		$attributes = $this->model->selectWhereData(
+			'tbl_attribute_master',
+			['fk_product_type_id' => $fk_product_types_id, 'is_delete' => 1],
+			'*',
+			false, // multiple rows
+			['id', 'ASC']
+		);
 
-        // Debugging: Check if attributes are fetched correctly
-        // var_dump($attributes); die();
+		// Debugging: Check if attributes are fetched correctly
+		// var_dump($attributes); die();
 
-        // Append each attribute as a column
-        if (!empty($attributes)) {
-            foreach ($attributes as $attr) {
-                if (isset($attr['attribute_name'])) {
-                    $headers[] = $attr['attribute_name']; // Add attribute name to headers
+		// Append each attribute as a column
+		if (!empty($attributes)) {
+			foreach ($attributes as $attr) {
+				if (isset($attr['attribute_name'])) {
+					$headers[] = $attr['attribute_name']; // Add attribute name to headers
 
-                    // Fetch the attribute value based on the attribute type
-                    switch ($attr['attribute_type']) {  // Assuming 'attribute_type' is a column in tbl_attribute_master
-                        case 'dropdown':  // If it's a dropdown, fetch possible values
-                            $attrValue = $this->model->selectWhereData(
-                                'tbl_attribute_values',
-                                ['fk_attribute_id' => $attr['id'], 'is_delete' => 1],
-                                '*',
-                                false,  // multiple values
-                                ['id', 'ASC']
-                            );
+					// Fetch the attribute value based on the attribute type
+					switch ($attr['attribute_type']) {  // Assuming 'attribute_type' is a column in tbl_attribute_master
+						case 'dropdown':  // If it's a dropdown, fetch possible values
+							$attrValue = $this->model->selectWhereData(
+								'tbl_attribute_values',
+								['fk_attribute_id' => $attr['id'], 'is_delete' => 1],
+								'*',
+								false,  // multiple values
+								['id', 'ASC']
+							);
 
-                            // Append the dropdown values to sampleRow, use the first option if multiple values exist
-                            $sampleRow[] = isset($attrValue[0]['attribute_value']) ? $attrValue[0]['attribute_value'] : '';
-                            break;
+							// Append the dropdown values to sampleRow, use the first option if multiple values exist
+							$sampleRow[] = isset($attrValue[0]['attribute_value']) ? $attrValue[0]['attribute_value'] : '';
+							break;
 
-                        case 'text':  // If it's a text-based attribute
-                            // Here you might fetch a default or sample text value for a text-based attribute
-                            $sampleRow[] = "Sample Text Value"; // Change to actual logic if needed
-                            break;
+						case 'text':  // If it's a text-based attribute
+							// Here you might fetch a default or sample text value for a text-based attribute
+							$sampleRow[] = "Sample Text Value"; // Change to actual logic if needed
+							break;
 
-                        case 'checkbox':  // If it's a checkbox (boolean type)
-                            // Provide a sample boolean value (true/false)
-                            $sampleRow[] = 'Yes'; // Change to "No" if you want to simulate unchecked checkbox
-                            break;
+						case 'checkbox':  // If it's a checkbox (boolean type)
+							// Provide a sample boolean value (true/false)
+							$sampleRow[] = 'Yes'; // Change to "No" if you want to simulate unchecked checkbox
+							break;
 
-                        case 'radio':  // If it's a radio button (single option)
-                            // You may want to provide a sample value, if available
-                            $sampleRow[] = 'Option1'; // Replace with actual logic or a default option
-                            break;
+						case 'radio':  // If it's a radio button (single option)
+							// You may want to provide a sample value, if available
+							$sampleRow[] = 'Option1'; // Replace with actual logic or a default option
+							break;
 
-                        default:
-                            $sampleRow[] = '';  // Default case, leave it empty
-                            break;
-                    }
-                }
-            }
-        }
-        // Create spreadsheet
-		
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->fromArray($headers, null, 'A1');
-        $sheet->fromArray($sampleRow, null, 'A2');
+						default:
+							$sampleRow[] = '';  // Default case, leave it empty
+							break;
+					}
+				}
+			}
+		}
+		// Create spreadsheet
 
-        // Output file
-        $filename = 'Product_Sample_with_Attributes.xlsx';
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-        header('Cache-Control: max-age=0');
+		$spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+		$sheet = $spreadsheet->getActiveSheet();
+		$sheet->fromArray($headers, null, 'A1');
+		$sheet->fromArray($sampleRow, null, 'A2');
 
-        // Clean output buffer before sending the file to prevent corrupt output
-        ob_end_clean();
+		// Output file
+		$filename = 'Product_Sample_with_Attributes.xlsx';
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"$filename\"");
+		header('Cache-Control: max-age=0');
 
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $writer->save('php://output');  // Direct output to the browser
+		// Clean output buffer before sending the file to prevent corrupt output
+		ob_end_clean();
 
-        exit;
-    }
+		$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+		$writer->save('php://output');  // Direct output to the browser
+
+		exit;
+	}
+
+	// public function importProductExcel()
+	// {
+	// 	$this->load->library('upload');
+	// 	require_once FCPATH . 'vendor/autoload.php';
+
+	// 	if (!empty($_FILES['product_excel']['name'])) {
+	// 		$tmpPath = $_FILES['product_excel']['tmp_name'];
+	// 		$spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmpPath);
+	// 		$sheet = $spreadsheet->getActiveSheet();
+	// 		$rows = $sheet->toArray();
+
+	// 		$rejected = [];
+	// 		$headers = $rows[1]; // Assuming headers are in 2nd row
+	// 		$headers[] = 'Error Message'; // For rejected export
+
+	// 		for ($i = 2; $i < count($rows); $i++) {
+	// 			$row = $rows[$i];
+	// 			$errorMsg = '';
+
+	// 			$sku = trim($row[1]);
+	// 			$batch_no = trim($row[4]);
+
+	// 			$sku_code = $this->model->countWhereRecord('tbl_sku_code_master', ['sku_code' => $sku, 'is_delete' => 1]);
+	// 			if ($sku_code > 0) {
+	// 				$fk_sku_code_id = $this->model->selectWhereData('tbl_sku_code_master', ['sku_code' => $sku, 'is_delete' => 1], 'id', true);
+	// 			} else {
+	// 				$this->model->insertData('tbl_sku_code_master', ['sku_code' => $sku]);
+	// 				$fk_sku_code_id = $this->model->selectWhereData('tbl_sku_code_master', ['sku_code' => $sku, 'is_delete' => 1], 'id', true);
+	// 			}
+
+	// 			$existing_product = $this->model->selectWhereData('tbl_product_master', ['product_sku_code' => $fk_sku_code_id['id']], '*', true);
+
+	// 			if ($existing_product) {
+	// 				$existing_batch = $this->model->selectWhereData('tbl_product_batches', [
+	// 					'fk_product_id' => $existing_product['id'],
+	// 					'batch_no' => $batch_no
+	// 				], 'id', true);
+
+	// 				if ($existing_batch) {
+	// 					$row[] = 'Duplicate product & batch. Skipped.';
+	// 					$rejected[] = $row;
+	// 					continue;
+	// 				}
+	// 			}
+
+	// 			$fk_stock_availability_id = $this->model->selectWhereData('tbl_stock_availability', ['stock_availability' => $row[2]], 'id', true);
+	// 			$fk_product_types_id = $this->model->selectWhereData('tbl_product_types', ['product_type_name' => $row[13]], 'id', true);
+	// 			$fk_sale_channel_id = $this->model->selectWhereData('tbl_sale_channel', ['sale_channel' => $row[15]], 'id', true);
+	// 			$quantity = $row[5];
+
+	// 			// Handle the images (comma-separated list of image paths)
+	// 			$images = trim($row[8]); // Assuming images are in column 8
+
+	// 			$image_urls = $this->handle_image_upload($images);
+
+	// 			if (!$existing_product) {
+	// 				$product_data = [
+	// 					'product_name' => $row[0],
+	// 					'product_sku_code' => $fk_sku_code_id['id'],
+	// 					'fk_stock_availability_id' => $fk_stock_availability_id['id'] ?? null,
+	// 					'barcode' => $row[3],
+	// 					'images' => $image_urls,
+	// 					'description' => $row[9],
+	// 					'fk_product_types_id' => $fk_product_types_id['id'] ?? null,
+	// 				];
+	// 				$product_id = $this->model->insertData('tbl_product_master', $product_data);
+	// 			} else {
+	// 				$product_id = $existing_product['id'];
+	// 			}
+
+	// 			$product_batch = [
+	// 				'fk_product_id' => $product_id,
+	// 				'batch_no' => $batch_no,
+	// 				'quantity' => $quantity,
+	// 				'expiry_date' => $row[6],
+	// 				'manufactured_date' => $row[7],
+	// 			];
+	// 			$batch_id = $this->model->insertData('tbl_product_batches', $product_batch);
+
+	// 			$product_price = [
+	// 				'fk_product_id' => $product_id,
+	// 				'fk_batch_id' => $batch_id,
+	// 				'purchase_price' => $row[10],
+	// 				'MRP' => $row[11],
+	// 				'selling_price' => $row[12],
+	// 			];
+	// 			$this->model->insertData('tbl_product_price', $product_price);
+
+	// 			$product_inventory = [
+	// 				'fk_product_id' => $product_id,
+	// 				'fk_batch_id' => $batch_id,
+	// 				'channel_type' => $row[14],
+	// 				'fk_sale_channel_id' => $fk_sale_channel_id['id'] ?? null,
+	// 				'add_quantity' => $quantity,
+	// 				'total_quantity' => $quantity,
+	// 				'used_status' => 1
+	// 			];
+	// 			$this->model->insertData('tbl_product_inventory', $product_inventory);
+
+	// 			// Handle dynamic attributes
+	// 			$headers = $rows[0];
+	// 			$dynamicHeaders = array_slice($headers, 16);
+
+	// 			foreach ($dynamicHeaders as $index => $attrName) {
+	// 				$attrName = trim($attrName);
+	// 				$attrValue = trim($row[16 + $index] ?? '');
+	// 				if ($attrName === '' || $attrValue === '') continue;
+
+	// 				$attribute = $this->model->selectWhereData('tbl_attribute_master', [
+	// 					'attribute_name' => $attrName,
+	// 					'is_delete' => 1
+	// 				], 'id', true);
+
+	// 				$attribute_id = $attribute['id'] ?? null;
+
+	// 				if ($attribute_id) {
+	// 					$attributeValue = $this->model->selectWhereData('tbl_attribute_values', [
+	// 						'attribute_value' => $attrValue,
+	// 						'fk_attribute_id' => $attribute_id
+	// 					], 'id', true);
+
+	// 					if (!empty($attributeValue['id'])) {
+	// 						$exists = $this->model->selectWhereData('tbl_product_attributes', [
+	// 							'fk_product_id' => $product_id,
+	// 							'fk_product_types_id' => $fk_product_types_id['id'] ?? null,
+	// 							'fk_attribute_id' => $attribute_id,
+	// 							'fk_attribute_value_id' => $attributeValue['id'],
+	// 						], 'id', true);
+
+	// 						if (!$exists) {
+	// 							$this->model->insertData('tbl_product_attributes', [
+	// 								'fk_product_id' => $product_id,
+	// 								'fk_product_types_id' => $fk_product_types_id['id'] ?? null,
+	// 								'fk_attribute_id' => $attribute_id,
+	// 								'fk_attribute_value_id' => $attributeValue['id'],
+	// 							]);
+	// 						}
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+
+	// 		if (!empty($rejected)) {
+	// 			$this->load->helper('download');
+	// 			$rejectedFile = FCPATH . 'uploads/rejected_products_' . time() . '.xlsx';
+	// 			$spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+	// 			$sheet = $spreadsheet->getActiveSheet();
+	// 			array_unshift($rejected, $headers);
+	// 			$sheet->fromArray($rejected, null, 'A1');
+	// 			$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+	// 			$writer->save($rejectedFile);
+
+	// 			$this->output
+	// 				->set_content_type('application/json')
+	// 				->set_output(json_encode([
+	// 					'status' => "error",
+	// 					'message' => "Some rows were rejected. Please download the rejected file.",
+	// 					'download_url' => base_url('uploads/' . basename($rejectedFile))
+	// 				]));
+	// 			return;
+	// 		} else {
+	// 			$this->output
+	// 				->set_content_type('application/json')
+	// 				->set_output(json_encode([
+	// 					'status' => "success",
+	// 					'message' => "All rows imported successfully!"
+	// 				]));
+	// 			return;
+	// 		}
+	// 	} else {
+	// 		$this->output
+	// 			->set_content_type('application/json')
+	// 			->set_output(json_encode([
+	// 				'status' => "error",
+	// 				'message' => "No file selected!"
+	// 			]));
+	// 		return;
+	// 	}
+	// }
+	
 
 	public function importProductExcel()
 	{
 		$this->load->library('upload');
 		require_once FCPATH . 'vendor/autoload.php';
+		$this->load->library('email'); // Load Email Library
 
 		if (!empty($_FILES['product_excel']['name'])) {
 			$tmpPath = $_FILES['product_excel']['tmp_name'];
@@ -1154,6 +1432,7 @@ class Inventory_manager extends CI_Controller {
 			$rows = $sheet->toArray();
 
 			$rejected = [];
+			$imported_products = []; // Store imported products
 			$headers = $rows[1]; // Assuming headers are in 2nd row
 			$headers[] = 'Error Message'; // For rejected export
 
@@ -1192,11 +1471,9 @@ class Inventory_manager extends CI_Controller {
 				$fk_sale_channel_id = $this->model->selectWhereData('tbl_sale_channel', ['sale_channel' => $row[15]], 'id', true);
 				$quantity = $row[5];
 
-				 // Handle the images (comma-separated list of image paths)
-				 $images = trim($row[8]); // Assuming images are in column 8
+				$images = trim($row[8]);
+				$image_urls = $this->handle_image_upload($images);
 
-				 $image_urls = $this->handle_image_upload($images);
-				
 				if (!$existing_product) {
 					$product_data = [
 						'product_name' => $row[0],
@@ -1282,6 +1559,19 @@ class Inventory_manager extends CI_Controller {
 						}
 					}
 				}
+
+				// Add to imported_products array
+				$imported_products[] = [
+					'Product Name' => $row[0],
+					'SKU' => $sku,
+					'Batch No' => $batch_no,
+					'Quantity' => $quantity,
+					'Purchase Price' => $row[10],
+					'MRP' => $row[11],
+					'Selling Price' => $row[12],
+					'Expiry Date' => $row[6],
+					'Manufactured Date' => $row[7]
+				];
 			}
 
 			if (!empty($rejected)) {
@@ -1294,15 +1584,20 @@ class Inventory_manager extends CI_Controller {
 				$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
 				$writer->save($rejectedFile);
 
+				$download_url = base_url('uploads/' . basename($rejectedFile));
+				$this->sendImportEmail($download_url, "Some rows were rejected. Please download the rejected file.", $imported_products);
+
 				$this->output
 					->set_content_type('application/json')
 					->set_output(json_encode([
 						'status' => "error",
 						'message' => "Some rows were rejected. Please download the rejected file.",
-						'download_url' => base_url('uploads/' . basename($rejectedFile))
+						'download_url' => $download_url
 					]));
 				return;
 			} else {
+				$this->sendImportEmail('', "All rows imported successfully!", $imported_products);
+
 				$this->output
 					->set_content_type('application/json')
 					->set_output(json_encode([
@@ -1322,35 +1617,36 @@ class Inventory_manager extends CI_Controller {
 		}
 	}
 	// Helper function to handle image uploads
-	private function handle_image_upload($images) {
+	private function handle_image_upload($images)
+	{
 		$upload_dir = './uploads/products/';
 		$image_urls = [];
-	
+
 		// Ensure the directory exists with proper permissions
 		if (!is_dir($upload_dir)) {
 			mkdir($upload_dir, 0777, true);
 		}
 		chmod($upload_dir, 0777);
-	
+
 		// Skip if images is empty
 		if (empty($images)) {
 			return '';
 		}
-	
+
 		// Split the comma-separated image URLs
 		$image_paths = explode(',', $images);
-		
+
 		foreach ($image_paths as $image_path) {
 			$image_path = trim($image_path);
-			
+
 			// Skip empty URLs
 			if (empty($image_path)) {
 				continue;
 			}
-			
+
 			// Generate filename
 			$extension = 'jpg'; // default
-			
+
 			// Try to extract extension from URL
 			$path_parts = pathinfo(parse_url($image_path, PHP_URL_PATH));
 			if (isset($path_parts['extension'])) {
@@ -1360,10 +1656,10 @@ class Inventory_manager extends CI_Controller {
 					$extension = 'jpg'; // fallback to jpg
 				}
 			}
-			
+
 			$filename = uniqid('img_') . '.' . $extension;
 			$destination = $upload_dir . $filename;
-			
+
 			try {
 				// Use simple file_get_contents() instead of cURL
 				$context = stream_context_create([
@@ -1376,13 +1672,13 @@ class Inventory_manager extends CI_Controller {
 						'verify_peer_name' => false
 					]
 				]);
-				
+
 				$image_content = @file_get_contents($image_path, false, $context);
-				
+
 				if ($image_content === false) {
 					continue;
 				}
-				
+
 				// Save the image directly
 				if (file_put_contents($destination, $image_content) !== false) {
 					chmod($destination, 0666); // Make the file readable
@@ -1394,9 +1690,223 @@ class Inventory_manager extends CI_Controller {
 				// Just continue with the next image if there's an error
 				continue;
 			}
-		}		
+		}
+
 		// Return comma-separated list of URLs
 		return implode(',', $image_urls);
+	}
+
+	public function upload_order_excel()
+	{
+		require_once FCPATH . 'vendor/autoload.php';
+
+		$uploadPath = FCPATH . 'uploads/rejected_excels/';
+
+		if (!is_dir($uploadPath)) {
+			mkdir($uploadPath, 0777, true);
+		}
+
+		if (isset($_FILES['excel_file']['name']) && $_FILES['excel_file']['name'] != '') {
+			$fileTmpPath = $_FILES['excel_file']['tmp_name'];
+
+			try {
+				$spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($fileTmpPath);
+				$sheet = $spreadsheet->getActiveSheet();
+				$data = $sheet->toArray();
+
+				// $insertData = []; 
+				$rejectedData = [];
+
+				// Add headers + rejection reason header
+				$headers = $data[0];
+				$headers[] = 'Rejection Reason';
+
+				for ($i = 2; $i < count($data); $i++) {
+					$row = $data[$i];
+					$sku_code     = trim($row[0]);
+					$batch_no     = trim($row[1]);
+					$channel_type = trim($row[2]);
+					$sale_channel = trim($row[3]);
+					$quantity     = trim($row[4]);
+
+					// Validate SKU
+					$skuValid = $this->model->selectWhereData('tbl_sku_code_master', [
+						'sku_code' => $sku_code,
+						'is_delete' => 1
+					], 'id', true);
+
+					if (!$skuValid) {
+						$row[] = 'Invalid SKU Code';
+						$rejectedData[] = $row;
+						continue;
+					}
+
+					// Validate product
+					$product = $this->model->selectWhereData('tbl_product_master', [
+						'product_sku_code' => $skuValid['id'],
+						'is_delete' => 1
+					], 'id', true);
+
+					if (!$product) {
+						$row[] = 'Product not found for SKU';
+						$rejectedData[] = $row;
+						continue;
+					}
+
+					$product_id = $product['id'];
+
+					// Validate batch
+					$batchValid = $this->model->selectWhereData('tbl_product_batches', [
+						'batch_no' => $batch_no,
+						'fk_product_id' => $product_id
+					], 'id', true);
+
+					if (!$batchValid) {
+						$row[] = 'Invalid batch for product';
+						$rejectedData[] = $row;
+						continue;
+					}
+
+					// Validate sale channel
+					$sale_channel_id = $this->model->selectWhereData('tbl_sale_channel', [
+						'sale_channel' => $sale_channel,
+						'is_delete' => 1
+					], 'id', true);
+
+					if (!$product_id || !$batchValid['id'] || !$sale_channel_id || !is_numeric($quantity)) {
+						$row[] = 'Invalid data or quantity not numeric';
+						$rejectedData[] = $row;
+						continue;
+					}
+
+					// Get last inventory quantity
+					$last_quantity = $this->model->selectWhereData('tbl_product_inventory', [
+						'fk_product_id' => $product_id,
+						'fk_batch_id' => $batchValid['id'],
+						'used_status' => 1
+					], 'total_quantity,id', true, ['id' => 'DESC']);
+
+					if (!empty($last_quantity)) {
+						$previous_quantity = $last_quantity['total_quantity'];
+						$inventory_id = $last_quantity['id'];
+						$total_quantity = $previous_quantity - $quantity;
+
+						if ($total_quantity < 0) {
+							$row[] = 'Resulting quantity would be zero or negative';
+							$rejectedData[] = $row;
+							continue;
+
+							$this->model->updateData('tbl_product_inventory', [
+								'used_status' => 0,
+								'is_delete' => '0'
+							], ['fk_product_id' => $product_id, 'fk_batch_id' => $batchValid['id'],]);
+						}
+
+						$this->model->updateData('tbl_product_inventory', [
+							'used_status' => 0,
+							'is_delete' => '0'
+						], ['fk_product_id' => $product_id, 'fk_batch_id' => $batchValid['id'],]);
+
+						// Prepare insert data
+						$insertData = [
+							'fk_product_id'       => $product_id,
+							'fk_batch_id'         => $batchValid['id'],
+							'channel_type'        => $channel_type,
+							'fk_sale_channel_id'  => $sale_channel_id['id'],
+							'deduct_quantity'     => $quantity,
+							'total_quantity'      => $total_quantity,
+							'used_status'         => 1
+						];
+						$this->model->insertData('tbl_product_inventory', $insertData);
+					} else {
+						$row[] = 'No previous inventory found';
+						$rejectedData[] = $row;
+						continue;
+					}
+				}
+				// Generate rejection Excel
+				if (!empty($rejectedData)) {
+					$rejectedSheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+					$sheet = $rejectedSheet->getActiveSheet();
+
+					$sheet->fromArray($headers, NULL, 'A1');
+					$sheet->fromArray($rejectedData, NULL, 'A2');
+
+					$fileName = 'rejected_orders_' . time() . '.xlsx';
+					$filePath = $uploadPath . $fileName;
+
+					$writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($rejectedSheet, 'Xlsx');
+					$writer->save($filePath);
+
+					$downloadUrl = base_url('uploads/rejected_excels/' . $fileName);
+
+					echo json_encode([
+						'status'       => 'partial',
+						'message'      => 'Some rows were rejected.',
+						'rejected_url' => $downloadUrl
+					]);
+					return;
+				}
+
+				echo json_encode([
+					'status'  => 'success',
+					'message' => 'All order data uploaded successfully.'
+				]);
+			} catch (Exception $e) {
+				echo json_encode([
+					'status'  => 'error',
+					'message' => 'Invalid Excel file or error: ' . $e->getMessage()
+				]);
+			}
+		} else {
+			echo json_encode([
+				'status'  => 'error',
+				'message' => 'No file selected.'
+			]);
+		}
+	}
+
+	private function sendImportEmail($file_link = '', $message = '', $imported_products = [])
+	{
+		// $this->email->from('your_email@example.com', 'Your Company');
+		// $this->email->to('receiver@example.com'); // Change this
+		// $this->email->subject('Product Import Status');
+
+		$to_email = "shirin@sda-zone.com"; // Replace with actual receiver
+		$subject = 'New Stock Added';
+
+		$body = "<p>$message</p>";
+
+		if (!empty($imported_products)) {
+			$body .= "<h3>Imported Products:</h3>";
+			$body .= "<table border='1' cellpadding='5' cellspacing='0'>";
+			$body .= "<thead><tr>";
+
+			foreach (array_keys($imported_products[0]) as $header) {
+				$body .= "<th>$header</th>";
+			}
+
+			$body .= "</tr></thead><tbody>";
+
+			foreach ($imported_products as $product) {
+				$body .= "<tr>";
+				foreach ($product as $value) {
+					$body .= "<td>$value</td>";
+				}
+				$body .= "</tr>";
+			}
+
+			$body .= "</tbody></table><br>";
+		}
+
+		if (!empty($file_link)) {
+			$body .= "<p><a href='$file_link' target='_blank'>Download Rejected File</a></p>";
+		}
+		$email_message = $body;
+		send_inventory_email($to_email, $subject, $email_message);
+		// $this->email->message($body);
+		// $this->email->set_mailtype('html');
+		// $this->email->send();
 	}
 	
 }
