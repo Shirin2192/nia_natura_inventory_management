@@ -530,5 +530,21 @@ class Model extends CI_Model {
         $query=$this->db->get();
         return $query->row_array();
     }
+	public function addUserLog($user_id, $action, $inserted_table = null, $inserted_data = null)
+	{
+		$ip_address = $this->input->ip_address();
+		$user_agent = $this->input->user_agent();
+
+		$logData = [
+			'fk_user_id' => $user_id,
+			'action' => $action,
+			'inserted_table' => $inserted_table,
+			'inserted_data' => !empty($inserted_data) ? json_encode($inserted_data) : null,
+			'ip_address' => $ip_address,
+			'user_agent' => $user_agent,
+		];
+
+		return $this->insertData('tbl_user_log', $logData);
+	}
 
 }//class ends here	

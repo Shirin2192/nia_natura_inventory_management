@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 defined('BASEPATH') or exit('No direct script access allowed');
 header("Access-Control-Allow-Origin: *"); // or use a specific domain instead of '*'
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
@@ -9,43 +9,45 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-class Inventory_manager extends CI_Controller {
+
+class Inventory_manager extends CI_Controller
+{
 
 	public function __construct()
 	{
 		parent::__construct();
 
-		 // Prevent browser caching for all admin pages
-		 $this->output
-		 ->set_header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0")
-		 ->set_header("Cache-Control: post-check=0, pre-check=0", false)
-		 ->set_header("Pragma: no-cache");
+		// Prevent browser caching for all admin pages
+		$this->output
+			->set_header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0")
+			->set_header("Cache-Control: post-check=0, pre-check=0", false)
+			->set_header("Pragma: no-cache");
 
-		$this->load->model('Product_model'); 
-		$this->load->model('user_model'); 
+		$this->load->model('Product_model');
+		$this->load->model('user_model');
 		$this->load->model('Product_attribute_model');
 		$this->load->model('model');
-		$this->load->library('form_validation'); 
+		$this->load->library('form_validation');
 
 		$inventory_session = $this->session->userdata('inventory_session'); // Check if admin session exists
 		$role_id = $inventory_session['role_id'] ?? null;
 		if ($role_id) {
-            $role_permission = $this->Role_model->get_role_permission($role_id);
+			$role_permission = $this->Role_model->get_role_permission($role_id);
 
-            foreach ($role_permission as $role_permission_row) {
-                $sidebar_id = $role_permission_row['fk_sidebar_id'];
+			foreach ($role_permission as $role_permission_row) {
+				$sidebar_id = $role_permission_row['fk_sidebar_id'];
 
-                $this->permissions[$sidebar_id] = [
-                    'can_view' => $role_permission_row['can_view'] ?? 0,
-                    'can_add' => $role_permission_row['can_add'] ?? 0,
-                    'can_edit' => $role_permission_row['can_edit'] ?? 0,
-                    'can_delete' => $role_permission_row['can_delete'] ?? 0,
-                    'has_access' => $role_permission_row['has_access'] ?? 0
-                ];
-            }
-        }
+				$this->permissions[$sidebar_id] = [
+					'can_view' => $role_permission_row['can_view'] ?? 0,
+					'can_add' => $role_permission_row['can_add'] ?? 0,
+					'can_edit' => $role_permission_row['can_edit'] ?? 0,
+					'can_delete' => $role_permission_row['can_delete'] ?? 0,
+					'has_access' => $role_permission_row['has_access'] ?? 0
+				];
+			}
+		}
 		$this->controller_name = $this->router->fetch_class();
-        $this->load->vars(['controller_name' => $this->controller_name]);
+		$this->load->vars(['controller_name' => $this->controller_name]);
 	}
 	public function index()
 	{
@@ -70,27 +72,27 @@ class Inventory_manager extends CI_Controller {
 				"SUM(total_quantity) as stock",
 				true
 			);
-			
+
 			// 2. Stock Levels
 			$stock_data = $this->Dashboard_model->fetch_stock_levels();
 			$response['stock_product_names'] = array_column($stock_data, 'product_name');
 			$response['stock_quantities'] = array_column($stock_data, 'total_quantity');
-		// echo "<pre>";print_r($response);die;
-			  // 3. Batch Expiry - Fetch product wise expiry summary
-			  $batch_expiry = $this->Dashboard_model->getProductBatchExpirySummary(30); // 30 days
-			  $response['batch_expiry_near'] = $batch_expiry['near_expiry']; // Near Expiry batches
-			  $response['batch_expiry_healthy'] = $batch_expiry['healthy'];  // Healthy batches
-		
+			// echo "<pre>";print_r($response);die;
+			// 3. Batch Expiry - Fetch product wise expiry summary
+			$batch_expiry = $this->Dashboard_model->getProductBatchExpirySummary(30); // 30 days
+			$response['batch_expiry_near'] = $batch_expiry['near_expiry']; // Near Expiry batches
+			$response['batch_expiry_healthy'] = $batch_expiry['healthy'];  // Healthy batches
+
 			// 4. Top 5 Products
 			$top5 = $this->Dashboard_model->getTop5Products();
 			$response['top5_product_names'] = array_column($top5, 'product_name');
 			$response['top5_quantities'] = array_column($top5, 'total_quantity');
-		
+
 			// 5. Out of Stock Trends
 			$trend = $this->Dashboard_model->getOutOfStockTrends();
 			$response['trend_weeks_or_months'] = array_column($trend, 'period_label'); // Week1, Week2...
 			$response['out_of_stock_counts'] = array_column($trend, 'out_of_stock_count');
-			$this->load->view('inventory_manager/dashboard',$response);
+			$this->load->view('inventory_manager/dashboard', $response);
 		}
 	}
 	public function add_product_type()
@@ -101,7 +103,7 @@ class Inventory_manager extends CI_Controller {
 		} else {
 			$data['permissions'] = $this->permissions; // Pass full permissions array
 			$data['current_sidebar_id'] = 3; // Set the sidebar ID for the current view
-			$this->load->view('add_product_type',$data);
+			$this->load->view('add_product_type', $data);
 		}
 	}
 	public function fetch_product_type()
@@ -176,7 +178,7 @@ class Inventory_manager extends CI_Controller {
 	}
 	public function delete_product_type()
 	{
-		$id = $this->input->post('id'); 
+		$id = $this->input->post('id');
 		if (!$id) {
 			echo json_encode(['status' => 'error', 'message' => 'Invalid product type ID']);
 			return;
@@ -189,7 +191,8 @@ class Inventory_manager extends CI_Controller {
 		}
 	}
 
-	public function add_product_attributes(){
+	public function add_product_attributes()
+	{
 		$inventory_session = $this->session->userdata('inventory_session'); // Check if admin session exists
 		if (!$inventory_session) {
 			redirect(base_url('common/index')); // Redirect to login page if session is not active
@@ -197,9 +200,8 @@ class Inventory_manager extends CI_Controller {
 			$response['product_types'] = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 4; // Set the sidebar ID for the current view
-			$this->load->view('add_product_attributes',$response);
+			$this->load->view('add_product_attributes', $response);
 		}
-		
 	}
 	public function get_product_attribute_detail()
 	{
@@ -243,7 +245,7 @@ class Inventory_manager extends CI_Controller {
 	}
 	public function get_product_attribute_detail_id()
 	{
-		$id = $this->input->post('id'); 	
+		$id = $this->input->post('id');
 		$product_attributes = $this->Product_attribute_model->get_product_attribute_detail_id($id);
 		if ($product_attributes) {
 			echo json_encode(["status" => "success", "data" => $product_attributes]);
@@ -274,28 +276,27 @@ class Inventory_manager extends CI_Controller {
 		$id = $this->input->post('edit_attribute_id');
 		$attribute_name = $this->input->post('edit_attribute_name');
 		$attribute_type = $this->input->post('edit_attribute_type');
-		
-		$count = $this->model->CountWhereRecord('tbl_attribute_master', array('attribute_name' => $attribute_name, 'id !=' => $id, 'is_delete' => 1));	
+
+		$count = $this->model->CountWhereRecord('tbl_attribute_master', array('attribute_name' => $attribute_name, 'id !=' => $id, 'is_delete' => 1));
 		if ($count == 1) {
 			$response = ["status" => "error", 'attribute_type_error' => "Product Attribute Already Exist"];
 			echo json_encode($response);
 			return;
-		}else{
+		} else {
 			$updateData = [
 				'attribute_name' => $attribute_name,
 				'attribute_type' => $attribute_type
 			];
-				
+
 			$updated = $this->model->updateData('tbl_attribute_master', $updateData, ['id' => $id]);
 			// Check if update was successful
-	
+
 			if ($updated) {
 				echo json_encode(["status" => "success", "message" => "Attribute updated successfully."]);
 			} else {
 				echo json_encode(["status" => "error", "message" => "Failed to update attribute."]);
 			}
-
-		}		
+		}
 	}
 	public function delete_product_attribute()
 	{
@@ -314,7 +315,8 @@ class Inventory_manager extends CI_Controller {
 		}
 	}
 
-	public function add_product_attributes_value(){
+	public function add_product_attributes_value()
+	{
 		$inventory_session = $this->session->userdata('inventory_session'); // Check if admin session exists
 		if (!$inventory_session) {
 			redirect(base_url('common/index')); // Redirect to login page if session is not active
@@ -322,7 +324,7 @@ class Inventory_manager extends CI_Controller {
 			$response['product_attributes'] = $this->model->selectWhereData('tbl_attribute_master', array('is_delete' => 1), "*", false, array('id', "DESC"));
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 5; // Set the sidebar ID for the current view
-			$this->load->view('add_product_attributes_value',$response);
+			$this->load->view('add_product_attributes_value', $response);
 		}
 	}
 	public function get_product_attributes_value_detail()
@@ -362,7 +364,7 @@ class Inventory_manager extends CI_Controller {
 	}
 	public function get_product_attributes_value_detail_id()
 	{
-		$id = $this->input->post('id'); 	
+		$id = $this->input->post('id');
 		$product_attributes_values = $this->Product_attribute_model->get_product_attributes_value_detail_id($id);
 		if ($product_attributes_values) {
 			echo json_encode(["status" => "success", "data" => $product_attributes_values]);
@@ -389,24 +391,23 @@ class Inventory_manager extends CI_Controller {
 		// Get input data
 		$id = $this->input->post('edit_attribute_value_id');
 		$attribute_value = $this->input->post('edit_attribute_value');
-		
-		$count = $this->model->CountWhereRecord('tbl_attribute_values', array('attribute_value' => $attribute_value, 'id !=' => $id, 'is_delete' => 1));	
+
+		$count = $this->model->CountWhereRecord('tbl_attribute_values', array('attribute_value' => $attribute_value, 'id !=' => $id, 'is_delete' => 1));
 		if ($count == 1) {
 			$response = ["status" => "error", 'attribute_type_error' => "Product Attribute Value Already Exist"];
 			echo json_encode($response);
 			return;
-		}else{
+		} else {
 			$updateData = [
 				'attribute_value' => $attribute_value,
 			];
-				
+
 			$updated = $this->model->updateData('tbl_attribute_values', $updateData, ['id' => $id]);
 			if ($updated) {
 				echo json_encode(["status" => "success", "message" => "Attribute Value updated successfully."]);
 			} else {
 				echo json_encode(["status" => "error", "message" => "Failed to update attribute value."]);
 			}
-			
 		}
 	}
 	public function delete_product_attributes_value()
@@ -433,7 +434,7 @@ class Inventory_manager extends CI_Controller {
 		} else {
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 6; // Set the sidebar ID for the current view
-			$this->load->view('add_sales_channel',$response);
+			$this->load->view('add_sales_channel', $response);
 		}
 	}
 	public function fetch_sale_channel()
@@ -533,7 +534,7 @@ class Inventory_manager extends CI_Controller {
 			echo json_encode(['status' => 'error', 'message' => 'Failed to delete Sale Channel']);
 		}
 	}
-	
+
 	public function add_product()
 	{
 		$inventory_session = $this->session->userdata('inventory_session'); // Check if admin session exists
@@ -542,8 +543,10 @@ class Inventory_manager extends CI_Controller {
 		} else {
 			$response['product_types'] = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
 			$response['stock_availability'] = $this->model->selectWhereData('tbl_stock_availability', array('is_delete' => 1), "*", false, array('id', "DESC"));
+			$response['product_sku_code'] = $this->model->selectWhereData('tbl_sku_code_master', array('is_delete' => 1), "*", false, array('id', "DESC"));
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 7; // Set the sidebar ID for the current view
+
 			$this->load->view('product', $response);
 		}
 	}
@@ -551,21 +554,21 @@ class Inventory_manager extends CI_Controller {
 	public function get_attribute_on_product_types_id()
 	{
 		$fk_product_types_id = $this->input->post('fk_product_types_id'); // Get the product type ID from POST request
-		$response['data'] = $this->model->selectWhereData('tbl_attribute_master', array("fk_product_type_id" => $fk_product_types_id,'is_delete' => 1), "*", false, array('id', "DESC"));
+		$response['data'] = $this->model->selectWhereData('tbl_attribute_master', array("fk_product_type_id" => $fk_product_types_id, 'is_delete' => 1), "*", false, array('id', "DESC"));
 		echo json_encode($response);
 	}
 
 	public function get_attribute_values_on_product_attributes_id()
 	{
 		$fk_product_attributes_id = $this->input->post('attribute_id'); // Get the product attribute ID from POST request
-		$response['data'] = $this->model->selectWhereData('tbl_attribute_values', array("fk_attribute_id" => $fk_product_attributes_id,'is_delete' => 1), "*", false, array('id', "DESC"));
+		$response['data'] = $this->model->selectWhereData('tbl_attribute_values', array("fk_attribute_id" => $fk_product_attributes_id, 'is_delete' => 1), "*", false, array('id', "DESC"));
 		echo json_encode($response);
 	}
 
 	public function get_sales_channel_on_channel_type()
 	{
 		$channel_type = $this->input->post('channel_type'); // Get the product attribute ID from POST request
-		$response['data'] = $this->model->selectWhereData('tbl_sale_channel', array("channel_type" => $channel_type,'is_delete' => 1), "*", false, array('id', "DESC"));
+		$response['data'] = $this->model->selectWhereData('tbl_sale_channel', array("channel_type" => $channel_type, 'is_delete' => 1), "*", false, array('id', "DESC"));
 		echo json_encode($response);
 	}
 
@@ -573,7 +576,7 @@ class Inventory_manager extends CI_Controller {
 	{
 		if ($this->input->server('REQUEST_METHOD') === 'POST') {
 			$response = ['status' => 'error', 'errors' => []];
-			
+
 			// Get input values
 			$product_name = $this->input->post('product_name');
 			$product_sku_code = $this->input->post('product_sku_code');
@@ -644,7 +647,7 @@ class Inventory_manager extends CI_Controller {
 			} else {
 				$product_data = [
 					'product_name' => $product_name,
-					'product_sku_code' => $product_sku_code,					
+					'product_sku_code' => $product_sku_code,
 					'fk_stock_availability_id' => $stock_availability,
 					'barcode' => $barcode,
 					'batch_no' => $batch_no,
@@ -702,6 +705,7 @@ class Inventory_manager extends CI_Controller {
 			$productDetails = [
 				'id' => $product['id'],
 				'product_name' => $product['product_name'],
+				'sku_code' => $product['sku_code'],
 				'purchase_price' => $product['purchase_price'],
 				'total_quantity' => $product['total_quantity'],
 				'product_types' => array_unique($types),
@@ -723,9 +727,13 @@ class Inventory_manager extends CI_Controller {
 	{
 		$id = $this->input->post('product_id');
 		$data['product'] = $this->Product_model->get_product_by_id($id);
-		$channel_type = $data['product']['channel_type'];
-		$sale_channel = $this->model->selectWhereData('tbl_sale_channel', array('channel_type'=>$channel_type,'is_delete' => 1), "*", false, array('id', "DESC"));
+		$channel_type = explode(",", $data['product']['channel_type']);
+
+		$sale_channel = $this->model->selectWhereData('tbl_sale_channel', array('channel_type' => $channel_type[0], 'is_delete' => 1), "*", false, array('id', "DESC"));
 		$data['sale_channel'] = $sale_channel;
+		$fk_product_types_id = $data['product']['fk_product_types_id'];
+		$product_type_id = explode(',', $fk_product_types_id);
+		$data['attribute_master'] = $this->model->selectWhereData('tbl_attribute_master', array("fk_product_type_id" => $product_type_id[0], 'is_delete' => 1), "*", false, array('id', "DESC"));
 		echo json_encode($data);
 	}
 
@@ -733,8 +741,8 @@ class Inventory_manager extends CI_Controller {
 	{
 
 		$this->load->library('form_validation');
-		$admin_session = $this->session->userdata('admin_session');
-		$login_id = $admin_session['id'];
+		$inventory_session = $this->session->userdata('inventory_session');
+		$login_id = $inventory_session['user_id'];
 
 		$product_id = $this->input->post('update_product_id');
 
@@ -983,19 +991,20 @@ class Inventory_manager extends CI_Controller {
 			echo json_encode(["success" => false, "message" => "Invalid product ID."]);
 		}
 	}
-	public function sku_code(){
-		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
-		if (!$admin_session) {
+	public function sku_code()
+	{
+		$inventory_session = $this->session->userdata('inventory_session'); // Check if admin session exists
+		if (!$inventory_session) {
 			redirect(base_url('common/index')); // Redirect to login page if session is not active
 		} else {
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
-			$this->load->view('sku_code',$response);
+			$this->load->view('sku_code', $response);
 		}
 	}
 	public function get_sku_code_detail()
 	{
-		$response['data'] = $this->model->selectWhereData('tbl_sku_code_master',array('is_delete'=>'1'),'*',false,array('id','DESC')); // Correctly access the model
+		$response['data'] = $this->model->selectWhereData('tbl_sku_code_master', array('is_delete' => '1'), '*', false, array('id', 'DESC')); // Correctly access the model
 		// $response['permissions'] = $this->permissions; // Pass full permissions array
 		// $response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
 		echo json_encode($response);
@@ -1044,7 +1053,7 @@ class Inventory_manager extends CI_Controller {
 			echo json_encode(["status" => "success", "sku_code" => $sku_code]);
 		} else {
 			echo json_encode(["status" => "error", "message" => "SKU Code not found"]);
-		}		
+		}
 	}
 	public function update_sku_code()
 	{
@@ -1069,28 +1078,27 @@ class Inventory_manager extends CI_Controller {
 			echo json_encode($response);
 			return;
 		}
-		
+
 		// Get input data
 		$id = $this->input->post('edit_sku_code_id');
 		$sku_code = $this->input->post('edit_sku_code');
-		
-		$count = $this->model->CountWhereRecord('tbl_sku_code_master', array('sku_code' => $sku_code, 'id !=' => $id, 'is_delete' => 1));	
+
+		$count = $this->model->CountWhereRecord('tbl_sku_code_master', array('sku_code' => $sku_code, 'id !=' => $id, 'is_delete' => 1));
 		if ($count == 1) {
 			$response = ["status" => "error", 'edit_sku_code' => "SKU Code Already Exist"];
 			echo json_encode($response);
 			return;
-		}else{
+		} else {
 			$updateData = [
 				'sku_code' => $sku_code,
 			];
-				
+
 			$updated = $this->model->updateData('tbl_sku_code_master', $updateData, ['id' => $id]);
 			if ($updated) {
 				echo json_encode(["status" => "success", "message" => "SKU Code updated successfully."]);
 			} else {
 				echo json_encode(["status" => "error", "message" => "Failed to update SKU Code."]);
 			}
-			
 		}
 	}
 	public function delete_sku_code()
@@ -1108,7 +1116,7 @@ class Inventory_manager extends CI_Controller {
 		} else {
 			echo json_encode(['status' => 'error', 'message' => 'Failed to delete SKU Code']);
 		}
-	}	
+	}
 	public function downloadProductSampleExcel()
 	{
 		ini_set('display_errors', 1);
@@ -1417,7 +1425,7 @@ class Inventory_manager extends CI_Controller {
 	// 		return;
 	// 	}
 	// }
-	
+
 
 	public function importProductExcel()
 	{
@@ -1425,6 +1433,8 @@ class Inventory_manager extends CI_Controller {
 		require_once FCPATH . 'vendor/autoload.php';
 		$this->load->library('email'); // Load Email Library
 
+		$inventory_session = $this->session->userdata('inventory_session');
+		$login_id = $inventory_session['user_id'];
 		if (!empty($_FILES['product_excel']['name'])) {
 			$tmpPath = $_FILES['product_excel']['tmp_name'];
 			$spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($tmpPath);
@@ -1514,7 +1524,8 @@ class Inventory_manager extends CI_Controller {
 					'fk_sale_channel_id' => $fk_sale_channel_id['id'] ?? null,
 					'add_quantity' => $quantity,
 					'total_quantity' => $quantity,
-					'used_status' => 1
+					'used_status' => 1,
+					'fk_login_id' => $login_id,
 				];
 				$this->model->insertData('tbl_product_inventory', $product_inventory);
 
@@ -1568,9 +1579,9 @@ class Inventory_manager extends CI_Controller {
 					'Quantity' => $quantity,
 					'Purchase Price' => $row[10],
 					'MRP' => $row[11],
-					'Selling Price' => $row[12],
+					'Manufactured Date' => $row[7],
 					'Expiry Date' => $row[6],
-					'Manufactured Date' => $row[7]
+
 				];
 			}
 
@@ -1585,7 +1596,7 @@ class Inventory_manager extends CI_Controller {
 				$writer->save($rejectedFile);
 
 				$download_url = base_url('uploads/' . basename($rejectedFile));
-				$this->sendImportEmail($download_url, "Some rows were rejected. Please download the rejected file.", $imported_products);
+				$this->sendImportEmail($download_url, "Some rows were rejected. Please download the rejected file.", $imported_products,'Rejected File');
 
 				$this->output
 					->set_content_type('application/json')
@@ -1596,7 +1607,7 @@ class Inventory_manager extends CI_Controller {
 					]));
 				return;
 			} else {
-				$this->sendImportEmail('', "All rows imported successfully!", $imported_products);
+				$this->sendImportEmail('', "All rows imported successfully!", $imported_products, 'New Stock Added');
 
 				$this->output
 					->set_content_type('application/json')
@@ -1698,6 +1709,14 @@ class Inventory_manager extends CI_Controller {
 
 	public function upload_order_excel()
 	{
+
+		$this->load->library('upload');
+		require_once FCPATH . 'vendor/autoload.php';
+		$this->load->library('email'); // Load Email Library
+
+		$inventory_session = $this->session->userdata('inventory_session');
+		$login_id = $inventory_session['user_id'];
+
 		require_once FCPATH . 'vendor/autoload.php';
 
 		$uploadPath = FCPATH . 'uploads/rejected_excels/';
@@ -1728,6 +1747,7 @@ class Inventory_manager extends CI_Controller {
 					$channel_type = trim($row[2]);
 					$sale_channel = trim($row[3]);
 					$quantity     = trim($row[4]);
+					$reason     = trim($row[5]);
 
 					// Validate SKU
 					$skuValid = $this->model->selectWhereData('tbl_sku_code_master', [
@@ -1808,6 +1828,7 @@ class Inventory_manager extends CI_Controller {
 						], ['fk_product_id' => $product_id, 'fk_batch_id' => $batchValid['id'],]);
 
 						// Prepare insert data
+
 						$insertData = [
 							'fk_product_id'       => $product_id,
 							'fk_batch_id'         => $batchValid['id'],
@@ -1815,7 +1836,9 @@ class Inventory_manager extends CI_Controller {
 							'fk_sale_channel_id'  => $sale_channel_id['id'],
 							'deduct_quantity'     => $quantity,
 							'total_quantity'      => $total_quantity,
-							'used_status'         => 1
+							'used_status'         => 1,
+							'reason'			  => $reason,
+							'fk_login_id'		  => $login_id
 						];
 						$this->model->insertData('tbl_product_inventory', $insertData);
 					} else {
@@ -1823,6 +1846,16 @@ class Inventory_manager extends CI_Controller {
 						$rejectedData[] = $row;
 						continue;
 					}
+
+					// Add to imported_products array
+					$imported_order[] = [
+						'SKU' => $row[0],
+						'Batch No' => $row[1],
+						'Channel Type' => $row[2],
+						'Sales Channel' => $row[3],
+						'Quantity' => $row[4],
+						'Reason' => $row[5],
+					];
 				}
 				// Generate rejection Excel
 				if (!empty($rejectedData)) {
@@ -1839,41 +1872,51 @@ class Inventory_manager extends CI_Controller {
 					$writer->save($filePath);
 
 					$downloadUrl = base_url('uploads/rejected_excels/' . $fileName);
+					$this->sendImportEmail($downloadUrl, "Some rows were rejected. Please download the rejected file.", $imported_products,'Rejected File');
 
-					echo json_encode([
-						'status'       => 'partial',
-						'message'      => 'Some rows were rejected.',
-						'rejected_url' => $downloadUrl
-					]);
+					$this->output
+						->set_content_type('application/json')
+						->set_output(json_encode([
+							'status'       => 'partial',
+							'message'      => 'Some rows were rejected.',
+							'rejected_url' => $downloadUrl
+						]));
+					return;
+				} else {
+					$this->sendImportEmail($downloadUrl, "All order data uploaded successfully!.", $imported_order, 'Quantity Deducted');
+
+					$this->output
+						->set_content_type('application/json')
+						->set_output(json_encode([
+							'status'  => 'success',
+							'message' => 'All order data uploaded successfully.'
+						]));
 					return;
 				}
-
-				echo json_encode([
-					'status'  => 'success',
-					'message' => 'All order data uploaded successfully.'
-				]);
 			} catch (Exception $e) {
-				echo json_encode([
-					'status'  => 'error',
-					'message' => 'Invalid Excel file or error: ' . $e->getMessage()
-				]);
+				$this->output
+					->set_content_type('application/json')
+					->set_output(json_encode([
+						'status'  => 'error',
+						'message' => 'Invalid Excel file or error: ' . $e->getMessage()
+					]));
+				return;
 			}
 		} else {
-			echo json_encode([
-				'status'  => 'error',
-				'message' => 'No file selected.'
-			]);
+			$this->output
+				->set_content_type('application/json')
+				->set_output(json_encode([
+					'status' => "error",
+					'message' => "No file selected!"
+				]));
+			return;
 		}
 	}
 
-	private function sendImportEmail($file_link = '', $message = '', $imported_products = [])
+	private function sendImportEmail($file_link = '', $message = '', $imported_products = [],$subject1 = "")
 	{
-		// $this->email->from('your_email@example.com', 'Your Company');
-		// $this->email->to('receiver@example.com'); // Change this
-		// $this->email->subject('Product Import Status');
-
 		$to_email = "shirin@sda-zone.com"; // Replace with actual receiver
-		$subject = 'New Stock Added';
+		$subject = $subject1;
 
 		$body = "<p>$message</p>";
 
@@ -1908,5 +1951,4 @@ class Inventory_manager extends CI_Controller {
 		// $this->email->set_mailtype('html');
 		// $this->email->send();
 	}
-	
 }

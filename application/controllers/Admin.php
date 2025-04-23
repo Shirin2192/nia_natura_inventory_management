@@ -390,7 +390,7 @@ class Admin extends CI_Controller
 			$response = ['status' => 'error', 'errors' => []];
 
 			$admin_session = $this->session->userdata('admin_session');
-			$login_id = $admin_session['id'];
+			$login_id = $admin_session['user_id'];
 			// Get input values
 			$product_name = $this->input->post('product_name');
 			$product_sku_code = $this->input->post('product_sku_code');
@@ -605,7 +605,7 @@ class Admin extends CI_Controller
 
 		$this->load->library('form_validation');
 		$admin_session = $this->session->userdata('admin_session');
-		$login_id = $admin_session['id'];
+		$login_id = $admin_session['user_id'];
 
 		$product_id = $this->input->post('update_product_id');
 
@@ -1596,6 +1596,9 @@ class Admin extends CI_Controller
 	{
 		$this->load->library('upload');
 		require_once FCPATH . 'vendor/autoload.php';
+		$this->load->library('email'); // Load Email Library
+		$admin_session = $this->session->userdata('admin_session');
+			$login_id = $admin_session['user_id'];
 
 		if (!empty($_FILES['product_excel']['name'])) {
 			$tmpPath = $_FILES['product_excel']['tmp_name'];
@@ -1658,6 +1661,8 @@ class Admin extends CI_Controller
 						'fk_product_types_id' => $fk_product_types_id['id'] ?? null,
 					];
 					$product_id = $this->model->insertData('tbl_product_master', $product_data);
+					$this->model->addUserLog($login_id, 'Insert Product', 'tbl_product_master', $product_data);
+
 				} else {
 					$product_id = $existing_product['id'];
 				}
@@ -1670,6 +1675,8 @@ class Admin extends CI_Controller
 					'manufactured_date' => $row[7],
 				];
 				$batch_id = $this->model->insertData('tbl_product_batches', $product_batch);
+				$this->model->addUserLog($login_id, 'Insert Product Batch', 'tbl_product_batches', $product_batch);
+
 
 				$product_price = [
 					'fk_product_id' => $product_id,
@@ -1679,6 +1686,7 @@ class Admin extends CI_Controller
 					'selling_price' => $row[12],
 				];
 				$this->model->insertData('tbl_product_price', $product_price);
+				$this->model->addUserLog($login_id, 'Insert Product Price', 'tbl_product_price', $product_price);
 
 				$product_inventory = [
 					'fk_product_id' => $product_id,
@@ -1687,9 +1695,11 @@ class Admin extends CI_Controller
 					'fk_sale_channel_id' => $fk_sale_channel_id['id'] ?? null,
 					'add_quantity' => $quantity,
 					'total_quantity' => $quantity,
-					'used_status' => 1
+					'used_status' => 1,
+					'fk_login_id' =>$login_id,
 				];
 				$this->model->insertData('tbl_product_inventory', $product_inventory);
+				$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $product_inventory);
 
 				// Handle dynamic attributes
 				$headers = $rows[0];
@@ -1732,6 +1742,17 @@ class Admin extends CI_Controller
 						}
 					}
 				}
+				// Add to imported_products array
+				$imported_products[] = [
+					'Product Name' => $row[0],
+					'SKU' => $sku,
+					'Batch No' => $batch_no,
+					'Quantity' => $quantity,
+					'Purchase Price' => $row[10],
+					'MRP' => $row[11],
+					'Expiry Date' => $row[6],
+					'Manufactured Date' => $row[7]
+				];
 			}
 
 			if (!empty($rejected)) {
@@ -1744,15 +1765,20 @@ class Admin extends CI_Controller
 				$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
 				$writer->save($rejectedFile);
 
+				$download_url = base_url('uploads/' . basename($rejectedFile));
+				$this->sendImportEmail($download_url, "Some rows were rejected. Please download the rejected file.", $imported_products);
+
 				$this->output
 					->set_content_type('application/json')
 					->set_output(json_encode([
 						'status' => "error",
 						'message' => "Some rows were rejected. Please download the rejected file.",
-						'download_url' => base_url('uploads/' . basename($rejectedFile))
+						'download_url' => $download_url
 					]));
 				return;
 			} else {
+				$this->sendImportEmail($download_url, "All rows imported successfully!", $imported_products, 'New Stock Added');
+
 				$this->output
 					->set_content_type('application/json')
 					->set_output(json_encode([
@@ -1851,7 +1877,7 @@ class Admin extends CI_Controller
 		return implode(',', $image_urls);
 	}
 
-
+	
 
 	/**
 	 * Debug test function for image upload
@@ -1981,11 +2007,14 @@ class Admin extends CI_Controller
 	// }
 	public function submit_order_form()
 	{
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
 		$this->form_validation->set_rules('sku_code', 'Sku Code', 'required|trim');
 		$this->form_validation->set_rules('fk_batch_id', 'Batch No', 'required|trim');
 		$this->form_validation->set_rules('order_quantity', 'Quantity', 'required|trim|numeric');
 		$this->form_validation->set_rules('channel_type', 'Channel Type', 'required|trim');
 		$this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim');
+		$this->form_validation->set_rules('reason', 'Reason', 'required|trim');
 
 		if ($this->form_validation->run() == FALSE) {
 			$response = [
@@ -1996,6 +2025,7 @@ class Admin extends CI_Controller
 					'order_quantity' => form_error('order_quantity'),
 					'channel_type' => form_error('channel_type'),
 					'sale_channel' => form_error('sale_channel'),
+					'reason' => form_error('reason'),
 				]
 			];
 			echo json_encode($response);
@@ -2007,6 +2037,7 @@ class Admin extends CI_Controller
 		$quantity = $this->input->post('order_quantity');
 		$channel_type = $this->input->post('channel_type');
 		$sale_channel = $this->input->post('sale_channel');
+		$reason = $this->input->post('reason');
 
 		$last_quantity = $this->model->selectWhereData('tbl_product_inventory', [
 			'fk_product_id' => $product_id,
@@ -2036,7 +2067,7 @@ class Admin extends CI_Controller
 			// If after deduction quantity is zero, update existing inventory
 			$update_data = [
 				'used_status' => 0,
-				'is_delete' => 0,
+				'is_delete' => '0',
 				'total_quantity' => 0
 			];
 			$this->model->updateData('tbl_product_inventory', $update_data, ['id' => $inventory_id]);
@@ -2046,7 +2077,7 @@ class Admin extends CI_Controller
 			// Otherwise, update existing record and insert new one with deducted quantity
 			$update_data = [
 				'used_status' => 0,
-				'is_delete' => 0
+				'is_delete' => '0'
 			];
 			$this->model->updateData('tbl_product_inventory', $update_data, ['id' => $inventory_id]);
 
@@ -2057,7 +2088,9 @@ class Admin extends CI_Controller
 				'fk_sale_channel_id' => $sale_channel,
 				'deduct_quantity' => $quantity,
 				'total_quantity' => $total_quantity,
-				'used_status' => 1
+				'used_status' => 1,
+				'fk_login_id' => $login_id,
+				'reason' =>$reason
 			];
 
 			$inserted = $this->model->insertData('tbl_product_inventory', $order_data);
@@ -2119,6 +2152,14 @@ class Admin extends CI_Controller
 
 	public function upload_order_excel()
 	{
+
+		$this->load->library('upload');
+		require_once FCPATH . 'vendor/autoload.php';
+		$this->load->library('email'); // Load Email Library
+
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
+
 		require_once FCPATH . 'vendor/autoload.php';
 
 		$uploadPath = FCPATH . 'uploads/rejected_excels/';
@@ -2149,6 +2190,7 @@ class Admin extends CI_Controller
 					$channel_type = trim($row[2]);
 					$sale_channel = trim($row[3]);
 					$quantity     = trim($row[4]);
+					$reason     = trim($row[5]);
 
 					// Validate SKU
 					$skuValid = $this->model->selectWhereData('tbl_sku_code_master', [
@@ -2229,6 +2271,7 @@ class Admin extends CI_Controller
 						], ['fk_product_id' => $product_id, 'fk_batch_id' => $batchValid['id'],]);
 
 						// Prepare insert data
+
 						$insertData = [
 							'fk_product_id'       => $product_id,
 							'fk_batch_id'         => $batchValid['id'],
@@ -2236,7 +2279,9 @@ class Admin extends CI_Controller
 							'fk_sale_channel_id'  => $sale_channel_id['id'],
 							'deduct_quantity'     => $quantity,
 							'total_quantity'      => $total_quantity,
-							'used_status'         => 1
+							'used_status'         => 1,
+							'reason'			  => $reason,
+							'fk_login_id'		  => $login_id
 						];
 						$this->model->insertData('tbl_product_inventory', $insertData);
 					} else {
@@ -2244,6 +2289,16 @@ class Admin extends CI_Controller
 						$rejectedData[] = $row;
 						continue;
 					}
+
+					// Add to imported_products array
+					$imported_order[] = [
+						'SKU' => $row[0],
+						'Batch No' => $row[1],
+						'Channel Type' => $row[2],
+						'Sales Channel' => $row[3],
+						'Quantity' => $row[4],
+						'Reason' => $row[5],					
+					];
 				}
 				// Generate rejection Excel
 				if (!empty($rejectedData)) {
@@ -2261,29 +2316,86 @@ class Admin extends CI_Controller
 
 					$downloadUrl = base_url('uploads/rejected_excels/' . $fileName);
 
-					echo json_encode([
+					$this->output
+					->set_content_type('application/json')
+					->set_output(json_encode([
 						'status'       => 'partial',
 						'message'      => 'Some rows were rejected.',
 						'rejected_url' => $downloadUrl
-					]);
+					]));
 					return;
-				}
-
-				echo json_encode([
-					'status'  => 'success',
-					'message' => 'All order data uploaded successfully.'
-				]);
+				}else {
+					$this->sendImportEmail('', "All order data uploaded successfully!.", $imported_products, 'Quantity Deducted');
+	
+					$this->output
+						->set_content_type('application/json')
+						->set_output(json_encode([
+							'status'  => 'success',
+							'message' => 'All order data uploaded successfully.'
+						]));
+					return;
+				}			
 			} catch (Exception $e) {
-				echo json_encode([
-					'status'  => 'error',
-					'message' => 'Invalid Excel file or error: ' . $e->getMessage()
-				]);
+				$this->output
+						->set_content_type('application/json')
+						->set_output(json_encode([
+							'status'  => 'error',
+							'message' => 'Invalid Excel file or error: ' . $e->getMessage()
+						]));
+					return;
 			}
 		} else {
-			echo json_encode([
-				'status'  => 'error',
-				'message' => 'No file selected.'
-			]);
+			$this->output
+				->set_content_type('application/json')
+				->set_output(json_encode([
+					'status' => "error",
+					'message' => "No file selected!"
+				]));
+			return;
 		}
+	}
+
+
+	private function sendImportEmail($file_link = '', $message = '', $imported_products = [],$subject1 = "")
+	{
+		// $this->email->from('your_email@example.com', 'Your Company');
+		// $this->email->to('receiver@example.com'); // Change this
+		// $this->email->subject('Product Import Status');
+
+		$to_email = "shirin@sda-zone.com"; // Replace with actual receiver
+		$subject = $subject1;
+
+		$body = "<p>$message</p>";
+
+		if (!empty($imported_products)) {
+			$body .= "<h3>Imported Products:</h3>";
+			$body .= "<table border='1' cellpadding='5' cellspacing='0'>";
+			$body .= "<thead><tr>";
+
+			foreach (array_keys($imported_products[0]) as $header) {
+				$body .= "<th>$header</th>";
+			}
+
+			$body .= "</tr></thead><tbody>";
+
+			foreach ($imported_products as $product) {
+				$body .= "<tr>";
+				foreach ($product as $value) {
+					$body .= "<td>$value</td>";
+				}
+				$body .= "</tr>";
+			}
+
+			$body .= "</tbody></table><br>";
+		}
+
+		if (!empty($file_link)) {
+			$body .= "<p><a href='$file_link' target='_blank'>Download Rejected File</a></p>";
+		}
+		$email_message = $body;
+		send_inventory_email($to_email, $subject, $email_message);
+		// $this->email->message($body);
+		// $this->email->set_mailtype('html');
+		// $this->email->send();
 	}
 }

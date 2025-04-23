@@ -143,6 +143,15 @@
                                                 <div class="text-danger"><?= form_error('order_quantity'); ?></div>
                                             </div>
                                         </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="reason">Reason <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="number" name="reason" id="reason"
+                                                    class="form-control">
+                                                <div class="text-danger"><?= form_error('reason'); ?></div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="form-group">
                                         <div class="col-lg-8 ml-auto">
