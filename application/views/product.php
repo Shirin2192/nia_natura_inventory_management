@@ -303,6 +303,15 @@
                                                 <div class="text-danger"><?= form_error('sale_channel'); ?></div>
                                             </div>
                                         </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="reason">Reason
+                                                    Quantity <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="reason"
+                                                    name="reason" placeholder="Enter Reason">
+                                                <div class="text-danger"><?= form_error('reason'); ?></div>
+                                            </div>
+                                        </div>
                                     </div>
                                     <!-- Submit Button -->
                                     <div class="form-group">

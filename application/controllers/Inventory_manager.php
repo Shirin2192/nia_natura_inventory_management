@@ -116,6 +116,8 @@ class Inventory_manager extends CI_Controller
 	}
 	public function save_product_types()
 	{
+		$inventory_session = $this->session->userdata('inventory_session');
+		$login_id = $inventory_session['user_id'];
 		$product_type_name = $this->input->post('product_type_name');
 		$this->form_validation->set_rules('product_type_name', 'Product Type Name', 'required|trim|regex_match[/^[a-zA-Z ]+$/]');
 		if ($this->form_validation->run() == FALSE) {
@@ -133,6 +135,8 @@ class Inventory_manager extends CI_Controller
 					'product_type_name' => $product_type_name,
 				);
 				$this->model->insertData('tbl_product_types', $data);
+				$this->model->addUserLog($login_id, 'Inserted Product Type', 'tbl_product_types', $data);
+
 				$response = ["status" => "success", "message" => "Product Type added successfully"];
 			}
 		}
@@ -154,6 +158,8 @@ class Inventory_manager extends CI_Controller
 	}
 	public function update_product_types()
 	{
+		$inventory_session = $this->session->userdata('inventory_session');
+		$login_id = $inventory_session['user_id'];
 		$flavour_id = $this->input->post('edit_id');
 		$product_type_name = $this->input->post('edit_product_type_name');
 		$this->form_validation->set_rules('edit_product_type_name', 'Product Type Name', 'required|trim|regex_match[/^[a-zA-Z ]+$/]');
@@ -170,6 +176,7 @@ class Inventory_manager extends CI_Controller
 				$update_data = ['product_type_name' => $product_type_name];
 
 				$this->model->updateData('tbl_product_types', $update_data, ['id' => $flavour_id]);
+				$this->model->addUserLog($login_id, 'Update Product Type', 'tbl_product_types', $data);
 
 				$response = ["status" => "success", "message" => "Product Type updated successfully"];
 			}
@@ -178,12 +185,16 @@ class Inventory_manager extends CI_Controller
 	}
 	public function delete_product_type()
 	{
+		$inventory_session = $this->session->userdata('inventory_session');
+		$login_id = $inventory_session['user_id'];
 		$id = $this->input->post('id');
 		if (!$id) {
 			echo json_encode(['status' => 'error', 'message' => 'Invalid product type ID']);
 			return;
 		}
 		$result = $this->model->updateData('tbl_product_types', ['is_delete' => '0'], ['id' => $id]); // Soft delete	
+		$this->model->addUserLog($login_id, 'Delete Product Type', 'tbl_product_types', ['is_delete' => '0']);
+
 		if ($result) {
 			echo json_encode(['status' => 'success', 'message' => 'Product Type deleted successfully']);
 		} else {
@@ -212,6 +223,8 @@ class Inventory_manager extends CI_Controller
 	}
 	public function save_product_attributes()
 	{
+		$inventory_session = $this->session->userdata('inventory_session');
+		$login_id = $inventory_session['user_id'];
 		$fk_product_type_id = $this->input->post('fk_product_type_id');
 		$attribute_name = $this->input->post('attribute_name');
 		$attribute_type = $this->input->post('attribute_type');
@@ -238,6 +251,7 @@ class Inventory_manager extends CI_Controller
 					'attribute_type' => $attribute_type,
 				);
 				$this->model->insertData('tbl_attribute_master', $data);
+				$this->model->addUserLog($login_id, 'Inserted Attribute Master Data', 'tbl_attribute_master', $data);
 				$response = ["status" => "success", "message" => "Product Attribute added successfully"];
 			}
 		}
@@ -273,6 +287,8 @@ class Inventory_manager extends CI_Controller
 		}
 
 		// Get input data
+		$inventory_session = $this->session->userdata('inventory_session');
+		$login_id = $inventory_session['user_id'];
 		$id = $this->input->post('edit_attribute_id');
 		$attribute_name = $this->input->post('edit_attribute_name');
 		$attribute_type = $this->input->post('edit_attribute_type');
@@ -287,10 +303,9 @@ class Inventory_manager extends CI_Controller
 				'attribute_name' => $attribute_name,
 				'attribute_type' => $attribute_type
 			];
-
 			$updated = $this->model->updateData('tbl_attribute_master', $updateData, ['id' => $id]);
+			$this->model->addUserLog($login_id, 'Update Attribute Master Data', 'tbl_attribute_master', $updateData);
 			// Check if update was successful
-
 			if ($updated) {
 				echo json_encode(["status" => "success", "message" => "Attribute updated successfully."]);
 			} else {
@@ -300,6 +315,8 @@ class Inventory_manager extends CI_Controller
 	}
 	public function delete_product_attribute()
 	{
+		$inventory_session = $this->session->userdata('inventory_session');
+		$login_id = $inventory_session['user_id'];
 		$id = $this->input->post('id'); // Get the flavour ID from AJAX
 		if (!$id) {
 			echo json_encode(['status' => 'error', 'message' => 'Invalid product Attribute  ID']);
@@ -307,7 +324,7 @@ class Inventory_manager extends CI_Controller
 		}
 
 		$result = $this->model->updateData('tbl_attribute_master', ['is_delete' => '0'], ['id' => $id]); // Soft delete
-
+		$this->model->addUserLog($login_id, 'Delete Attribute Master Data', 'tbl_attribute_master', ['is_delete' => '0']);
 		if ($result) {
 			echo json_encode(['status' => 'success', 'message' => 'Product Attribute deleted successfully']);
 		} else {
@@ -336,6 +353,8 @@ class Inventory_manager extends CI_Controller
 	}
 	public function save_product_attributes_value()
 	{
+		$inventory_session = $this->session->userdata('inventory_session');
+		$login_id = $inventory_session['user_id'];
 		$fk_attribute_id = $this->input->post('fk_attribute_id');
 		$attribute_value = $this->input->post('attribute_value');
 		$this->form_validation->set_rules('fk_attribute_id', 'Product Attribute', 'required|trim');
@@ -357,6 +376,7 @@ class Inventory_manager extends CI_Controller
 					'attribute_value' => $attribute_value,
 				);
 				$this->model->insertData('tbl_attribute_values', $data);
+				$this->model->addUserLog($login_id, 'Inserted Product Attribute Value', 'tbl_attribute_values', $data);
 				$response = ["status" => "success", "message" => "Product Attribute Value added successfully"];
 			}
 		}
@@ -389,6 +409,8 @@ class Inventory_manager extends CI_Controller
 		}
 
 		// Get input data
+		$inventory_session = $this->session->userdata('inventory_session');
+		$login_id = $inventory_session['user_id'];
 		$id = $this->input->post('edit_attribute_value_id');
 		$attribute_value = $this->input->post('edit_attribute_value');
 
@@ -403,6 +425,7 @@ class Inventory_manager extends CI_Controller
 			];
 
 			$updated = $this->model->updateData('tbl_attribute_values', $updateData, ['id' => $id]);
+			$this->model->addUserLog($login_id, 'Updated Product Attribute Value', 'tbl_attribute_values', $updateData);
 			if ($updated) {
 				echo json_encode(["status" => "success", "message" => "Attribute Value updated successfully."]);
 			} else {
@@ -413,12 +436,16 @@ class Inventory_manager extends CI_Controller
 	public function delete_product_attributes_value()
 	{
 		$id = $this->input->post('id'); // Get the flavour ID from AJAX
+		$inventory_session = $this->session->userdata('inventory_session');
+		$login_id = $inventory_session['user_id'];
 		if (!$id) {
 			echo json_encode(['status' => 'error', 'message' => 'Invalid product Attribute Value ID']);
 			return;
 		}
 
 		$result = $this->model->updateData('tbl_attribute_values', ['is_delete' => '0'], ['id' => $id]); // Soft delete
+		$this->model->addUserLog($login_id, 'Delete Product Attribute Value', 'tbl_attribute_values', ['is_delete' => '0']);
+
 
 		if ($result) {
 			echo json_encode(['status' => 'success', 'message' => 'Product Attribute Value deleted successfully']);
@@ -447,6 +474,8 @@ class Inventory_manager extends CI_Controller
 
 	public function save_sale_channel()
 	{
+		$inventory_session = $this->session->userdata('inventory_session');
+		$login_id = $inventory_session['user_id'];
 		$sale_channel = $this->input->post('sale_channel');
 		$this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim|regex_match[/^[a-zA-Z ]+$/]');
 
@@ -466,6 +495,8 @@ class Inventory_manager extends CI_Controller
 				);
 
 				$this->model->insertData('tbl_sale_channel', $data);
+				$this->model->addUserLog($login_id, 'Inserted Sale Channel', 'tbl_sale_channel', $data);
+
 				$response = ["status" => "success", "message" => "Sale Channel added successfully"];
 			}
 		}
@@ -492,6 +523,8 @@ class Inventory_manager extends CI_Controller
 
 	public function update_sale_channel()
 	{
+		$inventory_session = $this->session->userdata('inventory_session');
+		$login_id = $inventory_session['user_id'];
 		$sale_channel_id = $this->input->post('edit_sale_channel_id');
 		$sale_channel = $this->input->post('edit_sale_channel');
 
@@ -510,6 +543,7 @@ class Inventory_manager extends CI_Controller
 				$update_data = ['sale_channel' => $sale_channel];
 
 				$this->model->updateData('tbl_sale_channel', $update_data, ['id' => $sale_channel_id]);
+				$this->model->addUserLog($login_id, 'Update Sale Channel', 'tbl_sale_channel', $data);
 
 				$response = ["status" => "success", "message" => "Sale Channel updated successfully"];
 			}
@@ -519,6 +553,8 @@ class Inventory_manager extends CI_Controller
 	}
 	public function delete_sale_channel()
 	{
+		$inventory_session = $this->session->userdata('inventory_session');
+		$login_id = $inventory_session['user_id'];
 		$id = $this->input->post('id'); // Get the flavour ID from AJAX
 
 		if (!$id) {
@@ -527,6 +563,7 @@ class Inventory_manager extends CI_Controller
 		}
 
 		$result = $this->model->updateData('tbl_sale_channel', ['is_delete' => '0'], ['id' => $id]); // Soft delete
+		$this->model->addUserLog($login_id, 'Delete Sale Channel', 'tbl_sale_channel', ['is_delete' => '0']);
 
 		if ($result) {
 			echo json_encode(['status' => 'success', 'message' => 'Sale Channel deleted successfully']);
@@ -578,6 +615,8 @@ class Inventory_manager extends CI_Controller
 			$response = ['status' => 'error', 'errors' => []];
 
 			// Get input values
+			$inventory_session = $this->session->userdata('inventory_session');
+			$login_id = $inventory_session['user_id'];
 			$product_name = $this->input->post('product_name');
 			$product_sku_code = $this->input->post('product_sku_code');
 			$batch_no = $this->input->post('batch_no');
@@ -658,6 +697,8 @@ class Inventory_manager extends CI_Controller
 					'selling_price' => $selling_price,
 				];
 				$product_insert_id = $this->model->insertData('tbl_product_master', $product_data);
+				$this->model->addUserLog($login_id, 'Insert Product Master', 'tbl_product_master', $product_data);
+
 
 				foreach ($fk_product_attribute_id as $key => $attribute_id) {
 					$product_attribute = [
@@ -677,6 +718,8 @@ class Inventory_manager extends CI_Controller
 					'selling_price' => $selling_price,
 				];
 				$this->model->insertData('tbl_product_price', $product_price);
+				$this->model->addUserLog($login_id, 'Insert Product Price', 'tbl_product_price', $product_price);
+
 				$product_inventory = [
 					'fk_product_id' => $product_insert_id,
 					'add_quantity' => $add_quantity,
@@ -684,6 +727,8 @@ class Inventory_manager extends CI_Controller
 					'used_status' => 1
 				];
 				$product_inventory_insert_id = $this->model->insertData('tbl_product_inventory', $product_inventory);
+				$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $product_inventory);
+
 			}
 			if ($product_inventory_insert_id) {
 				echo json_encode(['status' => 'success', 'message' => 'Product added successfully!']);
@@ -860,7 +905,8 @@ class Inventory_manager extends CI_Controller
 			'images' => $imagess,
 		);
 		$this->model->updateData('tbl_product_master', $update_product, ['id' => $product_id]);
-
+		$this->model->addUserLog($login_id, 'Insert Product Master', 'tbl_product_master', $update_product);
+		
 		foreach ($batch_no as $batch_no_key => $batch_no_row) {
 			$update_product_batch = array(
 				// 'batch_no' => $batch_no,
@@ -900,6 +946,8 @@ class Inventory_manager extends CI_Controller
 				'selling_price' => $selling_price[$purchase_price_key],
 			);
 			$this->model->updateData('tbl_product_price', $update_product_price, ['fk_product_id' => $product_id, 'id' => $product_price_id[$purchase_price_key]]);
+			$this->model->addUserLog($login_id, 'Insert Product Price', 'tbl_product_price', $update_product_price);
+
 		}
 		if (!empty($add_new_quantity)) {
 			$update_product_inventory_status = array(
@@ -917,6 +965,7 @@ class Inventory_manager extends CI_Controller
 				'expiry_date' => $add_new_expiry_date
 			);
 			$new_batch_inserted_id = $this->model->insertData('tbl_product_batches', $add_new_batch_wise_quantity);
+			$this->model->addUserLog($login_id, 'Insert Product Batch', 'tbl_product_batches', $add_new_batch_wise_quantity);
 
 			$new_batch_wise_product_price = array(
 				'fk_product_id' => $product_id,
@@ -926,6 +975,7 @@ class Inventory_manager extends CI_Controller
 				'selling_price' => $add_new_selling_price
 			);
 			$this->model->insertData('tbl_product_price', $new_batch_wise_product_price);
+			$this->model->addUserLog($login_id, 'Insert Product Price', 'tbl_product_price', $new_batch_wise_product_price);
 
 			$add_new_product_inventory = array(
 				'fk_product_id' => $product_id,
@@ -1495,6 +1545,7 @@ class Inventory_manager extends CI_Controller
 						'fk_product_types_id' => $fk_product_types_id['id'] ?? null,
 					];
 					$product_id = $this->model->insertData('tbl_product_master', $product_data);
+					$this->model->addUserLog($login_id, 'Insert Product', 'tbl_product_master', $product_data);
 				} else {
 					$product_id = $existing_product['id'];
 				}
@@ -1507,6 +1558,7 @@ class Inventory_manager extends CI_Controller
 					'manufactured_date' => $row[7],
 				];
 				$batch_id = $this->model->insertData('tbl_product_batches', $product_batch);
+				$this->model->addUserLog($login_id, 'Insert Product Batch', 'tbl_product_batches', $product_batch);
 
 				$product_price = [
 					'fk_product_id' => $product_id,
@@ -1516,6 +1568,7 @@ class Inventory_manager extends CI_Controller
 					'selling_price' => $row[12],
 				];
 				$this->model->insertData('tbl_product_price', $product_price);
+				$this->model->addUserLog($login_id, 'Insert Product Price', 'tbl_product_price', $product_price);
 
 				$product_inventory = [
 					'fk_product_id' => $product_id,
@@ -1528,6 +1581,7 @@ class Inventory_manager extends CI_Controller
 					'fk_login_id' => $login_id,
 				];
 				$this->model->insertData('tbl_product_inventory', $product_inventory);
+				$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $product_inventory);
 
 				// Handle dynamic attributes
 				$headers = $rows[0];
@@ -1841,6 +1895,7 @@ class Inventory_manager extends CI_Controller
 							'fk_login_id'		  => $login_id
 						];
 						$this->model->insertData('tbl_product_inventory', $insertData);
+						$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $insertData);
 					} else {
 						$row[] = 'No previous inventory found';
 						$rejectedData[] = $row;

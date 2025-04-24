@@ -15,12 +15,10 @@ class Admin extends CI_Controller
 	public function __construct()
 	{
 		parent::__construct();
-
 		// Prevent browser caching for all admin pages
 		$this->output->set_header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0")
 			->set_header("Cache-Control: post-check=0, pre-check=0", false)
 			->set_header("Pragma: no-cache");
-
 		$this->load->model('Product_model');
 		$this->load->model('user_model');
 		$this->load->model('Product_attribute_model');
@@ -70,7 +68,6 @@ class Admin extends CI_Controller
 				"SUM(total_quantity) as stock",
 				true
 			);
-
 			// 2. Stock Levels
 			$stock_data = $this->Dashboard_model->fetch_stock_levels();
 			$response['stock_product_names'] = array_column($stock_data, 'product_name');
@@ -80,12 +77,10 @@ class Admin extends CI_Controller
 			$batch_expiry = $this->Dashboard_model->getProductBatchExpirySummary(30); // 30 days
 			$response['batch_expiry_near'] = $batch_expiry['near_expiry']; // Near Expiry batches
 			$response['batch_expiry_healthy'] = $batch_expiry['healthy'];  // Healthy batches
-
 			// 4. Top 5 Products
 			$top5 = $this->Dashboard_model->getTop5Products();
 			$response['top5_product_names'] = array_column($top5, 'product_name');
 			$response['top5_quantities'] = array_column($top5, 'total_quantity');
-
 			// 5. Out of Stock Trends
 			$trend = $this->Dashboard_model->getOutOfStockTrends();
 			$response['trend_weeks_or_months'] = array_column($trend, 'period_label'); // Week1, Week2...
@@ -95,7 +90,6 @@ class Admin extends CI_Controller
 	}
 	public function add_staff()
 	{
-
 		$admin_session = $this->session->userdata('admin_session');
 		if (!$admin_session) {
 			redirect(base_url('common/index'));
@@ -114,14 +108,14 @@ class Admin extends CI_Controller
 		$email = $this->input->post('email');
 		$password = $this->input->post('password');
 		$role = $this->input->post('role');
-
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
 		// Set validation rules
 		$this->form_validation->set_rules('first_name', 'First Name', 'trim|required|min_length[2]|alpha');
 		$this->form_validation->set_rules('last_name', 'Last Name', 'trim|required|min_length[2]|alpha');
 		$this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email|is_unique[tbl_user.email]');
 		$this->form_validation->set_rules('password', 'Password', 'trim|required|min_length[6]');
 		$this->form_validation->set_rules('role', 'Role', 'required');
-
 		if ($this->form_validation->run() == FALSE) {
 			// Validation failed, return error messages
 			$response = [
@@ -146,7 +140,7 @@ class Admin extends CI_Controller
 					'fk_role_id' => $role,
 				);
 				$insert_status = $this->model->insertData('tbl_user', $add_staff);
-
+				$this->model->addUserLog($login_id, 'Insert Staff Details', 'tbl_user', $add_staff);
 				if ($insert_status) {
 					$response = ["status" => "success", "message" => "User added successfully."];
 				} else {
@@ -167,10 +161,8 @@ class Admin extends CI_Controller
 		// Fetch paginated data
 		$users = $this->user_model->get_paginated_users($start, $length);
 		$data = [];
-
 		$response['permissions'] = $this->permissions; // Pass full permissions array
 		$response['current_sidebar_id'] = 2; // Set the sidebar ID for the current view
-
 		foreach ($users as $user) {
 			$data[] = [
 				"id" => $user['id'],
@@ -183,7 +175,6 @@ class Admin extends CI_Controller
 		$response['recordsTotal'] = $totalRecords;
 		$response['recordsFiltered'] = $totalRecords;
 		$response['data'] = $data;
-
 		echo json_encode($response);
 	}
 
@@ -220,11 +211,14 @@ class Admin extends CI_Controller
 			$staff_id = $this->input->post('staff_id');
 			$first_name = $this->input->post('edit_first_name');
 			$last_name = $this->input->post('edit_last_name');
+			$admin_session = $this->session->userdata('admin_session');
+			$login_id = $admin_session['user_id'];
 			$data = [
 				'name' => $first_name . " " . $last_name,
 				'fk_role_id' => $this->input->post('edit_role'),
 			];
 			$update_status = $this->model->updateData('tbl_user', $data, ['id' => $staff_id]);
+			$this->model->addUserLog($login_id, 'Updated Staff Details', 'tbl_user', $data);
 			if ($update_status) {
 				echo json_encode(["status" => "success", "message" => "Staff updated successfully."]);
 			} else {
@@ -252,11 +246,13 @@ class Admin extends CI_Controller
 	}
 
 	public function save_sale_channel()
-	{
+	{	
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
+
 		$sale_channel = $this->input->post('sale_channel');
 		$channel_type = $this->input->post('channel_type');
 		$this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim|regex_match[/^[a-zA-Z ]+$/]');
-
 		if ($this->form_validation->run() == FALSE) {
 			// Return validation errors as JSON (No page reload)
 			$response = [
@@ -274,37 +270,36 @@ class Admin extends CI_Controller
 				);
 
 				$this->model->insertData('tbl_sale_channel', $data);
+				$this->model->addUserLog($login_id, 'Inserted Sales Channel', 'tbl_sale_channel', $data);
+
 				$response = ["status" => "success", "message" => "Sale Channel added successfully"];
 			}
 		}
-
 		echo json_encode($response); // Return response as JSON
 	}
 	public function get_sale_channel_details()
 	{
 		$id = $this->input->post('id'); // Retrieve Bottle SIze ID from POST request
-
 		if (!$id) {
 			echo json_encode(["status" => "error", "message" => "Invalid request"]);
 			return;
 		}
-
 		$sale_channel = $this->model->selectWhereData('tbl_sale_channel', array('id' => $id, 'is_delete' => 1));
-
 		if ($sale_channel) {
 			echo json_encode(["status" => "success", "sale_channel" => $sale_channel]);
 		} else {
 			echo json_encode(["status" => "error", "message" => "Sale Channel not found"]);
 		}
 	}
-
 	public function update_sale_channel()
 	{
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
 		$sale_channel_id = $this->input->post('edit_sale_channel_id');
 		$sale_channel = $this->input->post('edit_sale_channel');
-
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
 		$this->form_validation->set_rules('edit_sale_channel', 'Sale Channel', 'required|trim|regex_match[/^[a-zA-Z ]+$/]');
-
 		if ($this->form_validation->run() == FALSE) {
 			$response = [
 				'status' => 'error',
@@ -318,21 +313,29 @@ class Admin extends CI_Controller
 				$update_data = ['sale_channel' => $sale_channel];
 
 				$this->model->updateData('tbl_sale_channel', $update_data, ['id' => $sale_channel_id]);
+				$this->model->addUserLog($login_id, 'Update Sales Channel', 'tbl_sale_channel', $update_data);
 
 				$response = ["status" => "success", "message" => "Sale Channel updated successfully"];
 			}
 		}
-
 		echo json_encode($response);
 	}
 	public function delete_sale_channel()
 	{
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
 		$id = $this->input->post('id'); // Get the flavour ID from AJAX
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
+
 		if (!$id) {
 			echo json_encode(['status' => 'error', 'message' => 'Invalid flavour ID']);
 			return;
 		}
-		$result = $this->model->updateData('tbl_sale_channel', ['is_delete' => '0'], ['id' => $id]); // Soft delete
+		$delete_data = ['is_delete' => '0'];
+		$result = $this->model->updateData('tbl_sale_channel',$delete_data , ['id' => $id]); // Soft delete
+		$this->model->addUserLog($login_id, 'Delete Sales Channel', 'tbl_sale_channel', $delete_data);		
+
 		if ($result) {
 			echo json_encode(['status' => 'success', 'message' => 'Sale Channel deleted successfully']);
 		} else {
@@ -359,7 +362,6 @@ class Admin extends CI_Controller
 			$response['product_sku_code'] = $this->model->selectWhereData('tbl_sku_code_master', array('is_delete' => 1), "*", false, array('id', "DESC"));
 			$response['permissions'] = $this->permissions; // Pass full permissions array
 			$response['current_sidebar_id'] = 7; // Set the sidebar ID for the current view
-
 			$this->load->view('product', $response);
 		}
 	}
@@ -369,21 +371,18 @@ class Admin extends CI_Controller
 		$response['data'] = $this->model->selectWhereData('tbl_attribute_master', array("fk_product_type_id" => $fk_product_types_id, 'is_delete' => 1), "*", false, array('id', "DESC"));
 		echo json_encode($response);
 	}
-
 	public function get_attribute_values_on_product_attributes_id()
 	{
 		$fk_product_attributes_id = $this->input->post('attribute_id'); // Get the product attribute ID from POST request
 		$response['data'] = $this->model->selectWhereData('tbl_attribute_values', array("fk_attribute_id" => $fk_product_attributes_id, 'is_delete' => 1), "*", false, array('id', "DESC"));
 		echo json_encode($response);
 	}
-
 	public function get_sales_channel_on_channel_type()
 	{
 		$channel_type = $this->input->post('channel_type'); // Get the product attribute ID from POST request
 		$response['data'] = $this->model->selectWhereData('tbl_sale_channel', array("channel_type" => $channel_type, 'is_delete' => 1), "*", false, array('id', "DESC"));
 		echo json_encode($response);
 	}
-
 	public function save_product()
 	{
 		if ($this->input->server('REQUEST_METHOD') === 'POST') {
@@ -410,6 +409,7 @@ class Admin extends CI_Controller
 			$fk_product_types_id = $this->input->post('fk_product_types_id');
 			$expiry_date = $this->input->post('expiry_date');
 			$manufacture_date = $this->input->post('manufacture_date');
+			$reason = $this->input->post('reason');
 
 			// Validation Rules
 			$this->form_validation->set_rules('product_name', 'Product Name', 'required|trim');
@@ -427,6 +427,7 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('channel_type', 'Sale Channel', 'required|trim');
 			$this->form_validation->set_rules('expiry_date', 'Expiry date', 'required|trim');
 			$this->form_validation->set_rules('manufacture_date', 'Manufacture Date', 'required|trim');
+			$this->form_validation->set_rules('reason', 'Reason', 'required|trim');
 
 			// Check validation
 			if ($this->form_validation->run() == FALSE) {
@@ -518,6 +519,7 @@ class Admin extends CI_Controller
 					'used_status' => 1,
 					'channel_type' => $_POST['channel_type'],
 					'fk_sale_channel_id' => $sale_channel,
+					'reason' => $reason,
 				];
 				$product_inventory_insert_id = $this->model->insertData('tbl_product_inventory', $product_inventory);
 
@@ -608,15 +610,10 @@ class Admin extends CI_Controller
 		$login_id = $admin_session['user_id'];
 
 		$product_id = $this->input->post('update_product_id');
-
 		$product_name = $this->input->post('update_product_name');
 		$description = $this->input->post('update_description');
-		// $product_sku_code = $this->input->post('update_product_sku_code');
-
 		$availability_status = $this->input->post('update_availability_status');
 		$barcode = $this->input->post('update_barcode');
-
-
 		$edit_fk_product_attribute_id = $this->input->post('edit_fk_product_attribute_id'); // Example: [3, 2, 1]
 		$edit_attributes_value = $this->input->post('edit_attributes_value'); // Example: [19, 16, 1]
 		$add_new_fk_product_attribute_id = $this->input->post('add_new_fk_product_attribute_id'); // Example: [3, 2, 1]
@@ -641,7 +638,7 @@ class Admin extends CI_Controller
 		// Handling image upload
 		$existing_images = $this->input->post('update_product_image');
 		$images = explode(',', $existing_images);
-
+		$update_reason = $this->input->post('update_reason');
 		//New Batch POST
 		$add_new_batch_no = $this->input->post('add_new_batch_no');
 		$add_new_manufacture_date = $this->input->post('add_new_manufacture_date');
@@ -651,20 +648,13 @@ class Admin extends CI_Controller
 		$add_new_selling_price = $this->input->post('add_new_selling_price');
 		$add_new_quantity = $this->input->post('add_new_quantity');
 		$add_new_reason = $this->input->post('add_new_reason');
-		$update_reason = $this->input->post('update_reason');
+		
 
 		// Set validation rules
 		$this->form_validation->set_rules('update_product_name', 'Product Name', 'required');
 		$this->form_validation->set_rules('update_description', 'Description', 'required');
 		$this->form_validation->set_rules('update_availability_status', 'Availability Status', 'required');
-		// $this->form_validation->set_rules('update_sale_channel', 'Sales Channel', 'required');
-		// $this->form_validation->set_rules('update_purchase_price', 'Purchase Price', 'required|numeric');
-		// $this->form_validation->set_rules('update_mrp', 'MRP', 'required|numeric');
-		// $this->form_validation->set_rules('update_selling_price', 'Selling Price', 'required|numeric');
-		// $this->form_validation->set_rules('update_total_quantity', 'Stock Quantity', 'required|numeric');
 		$this->form_validation->set_rules('update_reason', 'Reason', 'required');
-		// $this->form_validation->set_rules('update_manufacture_date', 'Manufacture Date', 'required');
-		// $this->form_validation->set_rules('update_expiry_date', 'Expiry Date', 'required');
 		$this->form_validation->set_rules('update_fk_product_types_id', 'Product Type', 'required');
 
 
@@ -723,13 +713,13 @@ class Admin extends CI_Controller
 			'images' => $imagess,
 		);
 		$this->model->updateData('tbl_product_master', $update_product, ['id' => $product_id]);
+		$this->model->addUserLog($login_id, 'Update Product Master', 'tbl_product_master', $update_product);
 
 		foreach ($batch_no as $batch_no_key => $batch_no_row) {
 			$update_product_batch = array(
-				// 'batch_no' => $batch_no,
 				'expiry_date' => $update_expiry_date[$batch_no_key],
 				'manufactured_date' => $update_manufacture_date[$batch_no_key],
-				// 'quantity' => $total_quantity[$batch_no_key],
+				
 			);
 			$this->model->updateData('tbl_product_batches', $update_product_batch, ['id' => $update_batch_id[$batch_no_key], 'fk_product_id' => $product_id]);
 		}
@@ -745,7 +735,7 @@ class Admin extends CI_Controller
 				$this->model->insertData('tbl_product_attributes', $product_attribute);
 			}
 		}
-		if (!empty($edit_fk_product_attribute_id)) {
+		if (!empty($edit_fk_product_attribute_id[0])) {
 			foreach ($edit_fk_product_attribute_id as $edit_fk_product_attribute_id_key => $edit_fk_product_attribute_id_row) {
 				$update_product_attribute = [
 					'fk_attribute_id' => $edit_fk_product_attribute_id_row,
@@ -780,6 +770,7 @@ class Admin extends CI_Controller
 				'expiry_date' => $add_new_expiry_date
 			);
 			$new_batch_inserted_id = $this->model->insertData('tbl_product_batches', $add_new_batch_wise_quantity);
+			$this->model->addUserLog($login_id, 'Inserted New Batch', 'tbl_product_batches', $add_new_batch_wise_quantity);
 
 			$new_batch_wise_product_price = array(
 				'fk_product_id' => $product_id,
@@ -789,6 +780,7 @@ class Admin extends CI_Controller
 				'selling_price' => $add_new_selling_price
 			);
 			$this->model->insertData('tbl_product_price', $new_batch_wise_product_price);
+			$this->model->addUserLog($login_id, 'Inserted New Batch Product Price', 'tbl_product_price', $new_batch_wise_product_price);
 
 			$add_new_product_inventory = array(
 				'fk_product_id' => $product_id,
@@ -802,6 +794,8 @@ class Admin extends CI_Controller
 				'used_status' => 1
 			);
 			$this->model->insertData('tbl_product_inventory', $add_new_product_inventory);
+			$this->model->addUserLog($login_id, 'Inserted New Batch Inventory Details', 'tbl_product_inventory', $add_new_product_inventory);
+
 		} else {
 			$get_last_quantity = $this->model->selectWhereData('tbl_product_inventory', ['fk_product_id' => $product_id, 'used_status' => 1], array('add_quantity', 'total_quantity'), true);
 			$last_quantity = $get_last_quantity['total_quantity'];
@@ -826,6 +820,7 @@ class Admin extends CI_Controller
 					);
 				}
 				$this->model->updateData('tbl_product_inventory', $update_product_inventory, ['id' => $inventory_id_row, 'fk_product_id' => $product_id, 'used_status' => 1]);
+				$this->model->addUserLog($login_id, 'Update Product Inventory', 'tbl_product_inventory', $update_product_inventory);
 			}
 		}
 		echo json_encode(['status' => 'success', 'message' => 'Product updated successfully']);
@@ -838,12 +833,21 @@ class Admin extends CI_Controller
 		$product_id = $this->input->post('product_id'); // Get product ID from AJAX request
 
 		if (!empty($product_id)) {
-			$update_product_status = $this->model->updateData('tbl_product', ['is_delete' => '0'], ['id' => $product_id]); // Soft delete
-			$this->model->updateData('tbl_product_price', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
-			$this->model->updateData('tbl_product_inventory', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
-			$this->model->updateData('tbl_product_batches', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
-			$this->model->updateData('tbl_product_attributes', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
+			$admin_session = $this->session->userdata('admin_session');
+			$login_id = $admin_session['user_id'];
 
+			$delete_data = ['is_delete' => '0'];
+			$update_product_status = $this->model->updateData('tbl_product_master', $delete_data, ['id' => $product_id]); // Soft delete
+			$this->model->updateData('tbl_product_price', $delete_data, ['fk_product_id' => $product_id]); // Soft delete
+			$this->model->updateData('tbl_product_inventory', $delete_data, ['fk_product_id' => $product_id]); // Soft delete
+			$this->model->updateData('tbl_product_batches', $delete_data, ['fk_product_id' => $product_id]); // Soft delete
+			$this->model->updateData('tbl_product_attributes', $delete_data, ['fk_product_id' => $product_id]); // Soft delete
+
+			$this->model->addUserLog($login_id, 'Delete Product', 'tbl_product_master', $delete_data);
+			$this->model->addUserLog($login_id, 'Delete Product Price', 'tbl_product_price', $delete_data);
+			$this->model->addUserLog($login_id, 'Delete Product Inventory', 'tbl_product_inventory', $delete_data);
+			$this->model->addUserLog($login_id, 'Delete Product Batch', 'tbl_product_batches', $delete_data);
+			$this->model->addUserLog($login_id, 'Delete Product Attributes', 'tbl_product_attributes', $delete_data);
 
 			if ($update_product_status) {
 				echo json_encode(["success" => true, "message" => "Product deleted successfully."]);
@@ -870,11 +874,12 @@ class Admin extends CI_Controller
 		$response = $this->model->selectWhereData('tbl_product_types', array('is_delete' => 1), "*", false, array('id', "DESC"));
 		$data['permissions'] = $this->permissions; // Pass full permissions array
 		$data['current_sidebar_id'] = 3; // Set the sidebar ID for the current view
-		// echo json_encode('response'=>$response, 'data'=>$data);
 		echo json_encode(['response' => $response, 'data' => $data]);
 	}
 	public function save_product_types()
 	{
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
 		$product_type_name = $this->input->post('product_type_name');
 		$this->form_validation->set_rules('product_type_name', 'Product Type Name', 'required|trim|regex_match[/^[a-zA-Z ]+$/]');
 		if ($this->form_validation->run() == FALSE) {
@@ -892,6 +897,7 @@ class Admin extends CI_Controller
 					'product_type_name' => $product_type_name,
 				);
 				$this->model->insertData('tbl_product_types', $data);
+				$this->model->addUserLog($login_id, 'Inserted Product Type', 'tbl_product_types', $data);
 				$response = ["status" => "success", "message" => "Product Type added successfully"];
 			}
 		}
@@ -913,6 +919,8 @@ class Admin extends CI_Controller
 	}
 	public function update_product_types()
 	{
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
 		$flavour_id = $this->input->post('edit_id');
 		$product_type_name = $this->input->post('edit_product_type_name');
 		$this->form_validation->set_rules('edit_product_type_name', 'Product Type Name', 'required|trim|regex_match[/^[a-zA-Z ]+$/]');
@@ -929,7 +937,7 @@ class Admin extends CI_Controller
 				$update_data = ['product_type_name' => $product_type_name];
 
 				$this->model->updateData('tbl_product_types', $update_data, ['id' => $flavour_id]);
-
+				$this->model->addUserLog($login_id, 'Update Product Type', 'tbl_product_types', $update_data);
 				$response = ["status" => "success", "message" => "Product Type updated successfully"];
 			}
 		}
@@ -937,12 +945,15 @@ class Admin extends CI_Controller
 	}
 	public function delete_product_type()
 	{
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
 		$id = $this->input->post('id');
 		if (!$id) {
 			echo json_encode(['status' => 'error', 'message' => 'Invalid product type ID']);
 			return;
 		}
 		$result = $this->model->updateData('tbl_product_types', ['is_delete' => '0'], ['id' => $id]); // Soft delete	
+		$this->model->addUserLog($login_id, 'Update Product Type', 'tbl_product_types', ['is_delete' => '0']);
 		if ($result) {
 			echo json_encode(['status' => 'success', 'message' => 'Product Type deleted successfully']);
 		} else {
@@ -971,6 +982,8 @@ class Admin extends CI_Controller
 	}
 	public function save_product_attributes()
 	{
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
 		$fk_product_type_id = $this->input->post('fk_product_type_id');
 		$attribute_name = $this->input->post('attribute_name');
 		$attribute_type = $this->input->post('attribute_type');
@@ -997,6 +1010,8 @@ class Admin extends CI_Controller
 					'attribute_type' => $attribute_type,
 				);
 				$this->model->insertData('tbl_attribute_master', $data);
+				$this->model->addUserLog($login_id, 'Inserted Attribute', 'tbl_attribute_master', $data);
+
 				$response = ["status" => "success", "message" => "Product Attribute added successfully"];
 			}
 		}
@@ -1031,6 +1046,8 @@ class Admin extends CI_Controller
 			return;
 		}
 		// Get input data
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
 		$id = $this->input->post('edit_attribute_id');
 		$attribute_name = $this->input->post('edit_attribute_name');
 		$attribute_type = $this->input->post('edit_attribute_type');
@@ -1045,10 +1062,9 @@ class Admin extends CI_Controller
 				'attribute_name' => $attribute_name,
 				'attribute_type' => $attribute_type
 			];
-
 			$updated = $this->model->updateData('tbl_attribute_master', $updateData, ['id' => $id]);
 			// Check if update was successful
-
+			$this->model->addUserLog($login_id, 'Update Attribute Master', 'tbl_attribute_master', $updateData);
 			if ($updated) {
 				echo json_encode(["status" => "success", "message" => "Attribute updated successfully."]);
 			} else {
@@ -1063,9 +1079,7 @@ class Admin extends CI_Controller
 			echo json_encode(['status' => 'error', 'message' => 'Invalid product Attribute  ID']);
 			return;
 		}
-
 		$result = $this->model->updateData('tbl_attribute_master', ['is_delete' => '0'], ['id' => $id]); // Soft delete
-
 		if ($result) {
 			echo json_encode(['status' => 'success', 'message' => 'Product Attribute deleted successfully']);
 		} else {
@@ -1094,6 +1108,8 @@ class Admin extends CI_Controller
 	}
 	public function save_product_attributes_value()
 	{
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
 		$fk_attribute_id = $this->input->post('fk_attribute_id');
 		$attribute_value = $this->input->post('attribute_value');
 		$this->form_validation->set_rules('fk_attribute_id', 'Product Attribute', 'required|trim');
@@ -1115,6 +1131,7 @@ class Admin extends CI_Controller
 					'attribute_value' => $attribute_value,
 				);
 				$this->model->insertData('tbl_attribute_values', $data);
+				$this->model->addUserLog($login_id, 'Inserted Attribute Value', 'tbl_attribute_values', $data);
 				$response = ["status" => "success", "message" => "Product Attribute Value added successfully"];
 			}
 		}
@@ -1146,6 +1163,8 @@ class Admin extends CI_Controller
 			return;
 		}
 		// Get input data
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
 		$id = $this->input->post('edit_attribute_value_id');
 		$attribute_value = $this->input->post('edit_attribute_value');
 
@@ -1160,6 +1179,8 @@ class Admin extends CI_Controller
 			];
 
 			$updated = $this->model->updateData('tbl_attribute_values', $updateData, ['id' => $id]);
+			$this->model->addUserLog($login_id, 'Update Attribute Value', 'tbl_attribute_values', $data);
+
 			if ($updated) {
 				echo json_encode(["status" => "success", "message" => "Attribute Value updated successfully."]);
 			} else {
@@ -1169,6 +1190,8 @@ class Admin extends CI_Controller
 	}
 	public function delete_product_attributes_value()
 	{
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
 		$id = $this->input->post('id'); // Get the flavour ID from AJAX
 		if (!$id) {
 			echo json_encode(['status' => 'error', 'message' => 'Invalid product Attribute Value ID']);
@@ -1176,6 +1199,7 @@ class Admin extends CI_Controller
 		}
 
 		$result = $this->model->updateData('tbl_attribute_values', ['is_delete' => '0'], ['id' => $id]); // Soft delete
+		$this->model->addUserLog($login_id, 'Delete Attribute Value', 'tbl_attribute_values', ['is_delete' => '0']);
 
 		if ($result) {
 			echo json_encode(['status' => 'success', 'message' => 'Product Attribute Value deleted successfully']);
@@ -1194,73 +1218,6 @@ class Admin extends CI_Controller
 			$this->load->view('role_access', $response);
 		}
 	}
-
-	// public function save_permissions()
-	// {
-	//     $this->form_validation->set_rules('role_id', 'Role', 'required');
-
-	//     if ($this->form_validation->run() == FALSE) {
-	//         echo json_encode([
-	//             'status' => false,
-	//             'errors' => [
-	//                 'role_id_error' => form_error('role_id'),
-	//             ]
-	//         ]);
-	//         return;
-	//     }
-
-	//     $role_id = $this->input->post('role_id');
-	//     $permissions = $this->input->post('permissions');
-
-	//     if (empty($permissions)) {
-	//         echo json_encode([
-	//             'status' => false,
-	//             'message' => "No permissions selected"
-	//         ]);
-	//         return;
-	//     }
-
-	//     // Check if permissions already exist for the role and module
-	//     $role_exist = $this->model->CountWhereRecord('tbl_permissions', array('fk_role_id' => $role_id));
-	//     if ($role_exist) {
-	//         foreach ($permissions as $module_id => $perm) {
-	//             $data = [
-	//                 'can_view' => !empty($perm['view']) ? 1 : 0,
-	//                 'can_add' => !empty($perm['add']) ? 1 : 0,
-	//                 'can_edit' => !empty($perm['edit']) ? 1 : 0,
-	//                 'can_delete' => !empty($perm['delete']) ? 1 : 0,
-	//                 'has_access' => !empty($perm['access']) ? 1 : 0 // For dashboard only
-	//             ];
-	//             $this->model->updateData('tbl_permissions', $data, array('fk_role_id' => $role_id, 'fk_sidebar_id' => $module_id));
-	//         }
-	// 		$response = "Permissions updated successfully";
-	//     } else {
-	//         foreach ($permissions as $module_id => $perm) {
-	//             $existing_permission = $this->model->CountWhereRecord('tbl_permissions', array('fk_role_id' => $role_id, 'fk_sidebar_id' => $module_id));
-	//             if (!empty($existing_permission)) {
-	//                 echo json_encode([
-	//                     'status' => false,
-	//                     'message' => "Permissions already exist for this role and module"
-	//                 ]);
-	//                 return;
-	//             } else {
-	//                 $data = [
-	//                     'fk_role_id' => $role_id,
-	//                     'fk_sidebar_id' => $module_id,
-	//                     'can_view' => !empty($perm['view']) ? 1 : 0,
-	//                     'can_add' => !empty($perm['add']) ? 1 : 0,
-	//                     'can_edit' => !empty($perm['edit']) ? 1 : 0,
-	//                     'can_delete' => !empty($perm['delete']) ? 1 : 0,
-	//                     'has_access' => !empty($perm['access']) ? 1 : 0 // For dashboard only
-	//                 ];
-	//                 $this->model->insertData('tbl_permissions', $data);
-	//             }
-	//         }
-	// 		$response = "Permissions added successfully";
-	//     }
-	//     echo json_encode(['status' => true, 'message' => $response]);
-	// }
-
 	public function save_permissions()
 	{
 		$this->form_validation->set_rules('role_id', 'Role', 'required');
@@ -1274,7 +1231,8 @@ class Admin extends CI_Controller
 			]);
 			return;
 		}
-
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
 		$role_id = $this->input->post('role_id');
 		$permissions = $this->input->post('permissions');
 
@@ -1307,11 +1265,14 @@ class Admin extends CI_Controller
 					'fk_role_id' => $role_id,
 					'fk_sidebar_id' => $module_id
 				]);
+				$this->model->addUserLog($login_id, 'Update Role Permission', 'tbl_permissions', $data);
+
 			} else {
 				// Insert new permission
 				$data['fk_role_id'] = $role_id;
 				$data['fk_sidebar_id'] = $module_id;
 				$this->model->insertData('tbl_permissions', $data);
+				$this->model->addUserLog($login_id, 'Inserted Role Permission', 'tbl_permissions', $data);
 			}
 		}
 
@@ -1325,7 +1286,6 @@ class Admin extends CI_Controller
 			echo json_encode(['status' => 'error', 'message' => 'Invalid role ID']);
 			return;
 		}
-		// $this->load->model('Role_model');
 		$permissions = $this->Role_model->get_permissions_by_role($role_id);
 		if ($permissions) {
 			echo json_encode(['status' => 'success', 'permissions' => $permissions]);
@@ -1523,10 +1483,6 @@ class Admin extends CI_Controller
 			false, // multiple rows
 			['id', 'ASC']
 		);
-
-		// Debugging: Check if attributes are fetched correctly
-		// var_dump($attributes); die();
-
 		// Append each attribute as a column
 		if (!empty($attributes)) {
 			foreach ($attributes as $attr) {
@@ -1543,7 +1499,6 @@ class Admin extends CI_Controller
 								false,  // multiple values
 								['id', 'ASC']
 							);
-
 							// Append the dropdown values to sampleRow, use the first option if multiple values exist
 							$sampleRow[] = isset($attrValue[0]['attribute_value']) ? $attrValue[0]['attribute_value'] : '';
 							break;
@@ -1583,7 +1538,6 @@ class Admin extends CI_Controller
 		header("Content-Disposition: attachment; filename=\"$filename\"");
 		header('Cache-Control: max-age=0');
 
-		// Clean output buffer before sending the file to prevent corrupt output
 		ob_end_clean();
 
 		$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
@@ -1701,7 +1655,6 @@ class Admin extends CI_Controller
 				$this->model->insertData('tbl_product_inventory', $product_inventory);
 				$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $product_inventory);
 
-				// Handle dynamic attributes
 				$headers = $rows[0];
 				$dynamicHeaders = array_slice($headers, 16);
 
@@ -1877,8 +1830,6 @@ class Admin extends CI_Controller
 		return implode(',', $image_urls);
 	}
 
-	
-
 	/**
 	 * Debug test function for image upload
 	 */
@@ -1946,65 +1897,6 @@ class Admin extends CI_Controller
 			echo json_encode(['status' => 'error', 'message' => 'Failed to fetch Batch No']);
 		}
 	}
-	// public function submit_order_form()
-	// {
-	// 	$this->form_validation->set_rules('sku_code', 'Sku Code', 'required|trim');
-	// 	$this->form_validation->set_rules('fk_batch_id', 'Batch No', 'required|trim');
-	// 	$this->form_validation->set_rules('order_quantity', 'Quantity', 'required|trim|numeric');
-	// 	$this->form_validation->set_rules('channel_type', 'Channel Type', 'required|trim');
-	// 	$this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim');
-
-	// 	if ($this->form_validation->run() == FALSE) {
-	// 		// Return validation errors for each field
-	// 		$response = [
-	// 			'status' => 'error',
-	// 			'errors' => [
-	// 				'sku_code' => form_error('sku_code'),
-	// 				'fk_batch_id' => form_error('fk_batch_id'),
-	// 				'order_quantity' => form_error('order_quantity'),
-	// 				'channel_type' => form_error('channel_type'),
-	// 				'sale_channel' => form_error('sale_channel'),
-	// 			]
-	// 		];
-	// 		echo json_encode($response); // Return response as JSON
-	// 		return;
-	// 	}
-
-	// 	$product_id = $this->input->post('product_id');
-	// 	$fk_batch_id = $this->input->post('fk_batch_id');
-	// 	$quantity = $this->input->post('order_quantity');
-	// 	$channel_type = $this->input->post('channel_type');
-	// 	$sale_channel = $this->input->post('sale_channel');
-	// 	$last_quantity = $this->model->selectWhereData('tbl_product_inventory', ['fk_product_id' => $product_id, 'fk_batch_id' => $fk_batch_id, 'used_status' => 1], 'total_quantity,id', true);
-	// 	$previous_quantity = $last_quantity['total_quantity'];
-	// 	$inventory_id = $last_quantity['id'];
-
-	// 	$total_quantity = $previous_quantity - $quantity;
-
-	// 	$update_data = array(
-	// 		'used_status' => 0,
-	// 		'is_delete' => '0',
-	// 	);
-	// 	$this->model->updateData('tbl_product_inventory', $update_data, array('id' => $inventory_id));
-
-	// 	$order_data = array(
-	// 		'fk_product_id' => $product_id,
-	// 		'fk_batch_id' => $fk_batch_id,
-	// 		'channel_type' => $channel_type,
-	// 		'fk_sale_channel_id' => $sale_channel,
-	// 		'deduct_quantity' => $quantity,
-	// 		'total_quantity' => $total_quantity,
-	// 		'used_status' => 1
-	// 	);
-
-	// 	$inserted = $this->model->insertData('tbl_product_inventory', $order_data);
-	// 	if ($inserted) {
-	// 		$response = ["status" => "success", "message" => "Order submitted successfully"];
-	// 	} else {
-	// 		$response = ["status" => "error", "message" => "Failed to submit order"];
-	// 	}
-	// 	echo json_encode($response); // Return response as JSON
-	// }
 	public function submit_order_form()
 	{
 		$admin_session = $this->session->userdata('admin_session');
@@ -2031,7 +1923,6 @@ class Admin extends CI_Controller
 			echo json_encode($response);
 			return;
 		}
-
 		$product_id = $this->input->post('product_id');
 		$fk_batch_id = $this->input->post('fk_batch_id');
 		$quantity = $this->input->post('order_quantity');
@@ -2071,6 +1962,7 @@ class Admin extends CI_Controller
 				'total_quantity' => 0
 			];
 			$this->model->updateData('tbl_product_inventory', $update_data, ['id' => $inventory_id]);
+			$this->model->addUserLog($login_id, 'Update Product Inventory', 'tbl_product_inventory', $update_data);
 
 			$response = ["status" => "success", "message" => "Order submitted successfully. Stock finished."];
 		} else {
@@ -2080,7 +1972,7 @@ class Admin extends CI_Controller
 				'is_delete' => '0'
 			];
 			$this->model->updateData('tbl_product_inventory', $update_data, ['id' => $inventory_id]);
-
+			$this->model->addUserLog($login_id, 'Update Product Inventory', 'tbl_product_inventory', $update_data);
 			$order_data = [
 				'fk_product_id' => $product_id,
 				'fk_batch_id' => $fk_batch_id,
@@ -2094,7 +1986,7 @@ class Admin extends CI_Controller
 			];
 
 			$inserted = $this->model->insertData('tbl_product_inventory', $order_data);
-
+			$this->model->addUserLog($login_id, 'Insert Product Inventory For Deduct Quantity', 'tbl_product_inventory', $update_data);
 			if ($inserted) {
 				$response = ["status" => "success", "message" => "Order submitted successfully"];
 			} else {
@@ -2284,6 +2176,7 @@ class Admin extends CI_Controller
 							'fk_login_id'		  => $login_id
 						];
 						$this->model->insertData('tbl_product_inventory', $insertData);
+						$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $insertData);
 					} else {
 						$row[] = 'No previous inventory found';
 						$rejectedData[] = $row;
@@ -2354,8 +2247,6 @@ class Admin extends CI_Controller
 			return;
 		}
 	}
-
-
 	private function sendImportEmail($file_link = '', $message = '', $imported_products = [],$subject1 = "")
 	{
 		// $this->email->from('your_email@example.com', 'Your Company');
