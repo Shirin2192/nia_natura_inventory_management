@@ -537,12 +537,12 @@ class Admin extends CI_Controller
 				// Load the email template
 				$email_message = $this->load->view('email_template', [
 					'dynamic_body_content' => $dynamic_body,
-					'subject' => 'New Stock Added - ' . $product_name . '(' . $product_sku_code . ')',
+					'subject' => 'New Stock Added - ' . $product_name . '(' . $sku_code['sku_code'] . ')',
 				], true);  // true = return as string
 
 				// Now send the email using your helper
 				$to_email = "shirin@sda-zone.com"; // Replace with actual receiver
-				$subject = 'New Stock Added - ' . $product_name . '(' . $product_sku_code . ')';
+				$subject = 'New Stock Added - ' . $product_name . '(' . $sku_code['sku_code'] . ')';
 
 				$send = send_inventory_email($to_email, $subject, $email_message);
 			}
@@ -930,7 +930,7 @@ class Admin extends CI_Controller
 				'edit_product_type_name_error' => form_error('edit_product_type_name'),
 			];
 		} else {
-			$count = $this->model->CountWhereRecord('tbl_product_types', array('product_type_name' => $product_type_name, 'id !=' => $flavour_id));
+			$count = $this->model->CountWhereRecord('tbl_product_types', array('product_type_name' => $product_type_name, 'id !=' => $flavour_id,'is_delete'=>'1'));
 			if ($count == 1) {
 				$response = ["status" => "error", 'product_type_name_error' => "Product Type Already Exist"];
 			} else {
@@ -1308,8 +1308,8 @@ class Admin extends CI_Controller
 	public function get_sku_code_detail()
 	{
 		$response['data'] = $this->model->selectWhereData('tbl_sku_code_master', array('is_delete' => '1'), '*', false, array('id', 'DESC')); // Correctly access the model
-		// $response['permissions'] = $this->permissions; // Pass full permissions array
-		// $response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
+		$response['permissions'] = $this->permissions; // Pass full permissions array
+		$response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
 		echo json_encode($response);
 	}
 	public function save_sku_code()

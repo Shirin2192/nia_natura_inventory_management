@@ -5,53 +5,73 @@ $(".chosen-select").chosen({
 
 $(document).ready(function () {
     loadSkuCode();
-    // let currentPermission = null; // Define it globally inside ready()
 
-    // Load DataTable
     function loadSkuCode() {
         $.ajax({
-            url: frontend + controllerName+"/get_sku_code_detail",
+            url: frontend + controllerName + "/get_sku_code_detail",
             type: "POST",
             dataType: "json",
-            success: function (data) {
-                // const permissions = data.data.permissions;
-                // const currentSidebarId = data.data.current_sidebar_id;
-                // currentPermission = permissions[currentSidebarId];
+            success: function (response) {
+                console.log("AJAX Success:", response); // debug
+
+                const tableData = response.data || []; // ← No filter now
+                const currentSidebarId = response.current_sidebar_id; // Get the current sidebar ID
+                const permissions = response.permissions || {}; // Get permissions
+
+                // Get the permissions for the current sidebar
+                const currentPermission = permissions[currentSidebarId] || {};
+
                 if ($.fn.DataTable.isDataTable("#SKUCodeTable")) {
-                    $("#SKUCodeTable").DataTable().destroy(); // Destroy previous instance
+                    $("#SKUCodeTable").DataTable().clear().destroy();
                 }
+
                 $("#SKUCodeTable").DataTable({
-                    destroy: true, // Ensure it gets reinitialized
-                    data: data.data ? data.data : [], // Fallback for empty data
+                    dom: 'Bfrtip',  // B = Buttons, f = filter, r = process info, t = table, i = info, p = paginate
+                    buttons: [
+                        'csv', 'excel'
+                    ],
+                    data: tableData,
                     columns: [
-                        { data: null, title: "Sr. No", render: function (data, type, row, meta) { return meta.row + 1; } },
-                        { data: "sku_code" },
+                        { data: null, title: "Sr. No", render: (data, type, row, meta) => meta.row + 1 },
+                        { data: "sku_code", title: "SKU Code" },
                         {
                             data: "id",
+                            title: "Actions",
                             render: function (data) {
                                 let actions = '';
-                                actions += `<button class="btn btn-info btn-sm view-sku-code" data-id="${data}" data-target="#sku_code_Modal">
-                                            <i class="icon-eye menu-icon"></i>
-                                        </button><button class="btn btn-warning btn-sm edit-sku-code" data-id="${data}" data-target="#edit_sku_code_modal">
-                                            <i class="icon-pencil menu-icon"></i>
-                                        </button><button class="btn btn-danger btn-sm" onclick="deleteSaleChannel(${data})">
-                                            <i class="icon-trash menu-icon"></i>
-                                        </button>`;
+                                
+                                // Check if the user has permission to view, edit, or delete
+                                if (currentPermission.can_view === "1") {
+                                    actions += `<button class="btn btn-info btn-sm view-sku-code" data-id="${data}">
+                                                    <i class="icon-eye menu-icon"></i>
+                                                 </button>`;
+                                }
+                                if (currentPermission.can_edit === "1") {
+                                    actions += `<button class="btn btn-warning btn-sm edit-sku-code" data-id="${data}">
+                                                    <i class="icon-pencil menu-icon"></i>
+                                                 </button>`;
+                                }
+                                if (currentPermission.can_delete === "1") {
+                                    actions += `<button class="btn btn-danger btn-sm" onclick="deleteSaleChannel(${data})">
+                                                    <i class="icon-trash menu-icon"></i>
+                                                 </button>`;
+                                }
+
+                                // If no permissions, return a placeholder
                                 return actions || '-';
                             }
                         }
-                    ],
-                    language: {
-                        emptyTable: "No data available" // Add a message for empty tables
-                    }
+                    ]
                 });
             },
-            error: function () {
-                console.error("Error fetching Bottle Size.");
+            error: function (xhr, status, error) {
+                console.error("AJAX Error:", status, error);
             }
         });
-    }  
+    }
 });
+
+
 
 $("#SkuCodeForm").on("submit", function (event) {
     event.preventDefault(); // Prevent page reload

@@ -107,14 +107,16 @@
                         <div class="card">
                             <div class="card-body">
                                 <h5>SKU Code</h5>
-                                <table id="SKUCodeTable" class="display">
+                                <table id="SKUCodeTable" class="table table-bordered">
                                     <thead>
                                         <tr>
+                                            <th>Sr. No</th>
                                             <th>SKU Code</th>
-                                            <th>Action</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                 </table>
+
                             </div>
                         </div>
                     </div>

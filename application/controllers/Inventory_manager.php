@@ -77,11 +77,6 @@ class Inventory_manager extends CI_Controller
 			$stock_data = $this->Dashboard_model->fetch_stock_levels();
 			$response['stock_product_names'] = array_column($stock_data, 'product_name');
 			$response['stock_quantities'] = array_column($stock_data, 'total_quantity');
-			// echo "<pre>";print_r($response);die;
-			// 3. Batch Expiry - Fetch product wise expiry summary
-			$batch_expiry = $this->Dashboard_model->getProductBatchExpirySummary(30); // 30 days
-			$response['batch_expiry_near'] = $batch_expiry['near_expiry']; // Near Expiry batches
-			$response['batch_expiry_healthy'] = $batch_expiry['healthy'];  // Healthy batches
 
 			// 4. Top 5 Products
 			$top5 = $this->Dashboard_model->getTop5Products();
@@ -169,14 +164,14 @@ class Inventory_manager extends CI_Controller
 				'edit_product_type_name_error' => form_error('edit_product_type_name'),
 			];
 		} else {
-			$count = $this->model->CountWhereRecord('tbl_product_types', array('product_type_name' => $product_type_name, 'id !=' => $flavour_id));
+			$count = $this->model->CountWhereRecord('tbl_product_types', array('product_type_name' => $product_type_name, 'id !=' => $flavour_id,'is_delete'=>'1'));
 			if ($count == 1) {
 				$response = ["status" => "error", 'product_type_name_error' => "Product Type Already Exist"];
 			} else {
 				$update_data = ['product_type_name' => $product_type_name];
 
 				$this->model->updateData('tbl_product_types', $update_data, ['id' => $flavour_id]);
-				$this->model->addUserLog($login_id, 'Update Product Type', 'tbl_product_types', $data);
+				$this->model->addUserLog($login_id, 'Update Product Type', 'tbl_product_types', $update_data);
 
 				$response = ["status" => "success", "message" => "Product Type updated successfully"];
 			}
@@ -729,6 +724,29 @@ class Inventory_manager extends CI_Controller
 				$product_inventory_insert_id = $this->model->insertData('tbl_product_inventory', $product_inventory);
 				$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $product_inventory);
 
+				$CI = &get_instance();
+
+				// Create the dynamic body
+				$sku_code = $this->model->selectWhereData('tbl_sku_code_master', array('id' => $product_sku_code), 'sku_code', true);
+				$dynamic_body = '
+						<h2>Inventory Details!</h2>
+						<p>Product: <strong>' . $product_name . '(' . $sku_code['sku_code'] . ')' . '</strong></p>
+						<p>Quantity Added: <strong>' . $add_quantity . '</strong></p>
+						<p>Batch No: <strong>' . $batch_no . '</strong></p>
+					';
+
+				// Load the email template
+				$email_message = $this->load->view('email_template', [
+					'dynamic_body_content' => $dynamic_body,
+					'subject' => 'New Stock Added - ' . $product_name . '(' . $sku_code['sku_code'] . ')',
+				], true);  // true = return as string
+
+				// Now send the email using your helper
+				$to_email = "shirin@sda-zone.com"; // Replace with actual receiver
+				$subject = 'New Stock Added - ' . $product_name . '(' . $sku_code['sku_code'] . ')';
+
+				$send = send_inventory_email($to_email, $subject, $email_message);
+
 			}
 			if ($product_inventory_insert_id) {
 				echo json_encode(['status' => 'success', 'message' => 'Product added successfully!']);
@@ -955,7 +973,7 @@ class Inventory_manager extends CI_Controller
 				'is_delete' => '0'
 			);
 			$this->model->updateData('tbl_product_inventory', $update_product_inventory_status, ['fk_product_id' => $product_id]);
-
+			
 			// $new_total_quantity = $total_quantity + $add_new_quantity;
 			$add_new_batch_wise_quantity = array(
 				'fk_product_id' => $product_id,
@@ -989,6 +1007,8 @@ class Inventory_manager extends CI_Controller
 				'used_status' => 1
 			);
 			$this->model->insertData('tbl_product_inventory', $add_new_product_inventory);
+			$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $add_new_product_inventory);
+
 		} else {
 			$get_last_quantity = $this->model->selectWhereData('tbl_product_inventory', ['fk_product_id' => $product_id, 'used_status' => 1], array('add_quantity', 'total_quantity'), true);
 			$last_quantity = $get_last_quantity['total_quantity'];
@@ -1013,6 +1033,7 @@ class Inventory_manager extends CI_Controller
 					);
 				}
 				$this->model->updateData('tbl_product_inventory', $update_product_inventory, ['id' => $inventory_id_row, 'fk_product_id' => $product_id, 'used_status' => 1]);
+				$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $update_product_inventory);
 			}
 		}
 		echo json_encode(['status' => 'success', 'message' => 'Product updated successfully']);
@@ -1021,7 +1042,8 @@ class Inventory_manager extends CI_Controller
 	public function delete_product()
 	{
 		$this->load->model('Product_model'); // Load the model
-
+		$inventory_session = $this->session->userdata('inventory_session');
+		$login_id = $inventory_session['user_id'];
 		$product_id = $this->input->post('product_id'); // Get product ID from AJAX request
 
 		if (!empty($product_id)) {
@@ -1031,6 +1053,11 @@ class Inventory_manager extends CI_Controller
 			$this->model->updateData('tbl_product_batches', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
 			$this->model->updateData('tbl_product_attributes', ['is_delete' => '0'], ['fk_product_id' => $product_id]); // Soft delete
 
+			$this->model->addUserLog($login_id, 'Delete Product', 'tbl_product_master', ['is_delete' => '0']);
+			$this->model->addUserLog($login_id, 'Delete Product Price', 'tbl_product_price', ['is_delete' => '0']);
+			$this->model->addUserLog($login_id, 'Delete Product Inventory', 'tbl_product_inventory', ['is_delete' => '0']);
+			$this->model->addUserLog($login_id, 'Delete Product Batch', 'tbl_product_batches', ['is_delete' => '0']);
+			$this->model->addUserLog($login_id, 'Delete Product Attributes', 'tbl_product_attributes', ['is_delete' => '0']);
 
 			if ($update_product_status) {
 				echo json_encode(["success" => true, "message" => "Product deleted successfully."]);
@@ -1055,8 +1082,8 @@ class Inventory_manager extends CI_Controller
 	public function get_sku_code_detail()
 	{
 		$response['data'] = $this->model->selectWhereData('tbl_sku_code_master', array('is_delete' => '1'), '*', false, array('id', 'DESC')); // Correctly access the model
-		// $response['permissions'] = $this->permissions; // Pass full permissions array
-		// $response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
+		$response['permissions'] = $this->permissions; // Pass full permissions array
+		$response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
 		echo json_encode($response);
 	}
 	public function save_sku_code()
@@ -1065,10 +1092,11 @@ class Inventory_manager extends CI_Controller
 		$this->form_validation->set_rules(
 			'sku_code',
 			'SKU Code',
-			'required|regex_match[/^[A-Z]{2}-[A-Z]{2,}-[0-9]{2,4}$/]',
+			'required',
+			//  'required|regex_match[/^[A-Z]{3}-[A-Z]{2,}-[0-9]{2,4}$/]',
 			array(
 				'required'     => 'The %s field is required.',
-				'regex_match'  => 'The %s must be in the format: NN-KA-250.'
+				// 'regex_match'  => 'The %s must be in the format: NN-KA-250.'
 			)
 		);
 		if ($this->form_validation->run() == FALSE) {
@@ -1760,7 +1788,132 @@ class Inventory_manager extends CI_Controller
 		// Return comma-separated list of URLs
 		return implode(',', $image_urls);
 	}
+    public function order_details()
+	{
+		$inventory_session = $this->session->userdata('inventory_session');
+		if (!$inventory_session) {
+			redirect(base_url('common/index'));
+		} else {
+			$data['sku_code'] = $this->model->selectWhereData('tbl_sku_code_master', array('is_delete' => 1), "id,sku_code", false, array('id', "DESC"));
+			$data['permissions'] = $this->permissions; // Pass full permissions array
+			$data['current_sidebar_id'] = 8; // Set the sidebar ID for the current view
+			$this->load->view('order_details', $data);
+		}
+	}
+	public function get_all_orders()
+	{
+		$start = $this->input->post('start');
+		$length = $this->input->post('length');
 
+		$orders = $this->Product_model->get_orders($start, $length);
+		$totalRecords = $this->Product_model->get_total_orders();
+
+		echo json_encode([
+			"draw" => intval($this->input->post('draw')),
+			"recordsTotal" => $totalRecords,
+			"recordsFiltered" => $totalRecords,
+			"data" => $orders
+		]);
+	}
+	public function submit_order_form()
+	{
+		$admin_session = $this->session->userdata('admin_session');
+		$login_id = $admin_session['user_id'];
+		$this->form_validation->set_rules('sku_code', 'Sku Code', 'required|trim');
+		$this->form_validation->set_rules('fk_batch_id', 'Batch No', 'required|trim');
+		$this->form_validation->set_rules('order_quantity', 'Quantity', 'required|trim|numeric');
+		$this->form_validation->set_rules('channel_type', 'Channel Type', 'required|trim');
+		$this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim');
+		$this->form_validation->set_rules('reason', 'Reason', 'required|trim');
+
+		if ($this->form_validation->run() == FALSE) {
+			$response = [
+				'status' => 'error',
+				'errors' => [
+					'sku_code' => form_error('sku_code'),
+					'fk_batch_id' => form_error('fk_batch_id'),
+					'order_quantity' => form_error('order_quantity'),
+					'channel_type' => form_error('channel_type'),
+					'sale_channel' => form_error('sale_channel'),
+					'reason' => form_error('reason'),
+				]
+			];
+			echo json_encode($response);
+			return;
+		}
+
+		$product_id = $this->input->post('product_id');
+		$fk_batch_id = $this->input->post('fk_batch_id');
+		$quantity = $this->input->post('order_quantity');
+		$channel_type = $this->input->post('channel_type');
+		$sale_channel = $this->input->post('sale_channel');
+		$reason = $this->input->post('reason');
+
+		$last_quantity = $this->model->selectWhereData('tbl_product_inventory', [
+			'fk_product_id' => $product_id,
+			'fk_batch_id' => $fk_batch_id,
+			'used_status' => 1
+		], 'total_quantity,id', true);
+
+		if (!$last_quantity) {
+			$response = ["status" => "error", "message" => "Inventory not found."];
+			echo json_encode($response);
+			return;
+		}
+
+		$previous_quantity = $last_quantity['total_quantity'];
+		$inventory_id = $last_quantity['id'];
+
+		// Check if ordered quantity is greater than available quantity
+		if ($quantity > $previous_quantity) {
+			$response = ["status" => "error", "message" => "Order quantity exceeds available stock."];
+			echo json_encode($response);
+			return;
+		}
+
+		$total_quantity = $previous_quantity - $quantity;
+
+		if ($total_quantity == 0) {
+			// If after deduction quantity is zero, update existing inventory
+			$update_data = [
+				'used_status' => 0,
+				'is_delete' => '0',
+				'total_quantity' => 0
+			];
+			$this->model->updateData('tbl_product_inventory', $update_data, ['id' => $inventory_id]);
+
+			$response = ["status" => "success", "message" => "Order submitted successfully. Stock finished."];
+		} else {
+			// Otherwise, update existing record and insert new one with deducted quantity
+			$update_data = [
+				'used_status' => 0,
+				'is_delete' => '0'
+			];
+			$this->model->updateData('tbl_product_inventory', $update_data, ['id' => $inventory_id]);
+
+			$order_data = [
+				'fk_product_id' => $product_id,
+				'fk_batch_id' => $fk_batch_id,
+				'channel_type' => $channel_type,
+				'fk_sale_channel_id' => $sale_channel,
+				'deduct_quantity' => $quantity,
+				'total_quantity' => $total_quantity,
+				'used_status' => 1,
+				'fk_login_id' => $login_id,
+				'reason' =>$reason
+			];
+
+			$inserted = $this->model->insertData('tbl_product_inventory', $order_data);
+
+			if ($inserted) {
+				$response = ["status" => "success", "message" => "Order submitted successfully"];
+			} else {
+				$response = ["status" => "error", "message" => "Failed to submit order"];
+			}
+		}
+
+		echo json_encode($response);
+	}
 	public function upload_order_excel()
 	{
 
@@ -2006,4 +2159,33 @@ class Inventory_manager extends CI_Controller
 		// $this->email->set_mailtype('html');
 		// $this->email->send();
 	}
+	public function inventory_details()
+	{
+		$inventory_session = $this->session->userdata('inventory_session');
+		if (!$inventory_session) {
+			redirect(base_url('common/index')); // Redirect to login page if session is not active
+		} else {
+			$response['permissions'] = $this->permissions; // Pass full permissions array
+			$response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
+			$this->load->view('inventory_details', $response);
+		}
+	}
+
+	public function get_inventory_by_product_and_batch()
+	{
+		$this->load->model('Product_model');
+		$data = $this->Product_model->get_inventory_by_product_and_batch();
+		if (!empty($data)) {
+			echo json_encode([
+				'status' => 'success',
+				'data' => $data
+			]);
+		} else {
+			echo json_encode([
+				'status' => 'error',
+				'message' => 'No inventory data found.'
+			]);
+		}
+	}
+
 }
