@@ -796,6 +796,26 @@ class Admin extends CI_Controller
 			$this->model->insertData('tbl_product_inventory', $add_new_product_inventory);
 			$this->model->addUserLog($login_id, 'Inserted New Batch Inventory Details', 'tbl_product_inventory', $add_new_product_inventory);
 
+			$CI = &get_instance();
+
+				// Create the dynamic body
+				$sku_code = $this->model->selectWhereData('tbl_sku_code_master', array('id' => $product_sku_code), 'sku_code', true);
+				$dynamic_body = '
+						<h2>Inventory Details!</h2>
+						<p>Product: <strong>' . $product_name . '(' . $sku_code['sku_code'] . ')' . '</strong></p>
+						<p>Quantity Added: <strong>' . $add_new_quantity . '</strong></p>
+						<p>Batch No: <strong>' . $add_new_batch_no . '</strong></p>
+					';
+				// Load the email template
+				$email_message = $this->load->view('email_template', [
+					'dynamic_body_content' => $dynamic_body,
+					'subject' => 'New Batch Added For - ' . $product_name . '(' . $sku_code['sku_code'] . ')',
+				], true);  // true = return as string
+
+				// Now send the email using your helper
+				$to_email = "shirin@sda-zone.com"; // Replace with actual receiver
+				$subject = 'New Stock Added - ' . $product_name . '(' . $sku_code['sku_code'] . ')';
+
 		} else {
 			$get_last_quantity = $this->model->selectWhereData('tbl_product_inventory', ['fk_product_id' => $product_id, 'used_status' => 1], array('add_quantity', 'total_quantity'), true);
 			$last_quantity = $get_last_quantity['total_quantity'];

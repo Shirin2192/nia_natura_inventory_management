@@ -236,8 +236,8 @@ class Staff extends CI_Controller {
 	public function get_sku_code_detail()
 	{
 		$response['data'] = $this->model->selectWhereData('tbl_sku_code_master',array('is_delete'=>'1'),'*',false,array('id','DESC')); // Correctly access the model
-		// $response['permissions'] = $this->permissions; // Pass full permissions array
-		// $response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
+		$response['permissions'] = $this->permissions; // Pass full permissions array
+		$response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
 		echo json_encode($response);
 	}
 	
