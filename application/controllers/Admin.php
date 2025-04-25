@@ -481,6 +481,7 @@ class Admin extends CI_Controller
 				];
 				//  print_r($product_data);
 				$product_insert_id = $this->model->insertData('tbl_product_master', $product_data);
+				$this->model->addUserLog($login_id, 'Insert Product Master', 'tbl_product_master', $product_data);
 
 				$product_batch_data = [
 					'fk_product_id' => $product_insert_id,
@@ -490,6 +491,7 @@ class Admin extends CI_Controller
 					'quantity' => $add_quantity,
 				];
 				$product_batch_id = $this->model->insertData('tbl_product_batches', $product_batch_data); // Insert batch data
+				$this->model->addUserLog($login_id, 'Insert Product Batch', 'tbl_product_batches', $product_batch_data);
 
 				foreach ($fk_product_attribute_id as $key => $attribute_id) {
 					$product_attribute = [
@@ -509,6 +511,8 @@ class Admin extends CI_Controller
 					'selling_price' => $selling_price,
 				];
 				$this->model->insertData('tbl_product_price', $product_price);
+				$this->model->addUserLog($login_id, 'Insert Product Price', 'tbl_product_price', $product_price);
+
 				// print_r($product_price);
 				$product_inventory = [
 					'fk_product_id' => $product_insert_id,
@@ -521,30 +525,8 @@ class Admin extends CI_Controller
 					'fk_sale_channel_id' => $sale_channel,
 					'reason' => $reason,
 				];
-				$product_inventory_insert_id = $this->model->insertData('tbl_product_inventory', $product_inventory);
-
-				$CI = &get_instance();
-
-				// Create the dynamic body
-				$sku_code = $this->model->selectWhereData('tbl_sku_code_master', array('id' => $product_sku_code), 'sku_code', true);
-				$dynamic_body = '
-						<h2>Inventory Details!</h2>
-						<p>Product: <strong>' . $product_name . '(' . $sku_code['sku_code'] . ')' . '</strong></p>
-						<p>Quantity Added: <strong>' . $add_quantity . '</strong></p>
-						<p>Batch No: <strong>' . $batch_no . '</strong></p>
-					';
-
-				// Load the email template
-				$email_message = $this->load->view('email_template', [
-					'dynamic_body_content' => $dynamic_body,
-					'subject' => 'New Stock Added - ' . $product_name . '(' . $sku_code['sku_code'] . ')',
-				], true);  // true = return as string
-
-				// Now send the email using your helper
-				$to_email = "shirin@sda-zone.com"; // Replace with actual receiver
-				$subject = 'New Stock Added - ' . $product_name . '(' . $sku_code['sku_code'] . ')';
-
-				$send = send_inventory_email($to_email, $subject, $email_message);
+				$product_inventory_insert_id = $this->model->insertData('tbl_product_inventory', $product_inventory);			
+				$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $product_inventory);
 			}
 			if ($product_inventory_insert_id) {
 				echo json_encode(['status' => 'success', 'message' => 'Product added successfully!']);
@@ -604,7 +586,6 @@ class Admin extends CI_Controller
 
 	public function update_product()
 	{
-
 		$this->load->library('form_validation');
 		$admin_session = $this->session->userdata('admin_session');
 		$login_id = $admin_session['user_id'];
@@ -795,27 +776,6 @@ class Admin extends CI_Controller
 			);
 			$this->model->insertData('tbl_product_inventory', $add_new_product_inventory);
 			$this->model->addUserLog($login_id, 'Inserted New Batch Inventory Details', 'tbl_product_inventory', $add_new_product_inventory);
-
-			$CI = &get_instance();
-
-				// Create the dynamic body
-				$sku_code = $this->model->selectWhereData('tbl_sku_code_master', array('id' => $product_sku_code), 'sku_code', true);
-				$dynamic_body = '
-						<h2>Inventory Details!</h2>
-						<p>Product: <strong>' . $product_name . '(' . $sku_code['sku_code'] . ')' . '</strong></p>
-						<p>Quantity Added: <strong>' . $add_new_quantity . '</strong></p>
-						<p>Batch No: <strong>' . $add_new_batch_no . '</strong></p>
-					';
-				// Load the email template
-				$email_message = $this->load->view('email_template', [
-					'dynamic_body_content' => $dynamic_body,
-					'subject' => 'New Batch Added For - ' . $product_name . '(' . $sku_code['sku_code'] . ')',
-				], true);  // true = return as string
-
-				// Now send the email using your helper
-				$to_email = "shirin@sda-zone.com"; // Replace with actual receiver
-				$subject = 'New Stock Added - ' . $product_name . '(' . $sku_code['sku_code'] . ')';
-
 		} else {
 			$get_last_quantity = $this->model->selectWhereData('tbl_product_inventory', ['fk_product_id' => $product_id, 'used_status' => 1], array('add_quantity', 'total_quantity'), true);
 			$last_quantity = $get_last_quantity['total_quantity'];
@@ -1739,7 +1699,7 @@ class Admin extends CI_Controller
 				$writer->save($rejectedFile);
 
 				$download_url = base_url('uploads/' . basename($rejectedFile));
-				$this->sendImportEmail($download_url, "Some rows were rejected. Please download the rejected file.", $imported_products);
+			//	$this->sendImportEmail($download_url, "Some rows were rejected. Please download the rejected file.", $imported_products);
 
 				$this->output
 					->set_content_type('application/json')
@@ -1750,7 +1710,7 @@ class Admin extends CI_Controller
 					]));
 				return;
 			} else {
-				$this->sendImportEmail($download_url, "All rows imported successfully!", $imported_products, 'New Stock Added');
+			//	$this->sendImportEmail($download_url, "All rows imported successfully!", $imported_products, 'New Stock Added');
 
 				$this->output
 					->set_content_type('application/json')
@@ -2238,7 +2198,7 @@ class Admin extends CI_Controller
 					]));
 					return;
 				}else {
-					$this->sendImportEmail('', "All order data uploaded successfully!.", $imported_products, 'Quantity Deducted');
+					//$this->sendImportEmail('', "All order data uploaded successfully!.", $imported_products, 'Quantity Deducted');
 	
 					$this->output
 						->set_content_type('application/json')
@@ -2309,4 +2269,95 @@ class Admin extends CI_Controller
 		// $this->email->set_mailtype('html');
 		// $this->email->send();
 	}
+	public function generate_inventory_report() {
+		$CI = &get_instance();
+		$this->load->model("Inventory_model");
+		$this->load->library('email');
+	
+		$date = date('Y-m-d');
+	
+		$start_of_day_inventory = $this->Inventory_model->get_start_of_day_inventory($date);
+		$end_of_day_inventory = $this->Inventory_model->get_end_of_day_inventory($date);
+		$quantity_on_hand_inventory = $this->Inventory_model->get_quantity_on_hand_inventory($date);
+	
+		$report_data = [];
+	
+		foreach ($quantity_on_hand_inventory as $row) {
+			$product_id = $row['fk_product_id'];
+			$sold_quantities = $this->Inventory_model->get_sold_quantity($product_id, $date);
+			$received_quantities = $this->Inventory_model->get_received_quantity($product_id, $date);
+	
+			$channel_data = [];
+	
+			foreach ($sold_quantities as $sold_row) {
+				$channel = $sold_row['sale_channel'];
+				$channel_data[$channel]['sold'] = $sold_row['sold_quantity'];
+			}
+	
+			foreach ($received_quantities as $received_row) {
+				$channel = $received_row['sale_channel'];
+				$channel_data[$channel]['received'] = $received_row['received_quantity'];
+			}
+	
+			foreach ($channel_data as $channel => $data) {
+				$report_data[] = [
+					'product_name' => $row['product_name'],
+					'sku_code' => $row['sku_code'],
+					'qty_on_hand' => $row['qty_on_hand'],
+					'received' => $data['received'] ?? 0,
+					'sold' => $data['sold'] ?? 0,
+					'sale_channel' => $channel,
+				];
+			}
+		}
+	
+		// Build HTML table
+		$html = "<h3>Inventory Report for {$date}</h3>";
+		$html .= "<p><strong>Start of Day Inventory:</strong> {$start_of_day_inventory}</p>";
+		$html .= "<p><strong>End of Day Inventory:</strong> {$end_of_day_inventory}</p>";
+		$html .= "<table border='1' cellpadding='5' cellspacing='0'>
+					<thead>
+						<tr>
+							<th>Product Name</th>
+							<th>SKU</th>
+							<th>Qty on Hand</th>
+							<th>Received Today</th>
+							<th>Sold Today</th>
+							<th>Sale Channel</th>
+							<th>Note</th>
+						</tr>
+					</thead>
+					<tbody>";
+	
+		foreach ($report_data as $row) {
+			$html .= "<tr>
+						<td>{$row['product_name']}</td>
+						<td>{$row['sku_code']}</td>
+						<td>{$row['qty_on_hand']}</td>
+						<td>{$row['received']}</td>
+						<td>{$row['sold']}</td>
+						<td>{$row['sale_channel']}</td>
+						<td>{$row['reason']}</td>
+					</tr>";
+		}
+	
+		$html .= "</tbody></table>";
+		
+		echo "<pre>";print_r($html);die;
+	
+		// Configure Email
+		$to_email = 'shirin@sda-zone.com';
+		$subject = "Nia Natura Inventory Daily Report - {$date}";
+	
+		// Call the email function to send the report
+		$send = send_inventory_email($to_email, $subject, $html);
+		if ($send) {
+			echo "Email sent successfully!";
+		} else {
+			echo "Email failed to send.";
+		}
+	}
+	
+	
+
 }

@@ -615,6 +615,7 @@ class Inventory_manager extends CI_Controller
 			$product_name = $this->input->post('product_name');
 			$product_sku_code = $this->input->post('product_sku_code');
 			$batch_no = $this->input->post('batch_no');
+
 			$barcode = $this->input->post('barcode');
 			$description = $this->input->post('description');
 			$purchase_price = $this->input->post('purchase_price');
@@ -622,22 +623,32 @@ class Inventory_manager extends CI_Controller
 			$selling_price = $this->input->post('selling_price');
 			$add_quantity = $this->input->post('add_quantity');
 			$stock_availability = $this->input->post('stock_availability');
-			// $sale_channel = $this->input->post('sale_channel');
+			$sale_channel = $this->input->post('sale_channel');
 
 			$fk_product_attribute_id = $this->input->post('fk_product_attribute_id'); // Example: [3, 2, 1]
 			$attributes_value = $this->input->post('attributes_value'); // Example: [19, 16, 1]
 			$fk_product_types_id = $this->input->post('fk_product_types_id');
-
+			$expiry_date = $this->input->post('expiry_date');
+			$manufacture_date = $this->input->post('manufacture_date');
+			$reason = $this->input->post('reason');
+			// Validation Rules
 			// Validation Rules
 			$this->form_validation->set_rules('product_name', 'Product Name', 'required|trim');
-			$this->form_validation->set_rules('product_sku_code', 'Product SKU Code', 'required|trim|is_unique[tbl_product_type.product_sku_code]');
+			$this->form_validation->set_rules('product_sku_code', 'Product SKU Code', 'required|trim');
+			$this->form_validation->set_rules('fk_product_types_id', 'Product Type', 'required|trim');
+			// $this->form_validation->set_rules('fk_bottle_size_id', 'Bottle Size', 'required|trim');
+			// $this->form_validation->set_rules('fk_bottle_type_id', 'Bottle Type', 'required|trim');
 			$this->form_validation->set_rules('description', 'Description', 'required|trim');
 			$this->form_validation->set_rules('purchase_price', 'Purchase Price', 'required|trim');
 			$this->form_validation->set_rules('mrp', 'MRP', 'required|trim');
 			$this->form_validation->set_rules('selling_price', 'Selling Price', 'required|trim');
 			$this->form_validation->set_rules('add_quantity', 'Stock Quantity', 'required|trim');
 			$this->form_validation->set_rules('stock_availability', 'Stock Availability', 'required|trim');
-			// $this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim');
+			$this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim');
+			$this->form_validation->set_rules('channel_type', 'Sale Channel', 'required|trim');
+			$this->form_validation->set_rules('expiry_date', 'Expiry date', 'required|trim');
+			$this->form_validation->set_rules('manufacture_date', 'Manufacture Date', 'required|trim');
+			$this->form_validation->set_rules('reason', 'Reason', 'required|trim');
 
 			// Check validation
 			if ($this->form_validation->run() == FALSE) {
@@ -684,16 +695,22 @@ class Inventory_manager extends CI_Controller
 					'product_sku_code' => $product_sku_code,
 					'fk_stock_availability_id' => $stock_availability,
 					'barcode' => $barcode,
-					'batch_no' => $batch_no,
 					'images' => implode(",", $product_images), // Store multiple images as JSON
 					'description' => $description,
-					'purchase_price' => $purchase_price,
-					'MRP' => $mrp,
-					'selling_price' => $selling_price,
+					'fk_product_types_id' => $fk_product_types_id,
 				];
+				//  print_r($product_data);
 				$product_insert_id = $this->model->insertData('tbl_product_master', $product_data);
 				$this->model->addUserLog($login_id, 'Insert Product Master', 'tbl_product_master', $product_data);
 
+				$product_batch_data = [
+					'fk_product_id' => $product_insert_id,
+					'batch_no' => $batch_no,
+					'expiry_date' => $expiry_date,
+					'manufactured_date' => $manufacture_date,
+					'quantity' => $add_quantity,
+				];
+				$product_batch_id = $this->model->insertData('tbl_product_batches', $product_batch_data); // Insert batch data
 
 				foreach ($fk_product_attribute_id as $key => $attribute_id) {
 					$product_attribute = [
@@ -702,51 +719,30 @@ class Inventory_manager extends CI_Controller
 						'fk_attribute_id' => $attribute_id,
 						'fk_attribute_value_id' => $attributes_value[$key],
 					];
-					// Insert product attributes into the database
 					$this->model->insertData('tbl_product_attributes', $product_attribute);
 				}
-				// Insert product price into the database			
+				// Insert product price and inventory data				
 				$product_price = [
 					'fk_product_id' => $product_insert_id,
+					'fk_batch_id' => $product_batch_id,
 					'purchase_price' => $purchase_price,
 					'MRP' => $mrp,
 					'selling_price' => $selling_price,
 				];
 				$this->model->insertData('tbl_product_price', $product_price);
-				$this->model->addUserLog($login_id, 'Insert Product Price', 'tbl_product_price', $product_price);
-
+				// print_r($product_price);
 				$product_inventory = [
 					'fk_product_id' => $product_insert_id,
+					'fk_login_id' => $login_id,
+					'fk_batch_id' => $product_batch_id,
 					'add_quantity' => $add_quantity,
 					'total_quantity' => $add_quantity,
-					'used_status' => 1
+					'used_status' => 1,
+					'channel_type' => $_POST['channel_type'],
+					'fk_sale_channel_id' => $sale_channel,
+					'reason' => $reason,
 				];
-				$product_inventory_insert_id = $this->model->insertData('tbl_product_inventory', $product_inventory);
-				$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $product_inventory);
-
-				$CI = &get_instance();
-
-				// Create the dynamic body
-				$sku_code = $this->model->selectWhereData('tbl_sku_code_master', array('id' => $product_sku_code), 'sku_code', true);
-				$dynamic_body = '
-						<h2>Inventory Details!</h2>
-						<p>Product: <strong>' . $product_name . '(' . $sku_code['sku_code'] . ')' . '</strong></p>
-						<p>Quantity Added: <strong>' . $add_quantity . '</strong></p>
-						<p>Batch No: <strong>' . $batch_no . '</strong></p>
-					';
-
-				// Load the email template
-				$email_message = $this->load->view('email_template', [
-					'dynamic_body_content' => $dynamic_body,
-					'subject' => 'New Stock Added - ' . $product_name . '(' . $sku_code['sku_code'] . ')',
-				], true);  // true = return as string
-
-				// Now send the email using your helper
-				$to_email = "shirin@sda-zone.com"; // Replace with actual receiver
-				$subject = 'New Stock Added - ' . $product_name . '(' . $sku_code['sku_code'] . ')';
-
-				$send = send_inventory_email($to_email, $subject, $email_message);
-
+				$product_inventory_insert_id = $this->model->insertData('tbl_product_inventory', $product_inventory);			
 			}
 			if ($product_inventory_insert_id) {
 				echo json_encode(['status' => 'success', 'message' => 'Product added successfully!']);
