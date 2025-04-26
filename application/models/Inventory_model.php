@@ -49,32 +49,25 @@ class Inventory_model extends CI_Model
         return $result['total_inventory'] ?? 0;
     }  
     public function get_quantity_on_hand_inventory($date = null) {
-        $date = $date ?? date('Y-m-d');
-    
-        $this->db->select("
-            tbl_product_master.product_name,
-            tbl_product_master.product_sku_code,
-            tbl_sku_code_master.sku_code,
-            tbl_product_inventory.total_quantity as qty_on_hand,
-            tbl_product_inventory.fk_product_id,
-            tbl_product_inventory.reason,
-        ");
-        $this->db->from("tbl_product_master");
-        $this->db->join("tbl_sku_code_master", "tbl_product_master.product_sku_code = tbl_sku_code_master.id", "left");
-        $this->db->join("tbl_product_inventory", "tbl_product_inventory.fk_product_id = tbl_product_master.id", "left");
-        // $this->db->join("tbl_sale_channel", "tbl_product_inventory.fk_sale_channel_id = tbl_sale_channel.id", "left");
-        $this->db->where("tbl_product_inventory.created_at >=", $date . " 00:00:00");
-        $this->db->where("tbl_product_inventory.created_at <=", $date . " 23:59:59");
-        $this->db->where("tbl_product_inventory.used_status", 1);
-        $this->db->where("tbl_product_inventory.is_delete", '1');
-    
-        // Group by product and sale channel
-        $this->db->group_by([
-            "tbl_product_inventory.fk_product_id",
-            // "tbl_product_inventory.fk_sale_channel_id"
-        ]);
-            return $this->db->get()->result_array();
-    }
+		$date = $date ?? date('Y-m-d');
+	
+		$this->db->select("
+			tbl_product_master.product_name,
+			tbl_product_master.product_sku_code,
+			tbl_sku_code_master.sku_code,
+			SUM(tbl_product_inventory.total_quantity) as qty_on_hand, 
+			tbl_product_inventory.fk_product_id,
+		");
+		$this->db->from("tbl_product_master");
+		$this->db->join("tbl_sku_code_master", "tbl_product_master.product_sku_code = tbl_sku_code_master.id", "left");
+		$this->db->join("tbl_product_inventory", "tbl_product_inventory.fk_product_id = tbl_product_master.id", "left");
+		$this->db->where("tbl_product_inventory.used_status", 1);
+		$this->db->where("tbl_product_inventory.is_delete", '1');
+		$this->db->group_by("tbl_product_inventory.fk_product_id");
+	
+		return $this->db->get()->result_array();
+	}
+	
     public function get_sold_quantity($product_id = "", $date = null) {
         $date = $date ?? date('Y-m-d');
     
