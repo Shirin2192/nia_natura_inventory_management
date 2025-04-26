@@ -2367,6 +2367,7 @@ class Admin extends CI_Controller
 		// Fetch Start of Day Inventory
 		$start_of_day_inventory = $this->Inventory_model->get_start_of_day_inventory($date);
 		$quantity_on_hand_inventory = $this->Inventory_model->get_quantity_on_hand_inventory($date);
+		// echo "<pre>"; print_r($quantity_on_hand_inventory); die;
 	
 		$report_data = [];
 	
@@ -2374,7 +2375,7 @@ class Admin extends CI_Controller
 		$total_received = 0;
 		$total_sold = 0;
 	
-		foreach ($quantity_on_hand_inventory as $row) {
+		foreach ($quantity_on_hand_inventory as $quantity_on_hand_inventory_key => $row) {
 			$product_id = $row['fk_product_id'];
 	
 			// Add Qty on Hand only once per product
@@ -2383,6 +2384,7 @@ class Admin extends CI_Controller
 			// Get sold and received quantities for the product
 			$sold_quantities = $this->Inventory_model->get_sold_quantity($product_id, $date);
 			$received_quantities = $this->Inventory_model->get_received_quantity($product_id, $date);
+			$product_name = $this->Inventory_model->get_product_name($product_id);
 	
 			$channel_data = [];
 	
@@ -2406,9 +2408,13 @@ class Admin extends CI_Controller
 			foreach ($channel_data as $channel => $data) {
 				$received = $data['received'] ?? 0;
 				$sold = $data['sold'] ?? 0;
-	
+
+				$attribute_value = explode(",",$product_name['attribute_value']);
+
+				$product_name = $product_name['product_type_name'] . ' ' . $attribute_value[0] . ' ' . $attribute_value[1] . ' ' . $attribute_value[2];
+								
 				$report_data[] = [
-					'product_name' => $row['product_name'],
+					'product_name' => $product_name,
 					'sku_code' => $row['sku_code'],
 					'qty_on_hand' => $row['qty_on_hand'],
 					'received' => $received,

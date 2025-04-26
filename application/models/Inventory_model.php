@@ -56,7 +56,7 @@ class Inventory_model extends CI_Model
 			tbl_product_master.product_sku_code,
 			tbl_sku_code_master.sku_code,
 			SUM(tbl_product_inventory.total_quantity) as qty_on_hand, 
-			tbl_product_inventory.fk_product_id,
+			tbl_product_inventory.fk_product_id,			
 		");
 		$this->db->from("tbl_product_master");
 		$this->db->join("tbl_sku_code_master", "tbl_product_master.product_sku_code = tbl_sku_code_master.id", "left");
@@ -96,7 +96,18 @@ class Inventory_model extends CI_Model
     
         return $this->db->get()->result_array();
     }
-    
+    public function get_product_name($product_id = "") {
+		$this->db->select("	GROUP_CONCAT(tbl_product_attributes.fk_attribute_value_id) as fk_attribute_value_id,
+			GROUP_CONCAT(tbl_attribute_values.attribute_value) as attribute_value,
+			GROUP_CONCAT(DISTINCT tbl_product_types.product_type_name) as product_type_name,tbl_product_master.id, ");
+		$this->db->from("tbl_product_master");
+		$this->db->join("tbl_product_attributes", "tbl_product_attributes.fk_product_id = tbl_product_master.id", "left");
+		$this->db->join("tbl_product_types", "tbl_product_master.fk_product_types_id = tbl_product_types.id", "left");
+		$this->db->join("tbl_attribute_values", "tbl_product_attributes.fk_attribute_value_id = tbl_attribute_values.id", "left");
+		$this->db->where("tbl_product_master.id", $product_id);	
+		return $this->db->get()->row_array();
+	}
+
     
     
 }
