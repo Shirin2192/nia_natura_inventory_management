@@ -2432,7 +2432,8 @@ class Admin extends CI_Controller
 		$calculated_end_of_day_inventory = $start_of_day_inventory + $total_received - $total_sold;
 	
 		// Build HTML table
-		$html = "<h3>Inventory Report for {$date}</h3>";
+		$now_date = date('jS M Y');  // outputs: 30th Apr 2025
+		$html = "<h3>Inventory Report for {$now_date}</h3>";
 		$html .= "<p><strong>Start of Day Inventory:</strong> {$start_of_day_inventory}</p>";
 		$html .= "<p><strong>End of Day Inventory:</strong> {$calculated_end_of_day_inventory}</p>";
 		$html .= "<table border='1' cellpadding='5' cellspacing='0'>
@@ -2440,26 +2441,26 @@ class Admin extends CI_Controller
 						<tr>
 							<th>Product Name</th>
 							<th>SKU</th>
-							<th>Qty on Hand</th>
+							<th>Qty in Stock</th>
 							<th>Received Today</th>
 							<th>Sold Today</th>
-							<th>Sale Channel</th>
+							<th>Sales Channel</th>
 							<th>Note</th>
 						</tr>
 					</thead>
 					<tbody>";
 	
-		foreach ($report_data as $row) {
-			$html .= "<tr>
-						<td>{$row['product_name']}</td>
-						<td>{$row['sku_code']}</td>
-						<td>{$row['qty_on_hand']}</td>
-						<td>{$row['received']}</td>
-						<td>{$row['sold']}</td>
-						<td>{$row['sale_channel']}</td>
-						<td>{$row['note']}</td>
-					</tr>";
-		}
+			foreach ($report_data as $row) {
+				$html .= "<tr>
+							<td>" . (!empty($row['product_name']) ? $row['product_name'] : 'NA') . "</td>
+							<td>" . (!empty($row['sku_code']) ? $row['sku_code'] : 'NA') . "</td>
+							<td>" . (isset($row['qty_on_hand']) ? $row['qty_on_hand'] : 'NA') . "</td>
+							<td>" . (isset($row['received']) ? $row['received'] : 'NA') . "</td>
+							<td>" . (isset($row['sold']) ? $row['sold'] : 'NA') . "</td>
+							<td>" . (($row['sold'] == 0 || empty($row['sale_channel'])) ? 'NA' : $row['sale_channel']) . "</td>
+							<td>" . (!empty($row['note']) ? $row['note'] : 'NA') . "</td>
+						</tr>";
+			}
 	
 		// Add total row
 		$html .= "<tr style='font-weight:bold; background-color:#f0f0f0;'>
@@ -2471,12 +2472,14 @@ class Admin extends CI_Controller
 				  </tr>";
 	
 		$html .= "</tbody></table>";
-	
-		echo "<pre>"; print_r($html); die;
+		
+		echo"<pre>";print_r($html);die;
 	
 		// Email config
-		$to_email = 'shirin@sda-zone.com';
-		$subject = "Nia Natura Inventory Daily Report - {$date}";
+	// 	$to_email = 'shirin@sda-zone.com, sanju@sda-zone.com';
+		$to_email = 'shirin@sda-zone.com, sanju@sda-zone.com, rekha@sda-zone.com, moiz@sda-zone.com';
+		$subject = "Nia Natura Inventory Daily Report";
+// 		$subject = "Nia Natura Inventory Daily Report - {$date}";
 		$send = send_inventory_email($to_email, $subject, $html);
 	
 		if ($send) {
