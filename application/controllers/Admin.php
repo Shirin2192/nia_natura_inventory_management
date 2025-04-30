@@ -2269,94 +2269,6 @@ class Admin extends CI_Controller
 		// $this->email->set_mailtype('html');
 		// $this->email->send();
 	}
-	// public function generate_inventory_report() {
-	// 	$CI = &get_instance();
-	// 	$this->load->model("Inventory_model");
-	// 	$this->load->library('email');
-	
-	// 	$date = date('Y-m-d');
-	
-	// 	$start_of_day_inventory = $this->Inventory_model->get_start_of_day_inventory($date);
-	// 	$end_of_day_inventory = $this->Inventory_model->get_end_of_day_inventory($date);
-	// 	$quantity_on_hand_inventory = $this->Inventory_model->get_quantity_on_hand_inventory($date);
-	
-	// 	$report_data = [];
-	
-	// 	foreach ($quantity_on_hand_inventory as $row) {
-	// 		$product_id = $row['fk_product_id'];
-	// 		$sold_quantities = $this->Inventory_model->get_sold_quantity($product_id, $date);
-	// 		$received_quantities = $this->Inventory_model->get_received_quantity($product_id, $date);
-	
-	// 		$channel_data = [];
-	
-	// 		foreach ($sold_quantities as $sold_row) {
-	// 			$channel = $sold_row['sale_channel'];
-	// 			$channel_data[$channel]['sold'] = $sold_row['sold_quantity'];
-	// 		}
-	
-	// 		foreach ($received_quantities as $received_row) {
-	// 			$channel = $received_row['sale_channel'];
-	// 			$channel_data[$channel]['received'] = $received_row['received_quantity'];
-	// 		}
-	
-	// 		foreach ($channel_data as $channel => $data) {
-	// 			$report_data[] = [
-	// 				'product_name' => $row['product_name'],
-	// 				'sku_code' => $row['sku_code'],
-	// 				'qty_on_hand' => $row['qty_on_hand'],
-	// 				'received' => $data['received'] ?? 0,
-	// 				'sold' => $data['sold'] ?? 0,
-	// 				'sale_channel' => $channel,
-	// 			];
-	// 		}
-	// 	}
-	
-	// 	// Build HTML table
-	// 	$html = "<h3>Inventory Report for {$date}</h3>";
-	// 	$html .= "<p><strong>Start of Day Inventory:</strong> {$start_of_day_inventory}</p>";
-	// 	$html .= "<p><strong>End of Day Inventory:</strong> {$end_of_day_inventory}</p>";
-	// 	$html .= "<table border='1' cellpadding='5' cellspacing='0'>
-	// 				<thead>
-	// 					<tr>
-	// 						<th>Product Name</th>
-	// 						<th>SKU</th>
-	// 						<th>Qty on Hand</th>
-	// 						<th>Received Today</th>
-	// 						<th>Sold Today</th>
-	// 						<th>Sale Channel</th>
-	// 						<th>Note</th>
-	// 					</tr>
-	// 				</thead>
-	// 				<tbody>";
-	
-	// 	foreach ($report_data as $row) {
-	// 		$html .= "<tr>
-	// 					<td>{$row['product_name']}</td>
-	// 					<td>{$row['sku_code']}</td>
-	// 					<td>{$row['qty_on_hand']}</td>
-	// 					<td>{$row['received']}</td>
-	// 					<td>{$row['sold']}</td>
-	// 					<td>{$row['sale_channel']}</td>
-	// 					<td>{$row['reason']}</td>
-	// 				</tr>";
-	// 	}
-	
-	// 	$html .= "</tbody></table>";
-		
-	// 	echo "<pre>";print_r($html);die;
-	
-	// 	// Configure Email
-	// 	$to_email = 'shirin@sda-zone.com';
-	// 	$subject = "Nia Natura Inventory Daily Report - {$date}";
-	
-	// 	// Call the email function to send the report
-	// 	$send = send_inventory_email($to_email, $subject, $html);
-	// 	if ($send) {
-	// 		echo "Email sent successfully!";
-	// 	} else {
-	// 		echo "Email failed to send.";
-	// 	}
-	// }
 	public function generate_inventory_report() {
 		$CI = &get_instance();
 		$this->load->model("Inventory_model");
@@ -2488,5 +2400,215 @@ class Admin extends CI_Controller
 			echo "Email failed to send.";
 		}
 	}
-	
+	//Sourcing Partner
+	public function sourcing_partner()
+	{
+		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
+		if (!$admin_session) {
+			redirect(base_url('common/index')); // Redirect to login page if session is not active
+		} else {
+			$data['permissions'] = $this->permissions; // Pass full permissions array
+			$data['current_sidebar_id'] = 11; // Set the sidebar ID for the current view
+			$this->load->view('sourcing_partner', $data);
+		}
+	}
+	public function save_sourcing_partner()
+	{
+		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
+		$login_id = $admin_session['user_id'];
+		$this->form_validation->set_rules('name', 'Name', 'required|trim');
+		$this->form_validation->set_rules('email', 'Email', 'required|trim');
+		$this->form_validation->set_rules('contact_no', 'Contact No', 'required|trim|max_length[10]|min_length[10]');
+		$this->form_validation->set_rules('address', 'Address', 'required|trim');
+
+		if ($this->form_validation->run() == FALSE) {
+			$response = [
+				'status' => 'error',
+				'errors' => [
+					'name' => form_error('name'),	
+					'email' => form_error('email'),
+					'address'=> form_error('address'),
+					'contact_no'=> form_error('contact_no'),
+				]
+			];
+			echo json_encode($response);
+			return;
+		}
+		
+		$name = $this->input->post('name');
+		$email = $this->input->post('email');
+		$contact_no = $this->input->post('contact_no');
+		$address = $this->input->post('address');
+		// Check if email already exists
+		$existing_email = $this->model->selectWhereData('tbl_sourcing_partner', ['email' => $email], 'id', true);
+		if ($existing_email) {
+			$response = [
+				"status" => "error",
+				"errors" => [
+					"email" => "Email already exists"
+				]
+			];
+			echo json_encode($response);
+			return;
+		}
+		// Check if contact number already exists
+		$existing_contact = $this->model->selectWhereData('tbl_sourcing_partner', ['contact_no' => $contact_no], 'id', true);
+		if ($existing_contact) {
+			$response = [
+				"status" => "error",
+				"errors" => [
+					"contact_no" => "Contact number already exists"
+				]
+			];
+			echo json_encode($response);
+			return;
+		}
+		// Insert new sourcing partner
+		$data = [
+			'name' => $name,
+			'email' => $email,
+			'contact_no' => $contact_no,
+			'address' => $address
+		];
+		$inserted = $this->model->insertData('tbl_sourcing_partner', $data);
+		$this->model->addUserLog($login_id, 'Insert Sourcing Partner', 'tbl_sourcing_partner', $data);
+		if ($inserted) {
+			$response = ["status" => "success", "message" => "Sourcing Partner added successfully"];
+		} else {
+			$response = ["status" => "error", "message" => "Failed to add Sourcing Partner"];
+		}		
+		echo json_encode($response);
+	}
+	public function get_sourcing_partner_list()
+	{
+		$response = [
+			'status' => 'success',
+			'data' => $this->model->selectWhereData('tbl_sourcing_partner', ['is_delete' => 1], '*', false, ['id' => 'DESC'])	
+		];
+		$response['permissions'] = $this->permissions; // Pass full permissions array
+		$response['current_sidebar_id'] = 11; // Set the sidebar ID for the current view
+		echo json_encode($response);
+	}	
+	public function view_sourcing_partner() {
+		$id = $this->input->post('id');
+		
+		if (empty($id)) {
+			echo json_encode(['status' => 'error', 'message' => 'Invalid sourcing partner ID']);
+			return;
+		}
+		
+		// Fetch sourcing partner details from the database
+		$sourcing_partner = $this->model->selectWhereData('tbl_sourcing_partner', ['id' => $id], '*', true);
+		
+		if ($sourcing_partner) {
+			$data['status'] = 'success';
+			$data['sourcing_partner'] = $sourcing_partner;
+		} else {
+			$data['status'] = 'error';
+			$data['message'] = 'Sourcing partner not found';
+		}
+		
+		echo json_encode($data);
+	}
+	public function update_sourcing_partner()
+	{
+		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
+		$login_id = $admin_session['user_id'];
+		$this->form_validation->set_rules('edit_name', 'Name', 'required|trim');
+		$this->form_validation->set_rules('edit_email', 'Email', 'required|trim');
+		$this->form_validation->set_rules(
+			'edit_contact_no',
+			'Contact No',
+			'required|trim|exact_length[10]|regex_match[/^[0-9]{10}$/]',
+			[
+				'regex_match' => 'The %s must be a valid 10-digit number.'
+			]
+		);
+		$this->form_validation->set_rules('edit_address', 'Address', 'required|trim');
+		$this->form_validation->set_rules('id', 'ID', 'required|trim');
+
+		if ($this->form_validation->run() == FALSE) {
+			$response = [
+				'status' => 'error',
+				'errors' => [
+					'edit_name' => form_error('edit_name'),	
+					'edit_email' => form_error('edit_email'),
+					'edit_address'=> form_error('edit_address'),
+					'edit_contact_no'=> form_error('edit_contact_no'),
+				]
+			];
+			echo json_encode($response);
+			return;
+		}
+		
+		$id = $this->input->post('id');
+		
+		if (empty($id)) {
+			echo json_encode(['status' => 'error', 'message' => 'Invalid sourcing partner ID']);
+			return;
+		}
+		
+		$name = $this->input->post('edit_name');
+		$email = $this->input->post('edit_email');
+		$contact_no = $this->input->post('edit_contact_no');
+		$address = $this->input->post('edit_address');
+		// Check if email already exists
+		$existing_email = $this->model->selectWhereData('tbl_sourcing_partner', ['email' => $email, 'id !=' => $id], 'id', true);
+		if ($existing_email) {
+			$response = [
+				"status" => "error",
+				"errors" => [
+					"edit_email" => "Email already exists"
+				]
+			];
+			echo json_encode($response);
+			return;
+		}
+		// Check if contact number already exists	
+		$existing_contact = $this->model->selectWhereData('tbl_sourcing_partner', ['contact_no' => $contact_no, 'id !=' => $id], 'id', true);
+		if ($existing_contact) {
+			$response = [
+				"status" => "error",
+				"errors" => [
+					"edit_contact_no" => "Contact number already exists"
+				]
+			];
+			echo json_encode($response);
+			return;
+		}
+		// Update sourcing partner
+		$data = [
+			'name' => $name,
+			'email' => $email,
+			'contact_no' => $contact_no,
+			'address' => $address
+		];
+		$updated = $this->model->updateData('tbl_sourcing_partner', $data, ['id' => $id]);
+		$this->model->addUserLog($login_id, 'Update Sourcing Partner', 'tbl_sourcing_partner', $data);
+		if ($updated) {
+			$response = ["status" => "success", "message" => "Sourcing Partner updated successfully"];
+		} else {
+			$response = ["status" => "error", "message" => "Failed to update Sourcing Partner"];
+		}
+		echo json_encode($response);
+	}
+	public function delete_sourcing_partner()
+	{
+		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
+		$login_id = $admin_session['user_id'];
+		$id = $this->input->post('id');
+		if (empty($id)) {
+			echo json_encode(['status' => 'error', 'message' => 'Invalid sourcing partner ID']);
+			return;
+		}		
+		// Soft delete sourcing partner
+		$data = ['is_delete' => '0'];
+		$deleted = $this->model->updateData('tbl_sourcing_partner', $data, ['id' => $id]);
+		if ($deleted) {
+			$this->model->addUserLog($login_id, 'Delete Sourcing Partner', 'tbl_sourcing_partner', $data);
+			echo json_encode(['status' => 'success', 'message' => 'Sourcing Partner deleted successfully']);
+		} else {
+			echo json_encode(['status' => 'error', 'message' => 'Failed to delete Sourcing Partner']);
+		}
+	}
 }

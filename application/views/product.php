@@ -276,6 +276,20 @@
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <div class="form-group">
+                                                <label class="col-form-label" for="fk_sourcing_partner_id">Sourcing Partner <span class="text-danger">*</span></label>
+                                                <select class="chosen-select form-control" id="fk_sourcing_partner_id"
+                                                    name="fk_sourcing_partner_id">
+                                                    <option value=""></option>
+                                                    <?php foreach($fk_sourcing_partner_id as $fk_sourcing_partner_id_key => $fk_sourcing_partner_id_row) {?>
+                                                    <option value="<?= $fk_sourcing_partner_id_row['id']?>">
+                                                        <?= $fk_sourcing_partner_id_row['name']?></option>
+                                                    <?php } ?>
+                                                </select>
+                                                <div class="text-danger"><?= form_error('fk_sourcing_partner_id'); ?></div>
+                                            </div>
+                                        </div>
+                                        <!-- <div class="col-lg-6 mb-3">
+                                            <div class="form-group">
                                                 <label class="col-form-label" for="channel_type">Channel
                                                     Type<span class="text-danger">*</span></label>
                                                 <div><select class=" chosen-select form-control" id="channel_type"
@@ -302,7 +316,7 @@
                                                 </select>
                                                 <div class="text-danger"><?= form_error('sale_channel'); ?></div>
                                             </div>
-                                        </div>
+                                        </div> -->
                                         <div class="col-lg-6 mb-3">
                                             <div class="form-group">
                                                 <label class="col-form-label" for="reason">Reason
