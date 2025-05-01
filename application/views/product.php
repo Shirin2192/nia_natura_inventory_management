@@ -280,9 +280,9 @@
                                                 <select class="chosen-select form-control" id="fk_sourcing_partner_id"
                                                     name="fk_sourcing_partner_id">
                                                     <option value=""></option>
-                                                    <?php foreach($fk_sourcing_partner_id as $fk_sourcing_partner_id_key => $fk_sourcing_partner_id_row) {?>
-                                                    <option value="<?= $fk_sourcing_partner_id_row['id']?>">
-                                                        <?= $fk_sourcing_partner_id_row['name']?></option>
+                                                    <?php foreach($sourcing_partner as $sourcing_partner_key => $sourcing_partner_row) {?>
+                                                    <option value="<?= $sourcing_partner_row['id']?>">
+                                                        <?= $sourcing_partner_row['name']?></option>
                                                     <?php } ?>
                                                 </select>
                                                 <div class="text-danger"><?= form_error('fk_sourcing_partner_id'); ?></div>
@@ -416,7 +416,7 @@
                                                 <th>ID</th>
                                                 <th>Product Name</th>
                                                 <th>SKU CODE</th>
-                                                <th>Purchase Price</th>
+                                                <!-- <th>Purchase Price</th> -->
                                                 <th>Total Quantity</th>
                                                 <th>Product Types</th>
                                                 <th>Action</th>
@@ -520,8 +520,8 @@
                 </div>
                 <form id="UpdateProductForm" enctype="multipart/form-data">
                     <input type="hidden" id="update_product_id" name="update_product_id">
-                    <input type="hidden" id="update_inventory_id" name="update_inventory_id">
-                    <input type="hidden" id="product_price_id" name="product_price_id">
+                    <!-- <input type="hidden" id="update_inventory_id" name="update_inventory_id">
+                    <input type="hidden" id="product_price_id" name="product_price_id"> -->
                     <input type="hidden" id="update_product_image" name="update_product_image">
                     <input type="hidden" id="update_batch_id" name="update_batch_id">
                     <div class="modal-body">
@@ -782,11 +782,25 @@
                                 <div class="form-group">
                                     <label class="col-form-label" for="add_new_reason">Reason <span
                                             class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" id="add_new_reason" name="add_new_reason"
+                                    <input type="text" class="form-control" id="add_new_reason" name="add_new_reason"
                                         placeholder="Enter Reason">
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="add_new_fk_sourcing_partner_id">Sourcing Partner <span class="text-danger">*</span></label>
+                                    <select class="chosen-select form-control" id="add_new_fk_sourcing_partner_id"
+                                        name="add_new_fk_sourcing_partner_id">
+                                        <option value=""></option>
+                                        <?php foreach($sourcing_partner as $sourcing_partner_key => $sourcing_partner_row) {?>
+                                        <option value="<?= $sourcing_partner_row['id']?>">
+                                            <?= $sourcing_partner_row['name']?></option>
+                                        <?php } ?>
+                                    </select>
+                                    <div class="text-danger"><?= form_error('add_new_fk_sourcing_partner_id'); ?></div>
+                                </div>
+                            </div>
+                            <!-- <div class="col-lg-6 mb-3">
                                 <div class="form-group">
                                     <label class="col-form-label" for="add_new_channel_type">Channel Type <span
                                             class="text-danger">*</span></label>
@@ -808,7 +822,7 @@
 
                                         </select></div>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                     <div class="modal-footer">

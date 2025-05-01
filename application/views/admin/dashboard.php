@@ -69,25 +69,13 @@
             <div class="row">
 
                 <!-- Stock Levels by Product -->
-                <div class="col-lg-6">
+                <div class="col-lg-12">
                     <div class="card shadow">
                         <div class="card-header bg-primary text-white">
                             <h5 class="mb-0">📦 Stock Levels by Product</h5>
                         </div>
                         <div class="card-body">
                             <canvas id="stockLevelChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Batch Expiry Status -->
-                <div class="col-lg-6">
-                    <div class="card shadow">
-                        <div class="card-header bg-danger text-white">
-                            <h5 class="mb-0">⏳ Batch Expiry Status</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="batchExpiryChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -133,6 +121,7 @@
     <script>
     // Injecting PHP variables into JavaScript
     var stockProductNames = <?php echo json_encode($stock_product_names); ?>;
+    var stock_sku_code = <?php echo json_encode($stock_sku_code); ?>;
     var stockQuantities = <?php echo json_encode($stock_quantities); ?>;
     var batchExpiryNear = <?php echo json_encode($batch_expiry_near); ?>;
     var batchExpiryHealthy = <?php echo json_encode($batch_expiry_healthy); ?>;

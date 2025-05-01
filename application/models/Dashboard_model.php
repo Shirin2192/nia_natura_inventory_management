@@ -11,10 +11,12 @@ class Dashboard_model extends CI_Model {
     }
 
     // Fetch Stock Levels by Product
-    public function fetch_stock_levels() {
-        $this->db->select('p.product_name, SUM(b.total_quantity) AS total_quantity');
+     // Fetch Stock Levels by Product
+     public function fetch_stock_levels() {
+        $this->db->select('p.product_name,scm.sku_code, SUM(b.total_quantity) AS total_quantity');
         $this->db->from('tbl_product_inventory b');
-        $this->db->join('tbl_product_master p', 'b.fk_product_id = p.id');
+        $this->db->join('tbl_product_master p', 'b.fk_product_id = p.id','left');
+        $this->db->join('tbl_sku_code_master scm', 'p.product_sku_code = scm.id','left');
         $this->db->where('b.used_status',1);
         $this->db->group_by('p.id');
         $query = $this->db->get();

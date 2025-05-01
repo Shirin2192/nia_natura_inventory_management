@@ -12,3 +12,13 @@
     max-width: 98%;
     margin: 1rem auto;
 }
+
+.out-of-stock {
+    border: 2px solid red; /* Example: border to highlight out-of-stock rows */
+    background-color: #f8d7da; /* Light red background */
+}
+
+input:disabled, select:disabled {
+    background-color: #e9ecef; /* Grey background for disabled fields */
+    cursor: not-allowed; /* Change cursor to indicate the field is not editable */
+}

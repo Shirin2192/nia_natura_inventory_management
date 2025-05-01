@@ -145,7 +145,7 @@ $(document).ready(function () {
 			{ data: 'id' },
 			{ data: 'product_name' },
 			{ data: 'sku_code' },
-			{ data: 'purchase_price' },
+			// { data: 'purchase_price' },
 			{ data: 'total_quantity' },
 			{
 				data: 'product_types',
@@ -853,6 +853,7 @@ $(document).on("click", ".update-product", function () {
 			const product = response.product;
 			const sale_channel = response.sale_channel;
 			const attribute_master = response.attribute_master;
+			const sourcing_partner = response.sourcing_partner;
 
 			// Clear previous batch details
 			$("#batch_fields_container_edit").empty();
@@ -868,6 +869,9 @@ $(document).on("click", ".update-product", function () {
 			const channelTypes = product.channel_type ? product.channel_type.split(",") : [];
 			const saleChannelIds = product.fk_sale_channel_id ? product.fk_sale_channel_id.split(",") : [];
 			const saleChannels = product.sale_channel ? product.sale_channel.split(",") : [];
+			const fk_sourcing_partner_id = product.fk_sourcing_partner_id ? product.fk_sourcing_partner_id.split(",") : [];
+			const product_price_id = product.product_price_id ? product.product_price_id.split(",") : [];
+			const update_inventory_id = product.inventory_id ? product.inventory_id.split(",") : [];
 
 			// Fill general product fields
 			$("#update_product_id").val(product.id);
@@ -899,23 +903,23 @@ $(document).on("click", ".update-product", function () {
 				`<img src="${frontend + 'uploads/products/' + img.trim()}" class="img-fluid m-2" width="100" height="100">`
 			).join('');
 			$("#update_images").html(imagePreview || "<p>No images available</p>");
-// Build sale channel options dynamically
-let saleChannelOptions = '<option value="" disabled>Select Sale Channel</option>';
-if (sale_channel && sale_channel.length > 0) {
-	sale_channel.forEach(item => {
-		const selected = String(item.id) === String(product.fk_sale_channel_id) ? 'selected' : '';
-		saleChannelOptions += `<option value="${item.id}" ${selected}>${item.sale_channel}</option>`;
-	});
-} else {
-	saleChannelOptions += '<option value="" disabled>No Sale Channel Available</option>';
-}
-$("#update_sale_channel").html(saleChannelOptions);
-// Update Chosen dropdown
-if ($("#update_sale_channel").data('chosen')) {
-	$("#update_sale_channel").trigger("chosen:updated");
-} else {
-	$("#update_sale_channel").chosen({ width: "100%" });
-}
+			// Build sale channel options dynamically
+			let saleChannelOptions = '<option value="" disabled>Select Sale Channel</option>';
+			if (sale_channel && sale_channel.length > 0) {
+				sale_channel.forEach(item => {
+					const selected = String(item.id) === String(product.fk_sale_channel_id) ? 'selected' : '';
+					saleChannelOptions += `<option value="${item.id}" ${selected}>${item.sale_channel}</option>`;
+				});
+			} else {
+				saleChannelOptions += '<option value="" disabled>No Sale Channel Available</option>';
+			}
+			$("#update_sale_channel").html(saleChannelOptions);
+			// Update Chosen dropdown
+			if ($("#update_sale_channel").data('chosen')) {
+				$("#update_sale_channel").trigger("chosen:updated");
+			} else {
+				$("#update_sale_channel").chosen({ width: "100%" });
+			}
 			// Handle dynamic attributes
 			$("#attributes_container_edit").empty();
 			$("#attribute_fields_container_edit").empty();
@@ -966,8 +970,7 @@ if ($("#update_sale_channel").data('chosen')) {
 					</div>
 				`;
 				$("#attribute_fields_container_edit").append(attributeRow);
-
-				
+			
 				// Fetch attribute value options and append selected
 				$.ajax({
 					url: frontend + controllerName + "/get_attribute_values_on_product_attributes_id",
@@ -1019,9 +1022,9 @@ if ($("#update_sale_channel").data('chosen')) {
 			];
 			
 			// Add console logs for debugging
-			console.log("Channel Types:", channelTypes);
-			console.log("Sale Channel IDs:", saleChannelIds);
-			console.log("Sale Channels:", sale_channel);
+			// console.log("Channel Types:", channelTypes);
+			// console.log("Sale Channel IDs:", saleChannelIds);
+			// console.log("Sale Channels:", sale_channel);
 			
 			// Loop through each batch and add it to the UI
 			batchIds.forEach((batchId, index) => {
@@ -1039,78 +1042,86 @@ if ($("#update_sale_channel").data('chosen')) {
 						return `<option value="${sc.id}" ${selected}>${sc.sale_channel}</option>`;
 					}).join('');
 				}
-				
-				const batchRow = `
+			
+				let sourcing_partnerOptionsHtml = '';
+				if (sourcing_partner && sourcing_partner.length > 0) {
+					sourcing_partnerOptionsHtml = sourcing_partner.map(sp => {
+						const selected = String(sp.id) === String(fk_sourcing_partner_id[index] || '') ? 'selected' : '';
+						return `<option value="${sp.id}" ${selected}>${sp.name}</option>`;
+					}).join('');
+				}
+			
+				const quantity = quantities[index] || '0';
+				const quantityStatusClass = parseInt(quantity) > 0 ? 'bg-success' : 'bg-danger';
+				const quantityStatusText = parseInt(quantity) > 0 ? 'In Stock' : 'Out of Stock';
+			
+				// Modify the batch row with the non-editable span for Batch ID
+				let batchRow = `
 				<div class="card mb-3 batch-card" data-index="${index + 1}">
 					<div class="card-body">
 						<div class="row">
-							<input type="hidden" name="update_batch_id[]" value="${batchId}">
-	
+							<!-- Display Batch ID as a non-editable span -->
 							<div class="col-md-4">
 								<div class="form-group">
 									<label>Batch No.</label>
-									<input type="text" name="batch_no[]" class="form-control" value="${batchNos[index] || ''}" readonly>
+									<span class="form-control-plaintext">${batchNos[index] || ''}</span>
+									<!-- Hidden input for batch ID, only included for in-stock batches -->
+									${parseInt(quantity) > 0 ? `<input type="hidden" name="update_batch_id[]" value="${batchId}">` : ''}
+									${parseInt(quantity) > 0 ? `<input type="hidden" id="update_inventory_id" name="update_inventory_id[]" value="${update_inventory_id[index]}">` : ''}
+                    				${parseInt(quantity) > 0 ? `<input type="hidden" id="product_price_id" name="product_price_id[]" value="${product_price_id[index]}">` : ''}
 								</div>
 							</div>
 							<div class="col-md-4">
 								<div class="form-group">
 									<label>Manufacture Date</label>
-									<input type="date" name="update_manufacture_date[]" class="form-control" value="${manufacturedDates[index] || ''}">
+									<input type="date" name="update_manufacture_date[]" class="form-control" value="${manufacturedDates[index] || ''}" ${parseInt(quantity) === 0 ? 'disabled' : ''}>
 								</div>
 							</div>
 							<div class="col-md-4">
 								<div class="form-group">
 									<label>Expiry Date</label>
-									<input type="date" name="update_expiry_date[]" class="form-control" value="${expiryDates[index] || ''}">
+									<input type="date" name="update_expiry_date[]" class="form-control" value="${expiryDates[index] || ''}" ${parseInt(quantity) === 0 ? 'disabled' : ''}>
 								</div>
-							</div>	
+							</div>  
 							<div class="col-md-4 mt-2">
 								<div class="form-group">
 									<label>Quantity</label>
-									<input type="number" name="update_total_quantity[]" class="form-control" value="${quantities[index] || '0'}">
+									<input type="number" name="update_total_quantity[]" class="form-control" value="${quantity}" ${parseInt(quantity) === 0 ? 'disabled' : ''}>
 								</div>
-							</div>	
+							</div>  
 							<div class="col-md-4 mt-2">
 								<div class="form-group">
 									<label>Purchase Price</label>
-									<input type="text" name="update_purchase_price[]" class="form-control" value="${purchasePrices[index] || '0'}">
+									<input type="text" name="update_purchase_price[]" class="form-control" value="${purchasePrices[index] || '0'}" ${parseInt(quantity) === 0 ? 'disabled' : ''}>
 								</div>
-							</div>	
+							</div>  
 							<div class="col-md-4 mt-2">
 								<div class="form-group">
 									<label>MRP</label>
-									<input type="text" name="update_mrp[]" class="form-control" value="${mrpPrices[index] || '0'}">
+									<input type="text" name="update_mrp[]" class="form-control" value="${mrpPrices[index] || '0'}" ${parseInt(quantity) === 0 ? 'disabled' : ''}>
 								</div>
-							</div>	
+							</div>  
 							<div class="col-md-4 mt-2">
 								<div class="form-group">
 									<label>Selling Price</label>
-									<input type="text" name="update_selling_price[]" class="form-control" value="${sellingPrices[index] || '0'}">
+									<input type="text" name="update_selling_price[]" class="form-control" value="${sellingPrices[index] || '0'}" ${parseInt(quantity) === 0 ? 'disabled' : ''}>
 								</div>
 							</div>
 							<div class="col-md-4 mt-2">
 								<div class="form-group">
-									<label>Channel Type</label>
-									<select name="update_channel_type[]" class="form-control batch-channel-type">
-										<option value="">Select Channel Type</option>
-										${channelTypeOptionsHtml}
+									<label>Sourcing Partner</label>
+									<select name="update_fk_sourcing_partner_id[]" class="form-control batch-channel-type" ${parseInt(quantity) === 0 ? 'disabled' : ''}>
+										<option value="">Select Sourcing Partner</option>
+										${sourcing_partnerOptionsHtml}
 									</select>
 								</div>
 							</div>
-							<div class="col-md-4 mt-2">
-								<div class="form-group">
-									<label>Sale Channel</label>
-									<select name="update_sale_channel[]" class="form-control batch-sale-channel">
-										<option value="">Select Sale Channel</option>
-										${saleChannelOptionsHtml}
-									</select>
-								</div>
-							</div>
+							
 							<div class="col-md-4 mt-2">
 								<div class="form-group">
 									<label>Status</label>
-									<span class="badge ${parseInt(quantities[index] || '0') > 0 ? 'bg-success' : 'bg-danger'}">
-										${parseInt(quantities[index] || '0') > 0 ? 'In Stock' : 'Out of Stock'}
+									<span class="badge ${quantityStatusClass}">
+										${quantityStatusText}
 									</span>
 								</div>
 							</div>
@@ -1118,8 +1129,131 @@ if ($("#update_sale_channel").data('chosen')) {
 					</div>
 				</div>
 				`;
+			
+				// Check if the total quantity is 0, if so, wrap the entire row in a span
+				if (parseInt(quantity) === 0) {
+					batchRow = `<span class="out-of-stock">${batchRow}</span>`;
+				}
+			
+				// Append the batch row to the container
 				$("#batch_fields_container_edit").append(batchRow);
 			});
+			
+		// 	batchIds.forEach((batchId, index) => {
+		// 		// Create channel type dropdown HTML with string comparison
+		// 		let channelTypeOptionsHtml = channelTypeOptions.map(option => {
+		// 			const selected = String(option.value) === String(channelTypes[index] || '') ? 'selected' : '';
+		// 			return `<option value="${option.value}" ${selected}>${option.label}</option>`;
+		// 		}).join('');
+				
+		// 		// Create sale channel dropdown HTML with string comparison
+		// 		let saleChannelOptionsHtml = '';
+		// 		if (sale_channel && sale_channel.length > 0) {
+		// 			saleChannelOptionsHtml = sale_channel.map(sc => {
+		// 				const selected = String(sc.id) === String(saleChannelIds[index] || '') ? 'selected' : '';
+		// 				return `<option value="${sc.id}" ${selected}>${sc.sale_channel}</option>`;
+		// 			}).join('');
+		// 		}
+
+		// 		let sourcing_partnerOptionsHtml = '';
+		// 		if (sourcing_partner && sourcing_partner.length > 0) {
+		// 			sourcing_partnerOptionsHtml = sourcing_partner.map(sp => {
+		// 				const selected = String(sp.id) === String(fk_sourcing_partner_id[index] || '') ? 'selected' : '';
+		// 				return `<option value="${sp.id}" ${selected}>${sp.name}</option>`;
+		// 			}).join('');
+		// 		}
+				
+		// 		const batchRow = `
+		// 		<div class="card mb-3 batch-card" data-index="${index + 1}">
+		// 			<div class="card-body">
+		// 				<div class="row">
+		// 					<input type="hidden" name="update_batch_id[]" value="${batchId}">
+	
+		// 					<div class="col-md-4">
+		// 						<div class="form-group">
+		// 							<label>Batch No.</label>
+		// 							<input type="text" name="batch_no[]" class="form-control" value="${batchNos[index] || ''}" readonly>
+		// 						</div>
+		// 					</div>
+		// 					<div class="col-md-4">
+		// 						<div class="form-group">
+		// 							<label>Manufacture Date</label>
+		// 							<input type="date" name="update_manufacture_date[]" class="form-control" value="${manufacturedDates[index] || ''}">
+		// 						</div>
+		// 					</div>
+		// 					<div class="col-md-4">
+		// 						<div class="form-group">
+		// 							<label>Expiry Date</label>
+		// 							<input type="date" name="update_expiry_date[]" class="form-control" value="${expiryDates[index] || ''}">
+		// 						</div>
+		// 					</div>	
+		// 					<div class="col-md-4 mt-2">
+		// 						<div class="form-group">
+		// 							<label>Quantity</label>
+		// 							<input type="number" name="update_total_quantity[]" class="form-control" value="${quantities[index] || '0'}">
+		// 						</div>
+		// 					</div>	
+		// 					<div class="col-md-4 mt-2">
+		// 						<div class="form-group">
+		// 							<label>Purchase Price</label>
+		// 							<input type="text" name="update_purchase_price[]" class="form-control" value="${purchasePrices[index] || '0'}">
+		// 						</div>
+		// 					</div>	
+		// 					<div class="col-md-4 mt-2">
+		// 						<div class="form-group">
+		// 							<label>MRP</label>
+		// 							<input type="text" name="update_mrp[]" class="form-control" value="${mrpPrices[index] || '0'}">
+		// 						</div>
+		// 					</div>	
+		// 					<div class="col-md-4 mt-2">
+		// 						<div class="form-group">
+		// 							<label>Selling Price</label>
+		// 							<input type="text" name="update_selling_price[]" class="form-control" value="${sellingPrices[index] || '0'}">
+		// 						</div>
+		// 					</div>
+		// 					<div class="col-md-4 mt-2">
+		// 						<div class="form-group">
+		// 						<label>Sourcing Partener</label>
+		// 						<select name="update_fk_sourcing_partner_id[]" class="form-control batch-channel-type">
+		// 							<option value="">Select Sourcing Partener</option>
+		// 							${sourcing_partnerOptionsHtml}
+		// 						</select>
+		// 						</div>
+		// 					</div>
+							
+		// 					<div class="col-md-4 mt-2">
+		// 						<div class="form-group">
+		// 							<label>Status</label>
+		// 							<span class="badge ${parseInt(quantities[index] || '0') > 0 ? 'bg-success' : 'bg-danger'}">
+		// 								${parseInt(quantities[index] || '0') > 0 ? 'In Stock' : 'Out of Stock'}
+		// 							</span>
+		// 						</div>
+		// 					</div>
+		// 				</div>
+		// 			</div>
+		// 		</div>
+		// 		`;
+		// 		$("#batch_fields_container_edit").append(batchRow);
+
+		// // 	<div class="col-md-4 mt-2">
+		// // 		<div class="form-group">
+		// // 		<label>Channel Type</label>
+		// // 		<select name="update_channel_type[]" class="form-control batch-channel-type">
+		// // 			<option value="">Select Channel Type</option>
+		// // 			${channelTypeOptionsHtml}
+		// // 		</select>
+		// // 	</div>
+		// // </div>
+		// // <div class="col-md-4 mt-2">
+		// // 	<div class="form-group">
+		// // 		<label>Sale Channel</label>
+		// // 		<select name="update_sale_channel[]" class="form-control batch-sale-channel">
+		// // 			<option value="">Select Sale Channel</option>
+		// // 			${saleChannelOptionsHtml}
+		// // 		</select>
+		// // 	</div>
+		// // </div>
+		// 	});
 			
 			// Initialize any chosen dropdowns inside new batch rows
 			$(".batch-channel-type, .batch-sale-channel").chosen({
@@ -1419,6 +1553,9 @@ $("#UpdateProductForm").on("submit", function (e) {
 					showConfirmButton: false,
 					timer: 2000
 				});
+				$("#UpdateProductForm")[0].reset(); // Reset form
+					// Clear Chosen-select dropdowns
+				$(".chosen-select").val('').trigger('chosen:updated');
 				$("#updateProductModal").modal("hide");
 				$('#product_table').DataTable().ajax.reload(); // Refresh DataTable
 			} else {
