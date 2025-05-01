@@ -1465,8 +1465,7 @@ class Admin extends CI_Controller
 			'MRP',
 			'Selling Price',
 			'Product Type',
-			'Channel Type',
-			'Sales Channel'
+			'Sourcing Partner'
 		];
 
 		$sampleRow = [
@@ -1483,8 +1482,7 @@ class Admin extends CI_Controller
 			120,
 			100,
 			'Honey',
-			'Online',
-			'Amazon'
+			'Test Sourcing Partner',
 		];
 
 		// Fetch attribute names and types for the product type
@@ -1608,14 +1606,13 @@ class Admin extends CI_Controller
 
 				$fk_stock_availability_id = $this->model->selectWhereData('tbl_stock_availability', ['stock_availability' => $row[2]], 'id', true);
 				$fk_product_types_id = $this->model->selectWhereData('tbl_product_types', ['product_type_name' => $row[12]], 'id', true);
-				$fk_sale_channel_id = $this->model->selectWhereData('tbl_sale_channel', ['sale_channel' => $row[14]], 'id', true);
+				// $fk_sale_channel_id = $this->model->selectWhereData('tbl_sale_channel', ['sale_channel' => $row[14]], 'id', true);
 				$quantity = $row[5];
 
 				// Handle the images (comma-separated list of image paths)
 				// $images = trim($row[8]); // Assuming images are in column 8
 
 				// $image_urls = $this->handle_image_upload($images);
-
 				if (!$existing_product) {
 				    if(!empty($row[0])){
     					$product_data = [
@@ -1659,8 +1656,8 @@ class Admin extends CI_Controller
     				$product_inventory = [
     					'fk_product_id' => $product_id,
     					'fk_batch_id' => $batch_id,
-    					'channel_type' => $row[13],
-    					'fk_sale_channel_id' => $fk_sale_channel_id['id'] ?? null,
+    					'fk_sourcing_partner_id' => $row[13],
+    					// 'fk_sale_channel_id' => $fk_sale_channel_id['id'] ?? null,
     					'add_quantity' => $quantity,
     					'total_quantity' => $quantity,
     					'used_status' => 1,
@@ -1670,11 +1667,11 @@ class Admin extends CI_Controller
     				$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $product_inventory);
                 }
 				$headers = $rows[0];
-				$dynamicHeaders = array_slice($headers, 15);
+				$dynamicHeaders = array_slice($headers, 14);
 
 				foreach ($dynamicHeaders as $index => $attrName) {
 					$attrName = trim($attrName);
-					$attrValue = trim($row[15 + $index] ?? '');
+					$attrValue = trim($row[14 + $index] ?? '');
 					if ($attrName === '' || $attrValue === '') continue;
 
 					$attribute = $this->model->selectWhereData('tbl_attribute_master', [
