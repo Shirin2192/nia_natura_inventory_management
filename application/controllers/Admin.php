@@ -2346,7 +2346,7 @@ class Admin extends CI_Controller
     	
     			// Ensure received quantities are included (even if none for today)
     			foreach ($received_quantities as $received_row) {
-    				$channel = $received_row['sale_channel'];
+    				$name = $received_row['name'];
     				$channel_data[$channel]['received'] = $received_row['received_quantity'];
     			}
     	
@@ -2369,6 +2369,7 @@ class Admin extends CI_Controller
     					'qty_on_hand' => $row['qty_on_hand'],
     					'received' => $received,
     					'sold' => $sold,
+    					'sourcing_partner' => $name,
     					'sale_channel' => $channel,
     					'note' => $row['reason'] ?? ''
     				];
@@ -2394,6 +2395,7 @@ class Admin extends CI_Controller
     							<th>Qty in Stock</th>
     							<th>Received Today</th>
     							<th>Sold Today</th>
+    							<th>Sourcing Partner</th>
     							<th>Sales Channel</th>
     							<th>Note</th>
     						</tr>
@@ -2407,6 +2409,7 @@ class Admin extends CI_Controller
                                 <td>" . (isset($row['qty_on_hand']) ? $row['qty_on_hand'] : 'NA') . "</td>
                                 <td>" . (isset($row['received']) ? $row['received'] : 'NA') . "</td>
                                 <td>" . (isset($row['sold']) ? $row['sold'] : 'NA') . "</td>
+                                <td>" . (($row['received'] == 0 || empty($row['sourcing_partner'])) ? 'NA' : $row['sourcing_partner']) . "</td>
                                 <td>" . (($row['sold'] == 0 || empty($row['sale_channel'])) ? 'NA' : $row['sale_channel']) . "</td>
                                 <td>" . ( $row['note']) . "</td>
                             </tr>";
@@ -2422,7 +2425,7 @@ class Admin extends CI_Controller
     				  </tr>";
     	
     		$html .= "</tbody></table>";
-    		    		// echo"<pre>";print_r($html);die;
+    		    		echo"<pre>";print_r($html);die;
     		// Email config
         // 	$to_email = 'shirin@sda-zone.com, sanju@sda-zone.com';
     		$to_email = 'shirin@sda-zone.com, shiraz@sda-zone.com, sanju@sda-zone.com, rekha@sda-zone.com, moiz@sda-zone.com';

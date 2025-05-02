@@ -2058,7 +2058,7 @@ class Inventory_manager extends CI_Controller
 						'Channel Type' => $row[2],
 						'Sales Channel' => $row[3],
 						'Quantity' => $row[4],
-						'Reason' => $row[5],
+						'Reason' => $row[5],					
 					];
 				}
 				// Generate rejection Excel
@@ -2076,19 +2076,18 @@ class Inventory_manager extends CI_Controller
 					$writer->save($filePath);
 
 					$downloadUrl = base_url('uploads/rejected_excels/' . $fileName);
-					$this->sendImportEmail($downloadUrl, "Some rows were rejected. Please download the rejected file.", $imported_products,'Rejected File');
 
 					$this->output
-						->set_content_type('application/json')
-						->set_output(json_encode([
-							'status'       => 'partial',
-							'message'      => 'Some rows were rejected.',
-							'rejected_url' => $downloadUrl
-						]));
+					->set_content_type('application/json')
+					->set_output(json_encode([
+						'status'       => 'partial',
+						'message'      => 'Some rows were rejected.',
+						'rejected_url' => $downloadUrl
+					]));
 					return;
-				} else {
-					$this->sendImportEmail($downloadUrl, "All order data uploaded successfully!.", $imported_order, 'Quantity Deducted');
-
+				}else {
+				// 	$this->sendImportEmail('', "All order data uploaded successfully!.", $imported_products, 'Quantity Deducted');
+	
 					$this->output
 						->set_content_type('application/json')
 						->set_output(json_encode([
@@ -2096,15 +2095,15 @@ class Inventory_manager extends CI_Controller
 							'message' => 'All order data uploaded successfully.'
 						]));
 					return;
-				}
+				}			
 			} catch (Exception $e) {
 				$this->output
-					->set_content_type('application/json')
-					->set_output(json_encode([
-						'status'  => 'error',
-						'message' => 'Invalid Excel file or error: ' . $e->getMessage()
-					]));
-				return;
+						->set_content_type('application/json')
+						->set_output(json_encode([
+							'status'  => 'error',
+							'message' => 'Invalid Excel file or error: ' . $e->getMessage()
+						]));
+					return;
 			}
 		} else {
 			$this->output

@@ -1,7 +1,6 @@
 <?php
 class Inventory_model extends CI_Model
 {
-
     function __construct()
     {
         parent::__construct();
@@ -86,13 +85,13 @@ class Inventory_model extends CI_Model
     public function get_received_quantity($product_id = "", $date = null) {
         $date = $date ?? date('Y-m-d');
     
-        $this->db->select("SUM(tbl_product_inventory.add_quantity) as received_quantity, tbl_sale_channel.sale_channel");
+        $this->db->select("SUM(tbl_product_inventory.add_quantity) as received_quantity, tbl_sourcing_partner.name");
         $this->db->from("tbl_product_inventory");
-        $this->db->join("tbl_sale_channel", "tbl_product_inventory.fk_sale_channel_id = tbl_sale_channel.id", "left");
+        $this->db->join("tbl_sourcing_partner", "tbl_product_inventory.fk_sourcing_partner_id = tbl_sourcing_partner.id", "left");
         $this->db->where("tbl_product_inventory.created_at >=", $date . " 00:00:00");
         $this->db->where("tbl_product_inventory.created_at <=", $date . " 23:59:59");
         $this->db->where("tbl_product_inventory.fk_product_id", $product_id);
-        $this->db->group_by("tbl_product_inventory.fk_sale_channel_id");
+        $this->db->group_by("tbl_product_inventory.fk_sourcing_partner_id");
     
         return $this->db->get()->result_array();
     }
