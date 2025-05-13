@@ -69,9 +69,7 @@ class Admin extends CI_Controller
 				true
 			);
 			// 2. Stock Levels
-			$stock_data = $this->Dashboard_model->fetch_stock_levels();
-		    // 			$response['stock_product_names'] = array_column($stock_data, 'product_name');
-        	// 	$response['stock_sku_code'] = array_column($stock_data, 'sku_code');
+			$stock_data = $this->Dashboard_model->fetch_stock_levels();		    
             $response['stock_product_names'] = array_map(function($item) {
                 return $item['product_name'] . ' (' . $item['sku_code'] . ')';
             }, $stock_data);

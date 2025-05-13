@@ -554,7 +554,7 @@ $(document).on("click", ".view-product", function () {
 
                 // Batches Dynamic
                 let batchHtml = '<table class="table table-bordered">';
-                batchHtml += '<thead><tr><th>Batch No</th><th>Manufacture Date</th><th>Expiry Date</th><th>Channel Type</th><th>Sales Channel</th><th>Purchase Price</th><th>MRP</th><th>Selling Price</th></tr></thead><tbody>';
+                batchHtml += '<thead><tr><th>Batch No</th><th>Manufacture Date</th><th>Expiry Date</th><th>Quantity</th><th>Channel Type</th><th>Sales Channel</th><th>Purchase Price</th><th>MRP</th><th>Selling Price</th></tr></thead><tbody>';
                 let batchNos = product.batch_no ? product.batch_no.split(',') : [];
                 let manufactureDates = product.manufactured_date ? product.manufactured_date.split(',') : [];
                 let expiryDates = product.expiry_date ? product.expiry_date.split(',') : [];
@@ -567,7 +567,11 @@ $(document).on("click", ".view-product", function () {
                 batchNos.forEach((batchNo, index) => {
 					const quantity = totalQuantities[index] ? parseInt(totalQuantities[index].trim()) : 0;
 					const status = quantity > 0 ? '<span class="badge bg-success">Available</span>' : '<span class="badge bg-danger">Out of Stock</span>';
-                    batchHtml += `<tr><td>${batchNo.trim()}</td><td>${manufactureDates[index] ? manufactureDates[index].trim() : ''}</td><td>${expiryDates[index] ? expiryDates[index].trim() : ''}</td><td>${channel_type[index] ? channel_type[index].trim() :''}</td>
+                    batchHtml += `<tr><td>${batchNo.trim()}</td>
+						<td>${manufactureDates[index] ? manufactureDates[index].trim() : ''}</td>
+						<td>${expiryDates[index] ? expiryDates[index].trim() : ''}</td>
+						<td>${totalQuantities[index] ? totalQuantities[index].trim() : ''}</td>
+						<td>${channel_type[index] ? channel_type[index].trim() :''}</td>
                         <td>${channels[index] ? channels[index].trim() :''}</td>
                         <td>${purchasePrices[index] ? purchasePrices[index].trim() :''}</td>
                         <td>${mrps[index] ? mrps[index].trim() : ''}</td>
