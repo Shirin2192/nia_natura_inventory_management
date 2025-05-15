@@ -147,9 +147,27 @@
                                             <div class="form-group">
                                                 <label class="col-form-label" for="reason">Reason <span
                                                         class="text-danger">*</span></label>
-                                                <input type="number" name="reason" id="reason"
+                                                <input type="text" name="reason" id="reason"
                                                     class="form-control">
                                                 <div class="text-danger"><?= form_error('reason'); ?></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="inventory_type">Order Type <span
+                                                        class="text-danger">*</span>
+                                                </label>
+                                                <select class=" chosen-select form-control" id="inventory_type"
+                                                    name="inventory_type" data-placeholder="Select Order Type">
+                                                    <option value=""></option>
+                                                    <?php foreach ($inventory_type as $inventory_type_row) { ?>
+                                                    <option value="<?= $inventory_type_row['id'] ?>">
+                                                        <?= $inventory_type_row['name'] ?>
+                                                    </option>
+                                                    <?php } ?>
+                                                </select>
+                                                <small class="text-danger" id="inventory_type_error"></small>
+                                                <!-- Error message here -->
                                             </div>
                                         </div>
                                     </div>
@@ -207,32 +225,92 @@
 
                     <?php endif ?>
                     <!-- Row for DataTable -->
-                    <div class="container-fluid">
-                        <div class="row justify-content-center">
-                            <div class="col-lg-12">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5>Order List</h5>
-                                        <table id="OrderTable" class="display">
-                                            <thead>
-                                                <tr>
-                                                    <th>Sr. No</th>
-                                                    <th>Product Name</th>
-                                                    <th>SKU CODE</th>
-                                                    <th>Batch No</th>
-                                                    <th>Channel Type</th>
-                                                    <th>Sales Channel</th>
-                                                    <th>Deducted Quantity</th>
-                                                    <th>Total Quantity</th>
-                                                    <th>Date</th>
-                                                </tr>
-                                            </thead>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
+                 <div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Order Management</h5>
+
+                    <!-- Tabs Nav -->
+                    <ul class="nav nav-tabs" id="orderTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="sale-tab" data-toggle="tab" href="#saleOrder" role="tab">Sale Order</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="return-tab" data-toggle="tab" href="#returnOrder" role="tab">Return Order</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="damaged-tab" data-toggle="tab" href="#damagedOrder" role="tab">Damaged Order</a>
+                        </li>
+                    </ul>
+
+                    <!-- Tabs Content -->
+                    <div class="tab-content mt-3" id="orderTabContent">
+                        <!-- Sale Order Tab -->
+                        <div class="tab-pane fade show active" id="saleOrder" role="tabpanel">
+                            <table id="OrderTable" class="display" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Sr. No</th>
+                                        <th>Product Name</th>
+                                        <th>SKU CODE</th>
+                                        <th>Batch No</th>
+                                        <th>Channel Type</th>
+                                        <th>Sales Channel</th>
+                                        <th>Deducted Quantity</th>
+                                        <th>Total Quantity</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+
+                        <!-- Return Order Tab -->
+                        <div class="tab-pane fade" id="returnOrder" role="tabpanel">
+                            <table id="ReturnOrderTable" class="display" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Sr. No</th>
+                                        <th>Product Name</th>
+                                        <th>SKU CODE</th>
+                                        <th>Batch No</th>
+                                        <th>Channel Type</th>
+                                        <th>Sales Channel</th>
+                                        <th>Returned Quantity</th>
+                                        <th>Total Quantity</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+
+                        <!-- Damaged Order Tab -->
+                        <div class="tab-pane fade" id="damagedOrder" role="tabpanel">
+                            <table id="DamagedOrderTable" class="display" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Sr. No</th>
+                                        <th>Product Name</th>
+                                        <th>SKU CODE</th>
+                                        <th>Batch No</th>
+                                        <th>Channel Type</th>
+                                        <th>Sales Channel</th>
+                                        <th>Damaged Quantity</th>
+                                        <th>Total Quantity</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                            </table>
                         </div>
                     </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
                 </div>
             </div>

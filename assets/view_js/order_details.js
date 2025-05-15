@@ -72,6 +72,53 @@ $("#sku_code").off("change").on("change", function () {
 });
 
 // Product ID change → fetch Batch Numbers
+// $("#product_id").off("change").on("change", function () {
+//     var product_id = $(this).val();
+//     if (product_id) {
+//         $.ajax({
+//             url: frontend + controllerName + "/get_batch_no_on_product_id",
+//             type: "POST",
+//             data: { product_id: product_id },
+//             dataType: "json",
+//             success: function (response) {
+//                 console.log(response);
+//                 var batch_no_option = '<option value="" disabled selected>Select Batch Number</option>';
+
+//                 if (response.data.length === 0) {
+//                     batch_no_option += '<option value="" disabled>No Batch Number available</option>';
+//                 }
+
+//                 if (response.data && typeof response.data === "object") {
+//                     batch_no_option += `<option value="${response.data.id}">${response.data.batch_no}</option>`;
+//                 } else {
+//                     batch_no_option += '<option value="" disabled>No Batch Number available</option>';
+//                 }
+
+//                 $("#fk_batch_id").html(batch_no_option);
+
+//                 // Re-initialize or update chosen
+//                 if ($("#fk_batch_id").data('chosen')) {
+//                     $("#fk_batch_id").trigger("chosen:updated");
+//                 } else {
+//                     $("#fk_batch_id").chosen({ width: "100%" });
+//                 }
+//             },
+//             error: function () {
+//                 alert("An error occurred while fetching the Batch Numbers.");
+//                 $("#fk_batch_id").html('<option value="">Select Batch Number</option>');
+//                 if ($("#fk_batch_id").data('chosen')) {
+//                     $("#fk_batch_id").trigger("chosen:updated");
+//                 }
+//             }
+//         });
+//     } else {
+//         // Clear fk_batch_id dropdown
+//         $("#fk_batch_id").html('<option value="">Select Batch Number</option>');
+//         if ($("#fk_batch_id").data('chosen')) {
+//             $("#fk_batch_id").trigger("chosen:updated");
+//         }
+//     }
+// });
 $("#product_id").off("change").on("change", function () {
     var product_id = $(this).val();
     if (product_id) {
@@ -81,15 +128,12 @@ $("#product_id").off("change").on("change", function () {
             data: { product_id: product_id },
             dataType: "json",
             success: function (response) {
-                console.log(response);
                 var batch_no_option = '<option value="" disabled selected>Select Batch Number</option>';
 
-                if (response.data.length === 0) {
-                    batch_no_option += '<option value="" disabled>No Batch Number available</option>';
-                }
-
-                if (response.data && typeof response.data === "object") {
-                    batch_no_option += `<option value="${response.data.id}">${response.data.batch_no}</option>`;
+                if (response.status === 'success' && Array.isArray(response.data) && response.data.length > 0) {
+                    response.data.forEach(function (item) {
+                        batch_no_option += `<option value="${item.id}">${item.batch_no}</option>`;
+                    });
                 } else {
                     batch_no_option += '<option value="" disabled>No Batch Number available</option>';
                 }
@@ -134,6 +178,8 @@ $("#OrderForm").submit(function (e) {
         contentType: false,
         dataType: "json",
         success: function (response) {
+            console.log(response);
+            
             if (response.status === "error") {
                 $.each(response.errors, function (key, value) {
                     // Avoid duplicate error messages
@@ -152,6 +198,8 @@ $("#OrderForm").submit(function (e) {
                         }, 3000);
                 });
             } else if (response.status === "success") {
+                inventory_type = response.inventory_type;
+                console.log(inventory_type);
                 swal({
                     icon: "success",
                     title: "Added!",
@@ -164,7 +212,23 @@ $("#OrderForm").submit(function (e) {
                 // Clear Chosen-select dropdowns
                 $(".chosen-select").val('').trigger('chosen:updated');
 
-                $('#OrderTable').DataTable().ajax.reload(); // Refresh DataTable
+                const tabSelectors = {
+                    3: 'a[data-toggle="tab"][href="#saleOrder"]',     // Bootstrap 5
+                    4: 'a[data-toggle="tab"][href="#returnOrder"]',
+                    5: 'a[data-toggle="tab"][href="#damagedOrder"]'
+                    // If you’re on Bootstrap 4, just replace data-bs-toggle with data-toggle
+                };
+
+                // Show the correct tab
+                $(tabSelectors[inventory_type]).tab('show');
+                 // Then refresh the matching table
+                if (inventory_type == 3) {
+                    $('#OrderTable').DataTable().ajax.reload();
+                } else if (inventory_type == 4) {
+                    $('#ReturnOrderTable').DataTable().ajax.reload();
+                } else if (inventory_type == 5) {
+                    $('#DamagedOrderTable').DataTable().ajax.reload();
+                }
             }
         },
         error: function () {
@@ -172,46 +236,116 @@ $("#OrderForm").submit(function (e) {
         }
     });
 });
-
 // Initialize DataTable
 $(document).ready(function () {
    $('#OrderTable').DataTable({
-    dom: 'Bfrtip',  // B = Buttons, f = filter, r = process info, t = table, i = info, p = paginate
-    buttons: [
-        'csv', 'excel'
-    ],
-    responsive: true,
-    processing: true,
-    serverSide: true,
-    ajax: {
-        url: frontend + controllerName + "/get_all_orders",
-        type: "POST"
-    },
-    columns: [
-        {
-            data: null,
-            title: "Sr. No",
-            render: function (data, type, row, meta) {
-                return meta.row + meta.settings._iDisplayStart + 1;
-            }
+        dom: 'Bfrtip',  // B = Buttons, f = filter, r = process info, t = table, i = info, p = paginate
+        buttons: [
+            'csv', 'excel'
+        ],
+        responsive: true,
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: frontend + controllerName + "/get_all_orders",
+            type: "POST"
         },
-        { data: "product_name", title: "Product Name" },
-        { data: "sku_code", title: "SKU CODE" },
-        { data: "batch_no", title: "Batch No" },
-        { data: "channel_type", title: "Channel Type" },
-        { data: "sale_channel", title: "Sales Channel" },
-        { data: "deduct_quantity", title: "Deducted Quantity" },
-        { data: "total_quantity", title: "Total Quantity" },
-        { data: "created_at", title: "Date" }
-    ],
-    order: [[7, "desc"]],
-    responsive: true,
-    language: {
-        emptyTable: "No orders available",
-        processing: "Loading..."
-    }
-});
-
+        columns: [
+            {
+                data: null,
+                title: "Sr. No",
+                render: function (data, type, row, meta) {
+                    return meta.row + meta.settings._iDisplayStart + 1;
+                }
+            },
+            { data: "product_name", title: "Product Name" },
+            { data: "sku_code", title: "SKU CODE" },
+            { data: "batch_no", title: "Batch No" },
+            { data: "channel_type", title: "Channel Type" },
+            { data: "sale_channel", title: "Sales Channel" },
+            { data: "deduct_quantity", title: "Deducted Quantity" },
+            { data: "total_quantity", title: "Total Quantity" },
+            { data: "created_at", title: "Date" }
+        ],
+        order: [[7, "desc"]],
+        responsive: true,
+        language: {
+            emptyTable: "No orders available",
+            processing: "Loading..."
+        }
+    });
+    $('#ReturnOrderTable').DataTable({
+        dom: 'Bfrtip',  // B = Buttons, f = filter, r = process info, t = table, i = info, p = paginate
+        buttons: [
+            'csv', 'excel'
+        ],
+        responsive: true,
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: frontend + controllerName + "/get_all_return_orders",
+            type: "POST"
+        },
+        columns: [
+            {
+                data: null,
+                title: "Sr. No",
+                render: function (data, type, row, meta) {
+                    return meta.row + meta.settings._iDisplayStart + 1;
+                }
+            },
+            { data: "product_name", title: "Product Name" },
+            { data: "sku_code", title: "SKU CODE" },
+            { data: "batch_no", title: "Batch No" },
+            { data: "channel_type", title: "Channel Type" },
+            { data: "sale_channel", title: "Sales Channel" },
+            { data: "add_quantity", title: "Deducted Quantity" },
+            { data: "total_quantity", title: "Total Quantity" },
+            { data: "created_at", title: "Date" }
+        ],
+        order: [[7, "desc"]],
+        responsive: true,
+        language: {
+            emptyTable: "No orders available",
+            processing: "Loading..."
+        }
+    });
+    $('#DamagedOrderTable').DataTable({
+        dom: 'Bfrtip',  // B = Buttons, f = filter, r = process info, t = table, i = info, p = paginate
+        buttons: [
+            'csv', 'excel'
+        ],
+        responsive: true,
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: frontend + controllerName + "/get_all_damage_orders",
+            type: "POST"
+        },
+        columns: [
+            {
+                data: null,
+                title: "Sr. No",
+                render: function (data, type, row, meta) {
+                    return meta.row + meta.settings._iDisplayStart + 1;
+                }
+            },
+            { data: "product_name", title: "Product Name" },
+            { data: "sku_code", title: "SKU CODE" },
+            { data: "batch_no", title: "Batch No" },
+            { data: "channel_type", title: "Channel Type" },
+            { data: "sale_channel", title: "Sales Channel" },
+            { data: "deduct_quantity", title: "Deducted Quantity" },
+            { data: "total_quantity", title: "Total Quantity" },
+            { data: "created_at", title: "Date" }
+        ],
+        order: [[7, "desc"]],
+        responsive: true,
+        language: {
+            emptyTable: "No orders available",
+            processing: "Loading..."
+        }
+    });
 });
 $('#ExcelOrderUploadForm').on('submit', function (e) {
     e.preventDefault();

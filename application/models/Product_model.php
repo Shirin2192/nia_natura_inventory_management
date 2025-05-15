@@ -5,39 +5,6 @@ class Product_model extends CI_Model {
 		parent::__construct();
 	}
 
-//     public function get_product_detail()
-//     {
-//         $this->db->select('
-//             tbl_product_master.*,
-//              tbl_sku_code_master.sku_code,
-//             GROUP_CONCAT(DISTINCT tbl_product_attributes.fk_product_types_id) as fk_product_types_id,
-//             GROUP_CONCAT(DISTINCT tbl_product_attributes.fk_attribute_id) as fk_attribute_id,
-//             GROUP_CONCAT(DISTINCT tbl_product_attributes.fk_attribute_value_id) as fk_attribute_value_id,,
-//             GROUP_CONCAT(DISTINCT tbl_attribute_master.attribute_name) as attribute_name,
-//             GROUP_CONCAT(DISTINCT tbl_product_types.product_type_name) as product_type_name,
-//             GROUP_CONCAT(DISTINCT tbl_attribute_values.attribute_value) as attribute_value,
-//             tbl_product_price.purchase_price,
-//             tbl_product_inventory.total_quantity
-           
-//         ');
-//         $this->db->from('tbl_product_master');
-//         $this->db->join('tbl_product_attributes', 'tbl_product_attributes.fk_product_id = tbl_product_master.id', 'left');
-//         $this->db->join('tbl_attribute_master', 'tbl_product_attributes.fk_attribute_id = tbl_attribute_master.id', 'left');
-//         $this->db->join('tbl_attribute_values', 'tbl_product_attributes.fk_attribute_value_id = tbl_attribute_values.id', 'left');
-//         $this->db->join('tbl_product_types', 'tbl_product_attributes.fk_product_types_id = tbl_product_types.id', 'left');
-//         $this->db->join('tbl_product_price', 'tbl_product_price.fk_product_id = tbl_product_master.id', 'left');
-//         $this->db->join('tbl_product_inventory', 'tbl_product_inventory.fk_product_id = tbl_product_master.id', 'left');
-//         $this->db->join('tbl_sku_code_master', 'tbl_product_master.product_sku_code = tbl_sku_code_master.id', 'left');
-//         $this->db->where('tbl_product_master.is_delete', '1');
-//         $this->db->where('tbl_product_inventory.used_status', 1);
-//         $this->db->where('tbl_product_inventory.is_delete', '1');
-//         $this->db->where('tbl_product_price.is_delete', 1);
-//         $this->db->order_by('tbl_product_master.id', 'DESC');
-//         $this->db->group_by('tbl_product_master.id');
-//  // Group by product ID to avoid duplicates
-//         $query = $this->db->get(); // Execute the query
-//         return $query->result_array(); // Return the result as an array
-//     }
 public function get_product_detail()
 {
     $this->db->select('
@@ -93,8 +60,7 @@ public function get_product_detail()
             GROUP_CONCAT(tbl_product_price.purchase_price ORDER BY tbl_product_price.fk_batch_id ASC) as purchase_price,
             GROUP_CONCAT(tbl_product_price.MRP ORDER BY tbl_product_price.fk_batch_id ASC) as MRP,
             GROUP_CONCAT(tbl_product_price.selling_price ORDER BY tbl_product_price.fk_batch_id ASC) as selling_price,
-            GROUP_CONCAT(DISTINCT tbl_product_price.id ORDER BY tbl_product_price.fk_batch_id ASC) as product_price_id,
-            
+            GROUP_CONCAT(DISTINCT tbl_product_price.id ORDER BY tbl_product_price.fk_batch_id ASC) as product_price_id,            
             GROUP_CONCAT(tbl_product_inventory.total_quantity ORDER BY tbl_product_inventory.fk_batch_id ASC) as total_quantity,
             GROUP_CONCAT(DISTINCT tbl_product_inventory.reason ORDER BY tbl_product_inventory.fk_batch_id ASC) as reason,
             GROUP_CONCAT(DISTINCT tbl_product_inventory.id ORDER BY tbl_product_inventory.fk_batch_id ASC) as inventory_id,
@@ -104,10 +70,12 @@ public function get_product_detail()
             GROUP_CONCAT(DISTINCT tbl_product_batches.batch_no ORDER BY tbl_product_batches.id ASC) as batch_no,
             GROUP_CONCAT(tbl_product_batches.expiry_date ORDER BY tbl_product_batches.id ASC) as expiry_date,
             GROUP_CONCAT(tbl_product_batches.manufactured_date ORDER BY tbl_product_batches.id ASC) as manufactured_date,
+            GROUP_CONCAT(tbl_product_inventory.fk_inventory_entry_type ORDER BY tbl_product_inventory.fk_batch_id ASC) as fk_inventory_entry_type,
             GROUP_CONCAT(DISTINCT tbl_product_batches.id ORDER BY tbl_product_batches.id ASC) as batch_id,
             tbl_stock_availability.stock_availability,
             GROUP_CONCAT(tbl_sale_channel.sale_channel ORDER BY tbl_sale_channel.id ASC) as sale_channel,
-            GROUP_CONCAT(tbl_sourcing_partner.name ORDER BY tbl_sourcing_partner.id ASC) as sourcing_partner_name
+            GROUP_CONCAT(tbl_sourcing_partner.name ORDER BY tbl_sourcing_partner.id ASC) as sourcing_partner_name,
+            GROUP_CONCAT(tbl_inventory_entry_type.name ORDER BY tbl_inventory_entry_type.id ASC) as inventory_entry_type_name
             ');
         $this->db->from('tbl_product_master');
         $this->db->join('tbl_product_attributes', 'tbl_product_attributes.fk_product_id = tbl_product_master.id', 'left');
@@ -121,6 +89,7 @@ public function get_product_detail()
         $this->db->join('tbl_stock_availability', 'tbl_product_master.fk_stock_availability_id=tbl_stock_availability.id', 'left');
         $this->db->join('tbl_sale_channel', 'tbl_product_inventory.fk_sale_channel_id=tbl_sale_channel.id', 'left');
         $this->db->join('tbl_sourcing_partner', 'tbl_product_inventory.fk_sourcing_partner_id=tbl_sourcing_partner.id', 'left');
+        $this->db->join('tbl_inventory_entry_type', 'tbl_product_inventory.fk_inventory_entry_type=tbl_inventory_entry_type.id', 'left');
         $this->db->where('tbl_product_master.id', $product_id);
         $this->db->where('tbl_product_inventory.used_status', 1);        
         $this->db->or_where('tbl_product_inventory.total_quantity', 0);
@@ -209,17 +178,108 @@ public function get_product_detail()
         $this->db->join('tbl_sku_code_master', 'tbl_product_master.product_sku_code = tbl_sku_code_master.id');
         $this->db->join('tbl_sale_channel', 'tbl_product_inventory.fk_sale_channel_id = tbl_sale_channel.id');
         $this->db->where('tbl_product_inventory.deduct_quantity IS NOT NULL');
+        $this->db->where('tbl_product_inventory.fk_inventory_entry_type_sale_id',3);
         $this->db->order_by('tbl_product_inventory.id DESC');
         $this->db->limit($length, $start);
     
         return $this->db->get()->result_array();
     }
-    
-
     public function get_total_orders() {
         $this->db->from('tbl_product_inventory');
         $this->db->where('tbl_product_inventory.deduct_quantity IS NOT NULL');
+        $this->db->where('tbl_product_inventory.fk_inventory_entry_type_sale_id',3);
         return $this->db->count_all_results();
     }
+    public function get_all_return_orders($start, $length) {
+        $this->db->select('
+            tbl_product_master.product_name,
+            tbl_sku_code_master.sku_code,
+            tbl_product_batches.batch_no,
+            tbl_product_inventory.channel_type,
+            tbl_sale_channel.sale_channel,
+            tbl_product_inventory.add_quantity,
+            tbl_product_inventory.total_quantity,
+            tbl_product_inventory.created_at
+        ');
+        $this->db->from('tbl_product_master');
+        $this->db->join('tbl_product_inventory', 'tbl_product_master.id = tbl_product_inventory.fk_product_id');
+        $this->db->join('tbl_product_batches', 'tbl_product_inventory.fk_batch_id = tbl_product_batches.id');
+        $this->db->join('tbl_sku_code_master', 'tbl_product_master.product_sku_code = tbl_sku_code_master.id');
+        $this->db->join('tbl_sale_channel', 'tbl_product_inventory.fk_sale_channel_id = tbl_sale_channel.id');
+        $this->db->where('tbl_product_inventory.add_quantity IS NOT NULL');
+        $this->db->where('tbl_product_inventory.fk_inventory_entry_type_return_id',4);
+        $this->db->order_by('tbl_product_inventory.id DESC');
+        $this->db->limit($length, $start);
     
+        return $this->db->get()->result_array();
+    }  
+
+    public function get_return_total_orders() {
+        $this->db->from('tbl_product_inventory');
+        $this->db->where('tbl_product_inventory.add_quantity IS NOT NULL');
+        $this->db->where('tbl_product_inventory.fk_inventory_entry_type_return_id',4);
+        return $this->db->count_all_results();
+    }
+
+    public function get_all_damage_orders($start, $length) {
+        $this->db->select('
+            tbl_product_master.product_name,
+            tbl_sku_code_master.sku_code,
+            tbl_product_batches.batch_no,
+            tbl_product_inventory.channel_type,
+            tbl_sale_channel.sale_channel,
+            tbl_product_inventory.deduct_quantity,
+            tbl_product_inventory.total_quantity,
+            tbl_product_inventory.created_at
+        ');
+        $this->db->from('tbl_product_master');
+        $this->db->join('tbl_product_inventory', 'tbl_product_master.id = tbl_product_inventory.fk_product_id');
+        $this->db->join('tbl_product_batches', 'tbl_product_inventory.fk_batch_id = tbl_product_batches.id');
+        $this->db->join('tbl_sku_code_master', 'tbl_product_master.product_sku_code = tbl_sku_code_master.id');
+        $this->db->join('tbl_sale_channel', 'tbl_product_inventory.fk_sale_channel_id = tbl_sale_channel.id');
+        $this->db->where('tbl_product_inventory.deduct_quantity IS NOT NULL');
+        $this->db->where('tbl_product_inventory.fk_inventory_entry_type_damage_id',5);
+        $this->db->order_by('tbl_product_inventory.id DESC');
+        $this->db->limit($length, $start);
+    
+        return $this->db->get()->result_array();
+    }
+
+    public function get_damage_total_orders() {
+        $this->db->from('tbl_product_inventory');
+        $this->db->where('tbl_product_inventory.deduct_quantity IS NOT NULL');
+        $this->db->where('tbl_product_inventory.fk_inventory_entry_type_damage_id',5);
+        return $this->db->count_all_results();
+    }
+    public function get_total_sold_quantity($product_id, $batch_id) {
+    return $this->db->select_sum('deduct_quantity')
+        ->from('tbl_product_inventory')
+        ->where([
+            'fk_product_id' => $product_id,
+            'fk_batch_id' => $batch_id,
+            'fk_inventory_entry_type_sale_id' => 3
+        ])->get()->row()->deduct_quantity ?? 0;
+}
+
+public function get_total_returned_quantity($product_id, $batch_id) {
+    return $this->db->select_sum('add_quantity')
+        ->from('tbl_product_inventory')
+        ->where([
+            'fk_product_id' => $product_id,
+            'fk_batch_id' => $batch_id,
+            'fk_inventory_entry_type_return_id' => 4
+        ])->get()->row()->add_quantity ?? 0;
+}
+
+public function get_total_damaged_quantity($product_id, $batch_id) {
+    return $this->db->select_sum('deduct_quantity')
+        ->from('tbl_product_inventory')
+        ->where([
+            'fk_product_id' => $product_id,
+            'fk_batch_id' => $batch_id,
+            'fk_inventory_entry_type_damage_id' => 5
+        ])->get()->row()->deduct_quantity ?? 0;
+}
+
+
 }

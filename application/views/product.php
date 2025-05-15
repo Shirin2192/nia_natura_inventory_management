@@ -276,7 +276,8 @@
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <div class="form-group">
-                                                <label class="col-form-label" for="fk_sourcing_partner_id">Sourcing Partner <span class="text-danger">*</span></label>
+                                                <label class="col-form-label" for="fk_sourcing_partner_id">Sourcing
+                                                    Partner <span class="text-danger">*</span></label>
                                                 <select class="chosen-select form-control" id="fk_sourcing_partner_id"
                                                     name="fk_sourcing_partner_id">
                                                     <option value=""></option>
@@ -285,7 +286,8 @@
                                                         <?= $sourcing_partner_row['name']?></option>
                                                     <?php } ?>
                                                 </select>
-                                                <div class="text-danger"><?= form_error('fk_sourcing_partner_id'); ?></div>
+                                                <div class="text-danger"><?= form_error('fk_sourcing_partner_id'); ?>
+                                                </div>
                                             </div>
                                         </div>
                                         <!-- <div class="col-lg-6 mb-3">
@@ -321,9 +323,25 @@
                                             <div class="form-group">
                                                 <label class="col-form-label" for="reason">Reason
                                                     Quantity <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" id="reason"
-                                                    name="reason" placeholder="Enter Reason">
+                                                <input type="text" class="form-control" id="reason" name="reason"
+                                                    placeholder="Enter Reason">
                                                 <div class="text-danger"><?= form_error('reason'); ?></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6 mb-3">
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="inventory_entry_type">Inventory Entry
+                                                    Type <span class="text-danger">*</span></label>
+                                                <select class="chosen-select form-control" id="inventory_entry_type"
+                                                    name="inventory_entry_type">
+                                                    <option value=""></option>
+                                                    <?php foreach($inventory_entry_type as $inventory_entry_type_key => $inventory_entry_type_row) {?>
+                                                    <option value="<?= $inventory_entry_type_row['id']?>">
+                                                        <?= $inventory_entry_type_row['name']?></option>
+                                                    <?php } ?>
+                                                </select>
+                                                <div class="text-danger"><?= form_error('inventory_entry_type'); ?>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -482,6 +500,7 @@
                                     <h6><strong>Description:</strong></h6>
                                     <p id="view_description" class="text-muted"></p>
                                 </div>
+                                
                             </div>
                             <div class="col-md-12">
                                 <h6><strong>Batch Details:</strong></h6>
@@ -613,8 +632,10 @@
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="update_reason">Reason <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" name="update_reason" id="update_reason" placeholder="Enter Reason"></textarea>
+                                    <label class="col-form-label" for="update_reason">Reason <span
+                                            class="text-danger">*</span></label>
+                                    <textarea class="form-control" name="update_reason" id="update_reason"
+                                        placeholder="Enter Reason"></textarea>
                                 </div>
                             </div>
                             <div class="col-lg-12">
@@ -788,7 +809,8 @@
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="add_new_fk_sourcing_partner_id">Sourcing Partner <span class="text-danger">*</span></label>
+                                    <label class="col-form-label" for="add_new_fk_sourcing_partner_id">Sourcing Partner
+                                        <span class="text-danger">*</span></label>
                                     <select class="chosen-select form-control" id="add_new_fk_sourcing_partner_id"
                                         name="add_new_fk_sourcing_partner_id">
                                         <option value=""></option>
@@ -798,6 +820,21 @@
                                         <?php } ?>
                                     </select>
                                     <div class="text-danger"><?= form_error('add_new_fk_sourcing_partner_id'); ?></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
+                                    <label class="col-form-label" for="add_new_inventory_entry_type">Inventory Entry Type <span
+                                            class="text-danger">*</span></label>
+                                    <select class="chosen-select form-control" id="add_new_inventory_entry_type"
+                                        name="add_new_inventory_entry_type">
+                                        <option value=""></option>
+                                        <?php foreach($inventory_entry_type as $inventory_entry_type_key => $inventory_entry_type_row) {?>
+                                        <option value="<?= $inventory_entry_type_row['id']?>">
+                                            <?= $inventory_entry_type_row['name']?></option>
+                                        <?php } ?>
+                                    </select>
+                                    <div class="text-danger"><?= form_error('add_new_inventory_entry_type'); ?></div>
                                 </div>
                             </div>
                             <!-- <div class="col-lg-6 mb-3">

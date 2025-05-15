@@ -50,8 +50,6 @@ class Dashboard_model extends CI_Model {
             'healthy' => $healthy
         ];
     }
-
-
     // Get Top 5 Products by Quantity
     public function getTop5Products() {
         $this->db->select('p.product_name, SUM(i.deduct_quantity) AS total_quantity');
@@ -66,7 +64,6 @@ class Dashboard_model extends CI_Model {
         return $query->result();
     }
     
-
     // Get Out of Stock Trends (Weekly or Monthly)
     public function getOutOfStockTrends() {
         // Example SQL Query to track out-of-stock events

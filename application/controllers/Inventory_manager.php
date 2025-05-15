@@ -1516,7 +1516,6 @@ class Inventory_manager extends CI_Controller
 			$rows = $sheet->toArray();
 
 			$rejected = [];
-			$imported_products = []; // Store imported products
 			$headers = $rows[1]; // Assuming headers are in 2nd row
 			$headers[] = 'Error Message'; // For rejected export
 
@@ -1551,69 +1550,75 @@ class Inventory_manager extends CI_Controller
 				}
 
 				$fk_stock_availability_id = $this->model->selectWhereData('tbl_stock_availability', ['stock_availability' => $row[2]], 'id', true);
-				$fk_product_types_id = $this->model->selectWhereData('tbl_product_types', ['product_type_name' => $row[13]], 'id', true);
-				$fk_sale_channel_id = $this->model->selectWhereData('tbl_sale_channel', ['sale_channel' => $row[15]], 'id', true);
+				$fk_product_types_id = $this->model->selectWhereData('tbl_product_types', ['product_type_name' => $row[12]], 'id', true);
+				// $fk_sale_channel_id = $this->model->selectWhereData('tbl_sale_channel', ['sale_channel' => $row[14]], 'id', true);
 				$quantity = $row[5];
 
-				$images = trim($row[8]);
-				$image_urls = $this->handle_image_upload($images);
 
+				// Handle the images (comma-separated list of image paths)
+				// $images = trim($row[8]); // Assuming images are in column 8
+
+				// $image_urls = $this->handle_image_upload($images);
 				if (!$existing_product) {
-					$product_data = [
-						'product_name' => $row[0],
-						'product_sku_code' => $fk_sku_code_id['id'],
-						'fk_stock_availability_id' => $fk_stock_availability_id['id'] ?? null,
-						'barcode' => $row[3],
-						'images' => $image_urls,
-						'description' => $row[9],
-						'fk_product_types_id' => $fk_product_types_id['id'] ?? null,
-					];
-					$product_id = $this->model->insertData('tbl_product_master', $product_data);
-					$this->model->addUserLog($login_id, 'Insert Product', 'tbl_product_master', $product_data);
+				    if(!empty($row[0])){
+    					$product_data = [
+    						'product_name' => $row[0],
+    						'product_sku_code' => $fk_sku_code_id['id'],
+    						'fk_stock_availability_id' => $fk_stock_availability_id['id'] ?? null,
+    						'barcode' => $row[3],
+    				// 		'images' => $image_urls,
+    						'description' => $row[8],
+    						'fk_product_types_id' => $fk_product_types_id['id'] ?? null,
+    					];
+    					$product_id = $this->model->insertData('tbl_product_master', $product_data);
+    					$this->model->addUserLog($login_id, 'Insert Product', 'tbl_product_master', $product_data);
+				    }
 				} else {
 					$product_id = $existing_product['id'];
 				}
-
-				$product_batch = [
-					'fk_product_id' => $product_id,
-					'batch_no' => $batch_no,
-					'quantity' => $quantity,
-					'expiry_date' => $row[6],
-					'manufactured_date' => $row[7],
-				];
-				$batch_id = $this->model->insertData('tbl_product_batches', $product_batch);
-				$this->model->addUserLog($login_id, 'Insert Product Batch', 'tbl_product_batches', $product_batch);
-
-				$product_price = [
-					'fk_product_id' => $product_id,
-					'fk_batch_id' => $batch_id,
-					'purchase_price' => $row[10],
-					'MRP' => $row[11],
-					'selling_price' => $row[12],
-				];
-				$this->model->insertData('tbl_product_price', $product_price);
-				$this->model->addUserLog($login_id, 'Insert Product Price', 'tbl_product_price', $product_price);
-
-				$product_inventory = [
-					'fk_product_id' => $product_id,
-					'fk_batch_id' => $batch_id,
-					'channel_type' => $row[14],
-					'fk_sale_channel_id' => $fk_sale_channel_id['id'] ?? null,
-					'add_quantity' => $quantity,
-					'total_quantity' => $quantity,
-					'used_status' => 1,
-					'fk_login_id' => $login_id,
-				];
-				$this->model->insertData('tbl_product_inventory', $product_inventory);
-				$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $product_inventory);
-
-				// Handle dynamic attributes
+                if(!empty($batch_no)){
+    				$product_batch = [
+    					'fk_product_id' => $product_id,
+    					'batch_no' => $batch_no,
+    					'quantity' => $quantity,
+    					'manufactured_date' => $row[6],
+    					'expiry_date' => $row[7],
+    				];
+    				$batch_id = $this->model->insertData('tbl_product_batches', $product_batch);
+    				$this->model->addUserLog($login_id, 'Insert Product Batch', 'tbl_product_batches', $product_batch);
+                }
+                if(!empty($row[9])){
+    				$product_price = [
+    					'fk_product_id' => $product_id,
+    					'fk_batch_id' => $batch_id,
+    					'purchase_price' => $row[9],
+    					'MRP' => $row[10],
+    					'selling_price' => $row[11],
+    				];
+    				$this->model->insertData('tbl_product_price', $product_price);
+    				$this->model->addUserLog($login_id, 'Insert Product Price', 'tbl_product_price', $product_price);
+                }
+                if(!empty($row[13])){
+    				$product_inventory = [
+    					'fk_product_id' => $product_id,
+    					'fk_batch_id' => $batch_id,
+    					'fk_sourcing_partner_id' => $row[13],
+    					// 'fk_sale_channel_id' => $fk_sale_channel_id['id'] ?? null,
+    					'add_quantity' => $quantity,
+    					'total_quantity' => $quantity,
+    					'used_status' => 1,
+    					'fk_login_id' =>$login_id,
+						'fk_inventory_entry_type'=> $row[14],
+    				];
+    				$this->model->insertData('tbl_product_inventory', $product_inventory);
+    				$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $product_inventory);
+                }
 				$headers = $rows[0];
-				$dynamicHeaders = array_slice($headers, 16);
+				$dynamicHeaders = array_slice($headers, 15);
 
 				foreach ($dynamicHeaders as $index => $attrName) {
 					$attrName = trim($attrName);
-					$attrValue = trim($row[16 + $index] ?? '');
+					$attrValue = trim($row[15 + $index] ?? '');
 					if ($attrName === '' || $attrValue === '') continue;
 
 					$attribute = $this->model->selectWhereData('tbl_attribute_master', [
@@ -1648,18 +1653,16 @@ class Inventory_manager extends CI_Controller
 						}
 					}
 				}
-
 				// Add to imported_products array
 				$imported_products[] = [
 					'Product Name' => $row[0],
 					'SKU' => $sku,
 					'Batch No' => $batch_no,
 					'Quantity' => $quantity,
-					'Purchase Price' => $row[10],
-					'MRP' => $row[11],
-					'Manufactured Date' => $row[7],
-					'Expiry Date' => $row[6],
-
+					'purchase_price' => $row[9],
+					'MRP' => $row[10],
+					'Expiry Date' => $row[7],
+					'Manufactured Date' => $row[6]
 				];
 			}
 
@@ -1674,7 +1677,7 @@ class Inventory_manager extends CI_Controller
 				$writer->save($rejectedFile);
 
 				$download_url = base_url('uploads/' . basename($rejectedFile));
-				$this->sendImportEmail($download_url, "Some rows were rejected. Please download the rejected file.", $imported_products,'Rejected File');
+				// $this->sendImportEmail($download_url, "Some rows were rejected. Please download the rejected file.", $imported_products);
 
 				$this->output
 					->set_content_type('application/json')
@@ -1685,7 +1688,7 @@ class Inventory_manager extends CI_Controller
 					]));
 				return;
 			} else {
-				$this->sendImportEmail('', "All rows imported successfully!", $imported_products, 'New Stock Added');
+				// $this->sendImportEmail($download_url, "All rows imported successfully!", $imported_products, 'New Stock Added');
 
 				$this->output
 					->set_content_type('application/json')
@@ -1793,6 +1796,8 @@ class Inventory_manager extends CI_Controller
 			$data['sku_code'] = $this->model->selectWhereData('tbl_sku_code_master', array('is_delete' => 1), "id,sku_code", false, array('id', "DESC"));
 			$data['permissions'] = $this->permissions; // Pass full permissions array
 			$data['current_sidebar_id'] = 8; // Set the sidebar ID for the current view
+			$inventory_entry_type = $this->model->selectWhereData('tbl_inventory_entry_type', array('is_delete' => '1'), array('id','name'), false);
+			$data['inventory_type'] = array_slice($inventory_entry_type, 2, 5);
 			$this->load->view('order_details', $data);
 		}
 	}
@@ -1810,6 +1815,35 @@ class Inventory_manager extends CI_Controller
 			"recordsFiltered" => $totalRecords,
 			"data" => $orders
 		]);
+	}
+	public function get_product_id_on_sku_code()
+	{
+		$sku_code = $this->input->post('sku_code'); // Get the SKU code from AJAX
+		if (!$sku_code) {
+			echo json_encode(['status' => 'error', 'message' => 'Invalid SKU code']);
+			return;
+		}
+		$result = $this->model->selectWhereData('tbl_product_master', ['product_sku_code' => $sku_code, 'is_delete' => 1], 'id'); // Soft delete
+		if ($result) {
+			echo json_encode(['status' => 'success', 'message' => 'Product ID fetched successfully', 'product_id' => $result['id']]);
+		} else {
+			echo json_encode(['status' => 'error', 'message' => 'Failed to fetch Product ID']);
+		}
+	}
+	public function get_batch_no_on_product_id()
+	{
+		$product_id = $this->input->post('product_id'); // Get the SKU code from AJAX
+
+		if (!$product_id) {
+			echo json_encode(['status' => 'error', 'message' => 'Invalid Product ID']);
+			return;
+		}
+		$result = $this->model->selectWhereData('tbl_product_batches', ['fk_product_id' => $product_id, 'is_delete' => 1], array('id','batch_no'),false); // Soft delete
+		if ($result) {
+			echo json_encode(['status' => 'success', 'message' => 'Batch No fetched successfully', 'data' => $result]);
+		} else {
+			echo json_encode(['status' => 'error', 'message' => 'Failed to fetch Batch No']);
+		}
 	}
 	public function submit_order_form()
 	{
