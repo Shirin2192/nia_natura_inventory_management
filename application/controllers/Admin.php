@@ -1916,286 +1916,6 @@ class Admin extends CI_Controller
 			echo json_encode(['status' => 'error', 'message' => 'Failed to fetch Batch No']);
 		}
 	}
-	// public function submit_order_form()
-	// {
-	// 	$admin_session = $this->session->userdata('admin_session');
-	// 	$login_id = $admin_session['user_id'];
-	// 	$this->form_validation->set_rules('sku_code', 'Sku Code', 'required|trim');
-	// 	$this->form_validation->set_rules('fk_batch_id', 'Batch No', 'required|trim');
-	// 	$this->form_validation->set_rules('order_quantity', 'Quantity', 'required|trim|numeric');
-	// 	$this->form_validation->set_rules('channel_type', 'Channel Type', 'required|trim');
-	// 	$this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim');
-	// 	$this->form_validation->set_rules('reason', 'Reason', 'required|trim');
-	// 	$this->form_validation->set_rules('inventory_type', 'Order Type', 'required|trim');
-		
-
-	// 	if ($this->form_validation->run() == FALSE) {
-	// 		$response = [
-	// 			'status' => 'error',
-	// 			'errors' => [
-	// 				'sku_code' => form_error('sku_code'),
-	// 				'fk_batch_id' => form_error('fk_batch_id'),
-	// 				'order_quantity' => form_error('order_quantity'),
-	// 				'channel_type' => form_error('channel_type'),
-	// 				'sale_channel' => form_error('sale_channel'),
-	// 				'reason' => form_error('reason'),
-	// 				'inventory_type' => form_error('inventory_type'),
-	// 			]
-	// 		];
-	// 		echo json_encode($response);
-	// 		return;
-	// 	}
-	// 	$product_id = $this->input->post('product_id');
-	// 	$fk_batch_id = $this->input->post('fk_batch_id');
-	// 	$quantity = $this->input->post('order_quantity');
-	// 	$channel_type = $this->input->post('channel_type');
-	// 	$sale_channel = $this->input->post('sale_channel');
-	// 	$reason = $this->input->post('reason');
-	// 	$inventory_type = $this->input->post('inventory_type');
-
-	// 	$last_quantity = $this->model->selectWhereData('tbl_product_inventory', [
-	// 		'fk_product_id' => $product_id,
-	// 		'fk_batch_id' => $fk_batch_id,
-	// 		'used_status' => 1
-	// 	], 'total_quantity,id', true);
-
-	// 	if (!$last_quantity) {
-	// 		$response = ["status" => "error", "message" => "Inventory not found."];
-	// 		echo json_encode($response);
-	// 		return;
-	// 	}
-
-	// 	$previous_quantity = $last_quantity['total_quantity'];
-	// 	$inventory_id = $last_quantity['id'];
-
-	// 	// Check if ordered quantity is greater than available quantity
-	// 	if ($quantity > $previous_quantity) {
-	// 		$response = ["status" => "error", "message" => "Order quantity exceeds available stock."];
-	// 		echo json_encode($response);
-	// 		return;
-	// 	}
-
-	// 	$total_quantity = $previous_quantity - $quantity;
-
-	// 	$add_return_quantity = $previous_quantity + $quantity;
-
-	// 	$previous_inserted_data = $this->model->selectWhereData('tbl_product_inventory',array('fk_product_id' => $product_id,'fk_batch_id' => $fk_batch_id),array('fk_inventory_entry_type','fk_sourcing_partner_id'));
-
-	// 	if ($total_quantity == 0) {
-	// 		// If after deduction quantity is zero, update existing inventory
-	// 		$update_data = [
-	// 			'used_status' => 0,
-	// 			'is_delete' => '0',
-	// 			'total_quantity' => 0
-	// 		];
-	// 		$this->model->updateData('tbl_product_inventory', $update_data, ['id' => $inventory_id]);
-	// 		$this->model->addUserLog($login_id, 'Update Product Inventory', 'tbl_product_inventory', $update_data);
-
-	// 		$update_price_status = ['is_delete' => '0', 'status' => 0];
-	// 		$this->model->updateData('tbl_product_price', $update_price_status, ['fk_product_id' => $product_id, 'fk_batch_id' => $fk_batch_id]);
-	// 		$this->model->addUserLog($login_id, 'Update Product Price', 'tbl_product_price', $update_price_status);
-
-	// 		$update_batch_status = ['is_delete' => '0', 'status' => 0];
-	// 		$this->model->updateData('tbl_product_batches', $update_batch_status, ['fk_product_id' => $product_id, 'id' => $fk_batch_id]);
-	// 		$this->model->addUserLog($login_id, 'Update Product Batch', 'tbl_product_batches', $update_batch_status);	
-	// 		$response = ["status" => "success", "message" => "Order submitted successfully. Stock finished."];
-	// 	} else {
-	// 		// Otherwise, update existing record and insert new one with deducted quantity
-	// 		$update_data = [
-	// 			'used_status' => 0,
-	// 			'is_delete' => '0'
-	// 		];
-	// 		$this->model->updateData('tbl_product_inventory', $update_data, ['id' => $inventory_id]);
-	// 		$this->model->addUserLog($login_id, 'Update Product Inventory', 'tbl_product_inventory', $update_data);
-	// 		if($inventory_type ==3) {
-	// 			$order_data = [
-	// 				'fk_product_id' => $product_id,
-	// 				'fk_batch_id' => $fk_batch_id,
-	// 				'channel_type' => $channel_type,
-	// 				'fk_sale_channel_id' => $sale_channel,
-	// 				'deduct_quantity' => $quantity,
-	// 				'total_quantity' => $total_quantity,
-	// 				'used_status' => 1,
-	// 				'fk_login_id' => $login_id,
-	// 				'reason' =>$reason,
-	// 				'fk_inventory_entry_type_sale_id'=> $inventory_type,
-	// 				'fk_inventory_entry_type' => $previous_inserted_data['fk_inventory_entry_type'],
-	// 				'fk_sourcing_partner_id' => $previous_inserted_data['fk_sourcing_partner_id'],
-	// 			];
-	// 		}else if($inventory_type == 4){
-	// 			$order_data = [
-	// 				'fk_product_id' => $product_id,
-	// 				'fk_batch_id' => $fk_batch_id,
-	// 				'channel_type' => $channel_type,
-	// 				'fk_sale_channel_id' => $sale_channel,
-	// 				'add_quantity' => $quantity,
-	// 				'total_quantity' => $add_return_quantity,
-	// 				'used_status' => 1,
-	// 				'fk_login_id' => $login_id,
-	// 				'reason' =>$reason,
-	// 				'fk_inventory_entry_type_return_id'=> $inventory_type,
-	// 				'fk_inventory_entry_type' => $previous_inserted_data['fk_inventory_entry_type'],
-	// 				'fk_sourcing_partner_id' => $previous_inserted_data['fk_sourcing_partner_id'],
-	// 			];
-	// 		}else if($inventory_type == 5){
-	// 			$order_data = [
-	// 				'fk_product_id' => $product_id,
-	// 				'fk_batch_id' => $fk_batch_id,
-	// 				'channel_type' => $channel_type,
-	// 				'fk_sale_channel_id' => $sale_channel,
-	// 				'deduct_quantity' => $quantity,
-	// 				'total_quantity' => $total_quantity,
-	// 				'used_status' => 1,
-	// 				'fk_login_id' => $login_id,
-	// 				'reason' =>$reason,
-	// 				'fk_inventory_entry_type_damage_id'=> $inventory_type,
-	// 				'fk_inventory_entry_type' => $previous_inserted_data['fk_inventory_entry_type'],
-	// 				'fk_sourcing_partner_id' => $previous_inserted_data['fk_sourcing_partner_id'],
-	// 			];
-	// 		}
-			
-	// 		$inserted = $this->model->insertData('tbl_product_inventory', $order_data);
-	// 		$this->model->addUserLog($login_id, 'Insert Product Inventory For Deduct Quantity', 'tbl_product_inventory', $update_data);
-
-	// 		if ($inserted) {
-	// 			$response = ["status" => "success", "message" => "Order submitted successfully",'inventory_type'=>$inventory_type];
-	// 		} else {
-	// 			$response = ["status" => "error", "message" => "Failed to submit order"];
-	// 		}
-	// 	}
-
-	// 	echo json_encode($response);
-	// }
-	// public function submit_order_form()
-	// {
-	// 	$admin_session = $this->session->userdata('admin_session');
-	// 	$login_id = $admin_session['user_id'];
-
-	// 	$this->form_validation->set_rules('sku_code', 'Sku Code', 'required|trim');
-	// 	$this->form_validation->set_rules('fk_batch_id', 'Batch No', 'required|trim');
-	// 	$this->form_validation->set_rules('order_quantity', 'Quantity', 'required|trim|numeric');
-	// 	$this->form_validation->set_rules('channel_type', 'Channel Type', 'required|trim');
-	// 	$this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim');
-	// 	$this->form_validation->set_rules('reason', 'Reason', 'required|trim');
-	// 	$this->form_validation->set_rules('inventory_type', 'Order Type', 'required|trim');
-
-	// 	if ($this->form_validation->run() == FALSE) {
-	// 		$response = [
-	// 			'status' => 'error',
-	// 			'errors' => [
-	// 				'sku_code' => form_error('sku_code'),
-	// 				'fk_batch_id' => form_error('fk_batch_id'),
-	// 				'order_quantity' => form_error('order_quantity'),
-	// 				'channel_type' => form_error('channel_type'),
-	// 				'sale_channel' => form_error('sale_channel'),
-	// 				'reason' => form_error('reason'),
-	// 				'inventory_type' => form_error('inventory_type'),
-	// 			]
-	// 		];
-	// 		echo json_encode($response);
-	// 		return;
-	// 	}
-
-	// 	// POST Data
-	// 	$product_id = $this->input->post('product_id');
-	// 	$fk_batch_id = $this->input->post('fk_batch_id');
-	// 	$quantity = $this->input->post('order_quantity');
-	// 	$channel_type = $this->input->post('channel_type');
-	// 	$sale_channel = $this->input->post('sale_channel');
-	// 	$reason = $this->input->post('reason');
-	// 	$inventory_type = $this->input->post('inventory_type');
-
-	// 	// Get active inventory record
-	// 	$last_quantity = $this->model->selectWhereData('tbl_product_inventory', [
-	// 		'fk_product_id' => $product_id,
-	// 		'fk_batch_id' => $fk_batch_id,
-	// 		'used_status' => 1
-	// 	], 'total_quantity,id', true);
-
-	// 	if (!$last_quantity) {
-	// 		$response = ["status" => "error", "message" => "Inventory not found."];
-	// 		echo json_encode($response);
-	// 		return;
-	// 	}
-
-	// 	$previous_quantity = $last_quantity['total_quantity'];
-	// 	$inventory_id = $last_quantity['id'];
-
-	// 	// For Sale and Damaged, check if quantity exceeds available
-	// 	if (in_array($inventory_type, ['3', '5']) && $quantity > $previous_quantity) {
-	// 		$response = ["status" => "error", "message" => "Order quantity exceeds available stock."];
-	// 		echo json_encode($response);
-	// 		return;
-	// 	}
-
-	// 	$total_quantity = ($inventory_type == 4) 
-	// 		? $previous_quantity + $quantity 
-	// 		: $previous_quantity - $quantity;
-
-	// 	$previous_inserted_data = $this->model->selectWhereData(
-	// 		'tbl_product_inventory',
-	// 		['fk_product_id' => $product_id, 'fk_batch_id' => $fk_batch_id],
-	// 		['fk_inventory_entry_type', 'fk_sourcing_partner_id']
-	// 	);
-
-	// 	// Mark previous record inactive
-	// 	$update_data = ['used_status' => 0, 'is_delete' => '0'];
-	// 	$this->model->updateData('tbl_product_inventory', $update_data, ['id' => $inventory_id]);
-	// 	$this->model->addUserLog($login_id, 'Update Product Inventory', 'tbl_product_inventory', $update_data);
-
-	// 	// If after deduction stock is zero, mark related price and batch inactive
-	// 	if ($inventory_type != 4 && $total_quantity == 0) {
-	// 		$this->model->updateData('tbl_product_price', ['is_delete' => '0', 'status' => 0], [
-	// 			'fk_product_id' => $product_id,
-	// 			'fk_batch_id' => $fk_batch_id
-	// 		]);
-	// 		$this->model->addUserLog($login_id, 'Update Product Price', 'tbl_product_price', ['status' => 0]);
-
-	// 		$this->model->updateData('tbl_product_batches', ['is_delete' => '0', 'status' => 0], [
-	// 			'fk_product_id' => $product_id,
-	// 			'id' => $fk_batch_id
-	// 		]);
-	// 		$this->model->addUserLog($login_id, 'Update Product Batch', 'tbl_product_batches', ['status' => 0]);
-	// 	}
-
-	// 	// Prepare insert data
-	// 	$order_data = [
-	// 		'fk_product_id' => $product_id,
-	// 		'fk_batch_id' => $fk_batch_id,
-	// 		'channel_type' => $channel_type,
-	// 		'fk_sale_channel_id' => $sale_channel,
-	// 		'total_quantity' => $total_quantity,
-	// 		'used_status' => 1,
-	// 		'fk_login_id' => $login_id,
-	// 		'reason' => $reason,
-	// 		'fk_inventory_entry_type' => $previous_inserted_data['fk_inventory_entry_type'],
-	// 		'fk_sourcing_partner_id' => $previous_inserted_data['fk_sourcing_partner_id']
-	// 	];
-
-	// 	// Inventory type specific fields
-	// 	if ($inventory_type == 3) {
-	// 		$order_data['deduct_quantity'] = $quantity;
-	// 		$order_data['fk_inventory_entry_type_sale_id'] = $inventory_type;
-	// 	} elseif ($inventory_type == 4) {
-	// 		$order_data['add_quantity'] = $quantity;
-	// 		$order_data['fk_inventory_entry_type_return_id'] = $inventory_type;
-	// 	} elseif ($inventory_type == 5) {
-	// 		$order_data['deduct_quantity'] = $quantity;
-	// 		$order_data['fk_inventory_entry_type_damage_id'] = $inventory_type;
-	// 	}
-
-	// 	// Insert new inventory entry
-	// 	$inserted = $this->model->insertData('tbl_product_inventory', $order_data);
-	// 	$this->model->addUserLog($login_id, 'Insert Product Inventory Operation', 'tbl_product_inventory', $order_data);
-
-	// 	if ($inserted) {
-	// 		$response = ["status" => "success", "message" => "Order submitted successfully", 'inventory_type' => $inventory_type];
-	// 	} else {
-	// 		$response = ["status" => "error", "message" => "Failed to submit order"];
-	// 	}
-
-	// 	echo json_encode($response);
-	// }
 	public function submit_order_form()
 	{
 		$admin_session = $this->session->userdata('admin_session');
@@ -2419,7 +2139,6 @@ class Admin extends CI_Controller
 
 	public function upload_order_excel()
 	{
-
 		$this->load->library('upload');
 		require_once FCPATH . 'vendor/autoload.php';
 		$this->load->library('email'); // Load Email Library
@@ -2458,6 +2177,7 @@ class Admin extends CI_Controller
 					$sale_channel = trim($row[3]);
 					$quantity     = trim($row[4]);
 					$reason     = trim($row[5]);
+					$order_type     = trim($row[6]);
 
 					// Validate SKU
 					$skuValid = $this->model->selectWhereData('tbl_sku_code_master', [
@@ -2467,6 +2187,13 @@ class Admin extends CI_Controller
 
 					if (!$skuValid) {
 						$row[] = 'Invalid SKU Code';
+						$rejectedData[] = $row;
+						continue;
+					}
+
+					$inventory_type = $this->model->selectWhereData('tbl_inventory_entry_type',array('name'=>$order_type,'is_delete'=>'1'),'id',true);
+					if(!$inventory_type['id']){
+						$row[]='Invalid Order Type';
 						$rejectedData[] = $row;
 						continue;
 					}
@@ -2514,42 +2241,82 @@ class Admin extends CI_Controller
 						'fk_product_id' => $product_id,
 						'fk_batch_id' => $batchValid['id'],
 						'used_status' => 1
-					], 'total_quantity,id', true, ['id' => 'DESC']);
+					], 'total_quantity,id,fk_inventory_entry_type,fk_sourcing_partner_id', true, ['id' => 'DESC']);
 
 					if (!empty($last_quantity)) {
 						$previous_quantity = $last_quantity['total_quantity'];
-						$inventory_id = $last_quantity['id'];
-						$total_quantity = $previous_quantity - $quantity;
 
-						if ($total_quantity < 0) {
-							$row[] = 'Resulting quantity would be zero or negative';
+						$inventory_id = $last_quantity['id'];
+						// Inventory type validations
+					if ($inventory_type['id'] == 3 || $inventory_type['id'] == 5) {
+						if ($quantity > $previous_quantity) {
+							$row[] = 'Quantity exceeds available stock';
 							$rejectedData[] = $row;
 							continue;
-
-							$this->model->updateData('tbl_product_inventory', [
-								'used_status' => 0,
-								'is_delete' => '0'
-							], ['fk_product_id' => $product_id, 'fk_batch_id' => $batchValid['id'],]);
 						}
+					}
 
-						$this->model->updateData('tbl_product_inventory', [
-							'used_status' => 0,
-							'is_delete' => '0'
-						], ['fk_product_id' => $product_id, 'fk_batch_id' => $batchValid['id'],]);
+					if ($inventory_type['id'] == 4) {
+						$total_sold_qty = $this->Product_Model->get_total_sold_quantity($product_id, $batchValid['id']);
+						$total_returned_qty = $this->Product_Model->get_total_returned_quantity($product_id, $batchValid['id']);
 
-						// Prepare insert data
+						if (($total_returned_qty + $quantity) > $total_sold_qty) {
+							$row[] = 'Return quantity exceeds total sold quantity';
+							$rejectedData[] = $row;
+							continue;
+						}
+					}
+
+					if ($inventory_type['id'] == 5) {
+						$total_returned_qty = $this->Product_Model->get_total_returned_quantity($product_id, $batchValid['id']);
+						$total_damaged_qty = $this->Product_Model->get_total_damaged_quantity($product_id, $batchValid['id']);
+
+						if (($total_damaged_qty + $quantity) > $total_returned_qty) {
+							$row[] = 'Damaged quantity exceeds returned quantity';
+							$rejectedData[] = $row;
+							continue;
+						}
+					}
+					// Final quantity logic
+					$total_quantity = ($inventory_type['id'] == 4)
+						? $previous_quantity + $quantity
+						: $previous_quantity - $quantity;
+
+					if ($total_quantity < 0) {
+						$row[] = 'Resulting quantity would be negative';
+						$rejectedData[] = $row;
+						continue;
+					}
+					// Deactivate previous
+					$this->model->updateData('tbl_product_inventory', [
+						'used_status' => 0,
+						'is_delete' => '0'
+					], ['fk_product_id' => $product_id, 'fk_batch_id' => $batchValid['id']]);
 
 						$insertData = [
 							'fk_product_id'       => $product_id,
 							'fk_batch_id'         => $batchValid['id'],
 							'channel_type'        => $channel_type,
 							'fk_sale_channel_id'  => $sale_channel_id['id'],
-							'deduct_quantity'     => $quantity,
 							'total_quantity'      => $total_quantity,
 							'used_status'         => 1,
 							'reason'			  => $reason,
-							'fk_login_id'		  => $login_id
+							'fk_login_id'		  => $login_id,
+							'fk_inventory_entry_type' => $last_quantity['fk_inventory_entry_type'],
+							'fk_sourcing_partner_id' => $last_quantity['fk_sourcing_partner_id']
+							
 						];
+						if ($inventory_type['id'] == 3) {
+							$insertData['deduct_quantity'] = $quantity;
+							$insertData['fk_inventory_entry_type_sale_id'] = $inventory_type['id'];
+						} elseif ($inventory_type['id'] == 4) {
+							$insertData['add_quantity'] = $quantity;
+							$insertData['fk_inventory_entry_type_return_id'] = $inventory_type['id'];
+						} elseif ($inventory_type['id'] == 5) {
+							$insertData['deduct_quantity'] = $quantity;
+							$insertData['fk_inventory_entry_type_damage_id'] = $inventory_type['id'];
+						}
+
 						$this->model->insertData('tbl_product_inventory', $insertData);
 						$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $insertData);
 					} else {
@@ -2565,7 +2332,8 @@ class Admin extends CI_Controller
 						'Channel Type' => $row[2],
 						'Sales Channel' => $row[3],
 						'Quantity' => $row[4],
-						'Reason' => $row[5],					
+						'Reason' => $row[5],		
+					    'Order Type' => $row[6]		
 					];
 				}
 				// Generate rejection Excel
