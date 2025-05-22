@@ -820,8 +820,6 @@ class Admin extends CI_Controller
 						'fk_login_id' => $login_id,
 						'add_quantity' => $get_last_quantity['add_quantity'],
 						'total_quantity' => $total_quantity[$inventory_id_key],
-						// 'channel_type' => $channel_type[$inventory_id_key],
-						// 'fk_sale_channel_id' => $sale_channel[$inventory_id_key],
 						'fk_sourcing_partner_id' => $update_fk_sourcing_partner_id[$inventory_id_key],	
 						'reason' => $update_reason,
 						'fk_inventory_entry_type' => $update_fk_inventory_entry_type[$inventory_id_key]
@@ -831,8 +829,6 @@ class Admin extends CI_Controller
 						'fk_login_id' => $login_id,
 						'add_quantity' => $total_quantity[$inventory_id_key],
 						'total_quantity' => $total_quantity[$inventory_id_key],
-						// 'channel_type' => $channel_type[$inventory_id_key],
-						// 'fk_sale_channel_id' => $sale_channel[$inventory_id_key],
 						'fk_sourcing_partner_id' => $update_fk_sourcing_partner_id[$inventory_id_key],
 						'reason' => $update_reason,
 						'fk_inventory_entry_type' => $update_fk_inventory_entry_type[$inventory_id_key]
