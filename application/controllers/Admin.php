@@ -2775,4 +2775,31 @@ class Admin extends CI_Controller
 			echo json_encode(['status' => 'error', 'message' => 'Failed to delete Sourcing Partner']);
 		}
 	}
+	public function inventory_details()
+	{
+		$admin_session = $this->session->userdata('admin_session');
+		if (!$admin_session) {
+			redirect(base_url('common/index')); // Redirect to login page if session is not active
+		} else {
+			$response['permissions'] = $this->permissions; // Pass full permissions array
+			$response['current_sidebar_id'] = 10; // Set the sidebar ID for the current view
+			$this->load->view('inventory_details', $response);
+		}
+	}
+	public function get_inventory_by_product_and_batch()
+	{
+		$this->load->model('Product_model');
+		$data = $this->Product_model->get_inventory_by_product_and_batch();
+		if (!empty($data)) {
+			echo json_encode([
+				'status' => 'success',
+				'data' => $data
+			]);
+		} else {
+			echo json_encode([
+				'status' => 'error',
+				'message' => 'No inventory data found.'
+			]);
+		}
+	}
 }
