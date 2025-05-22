@@ -416,27 +416,24 @@ class Admin extends CI_Controller
 			$reason = $this->input->post('reason');
 			$fk_sourcing_partner_id = $this->input->post('fk_sourcing_partner_id');
 			$inventory_entry_type = $this->input->post('inventory_entry_type');
+			$purchase_date = $this->input->post('purchase_date');
 
 			// Validation Rules
 			$this->form_validation->set_rules('product_name', 'Product Name', 'required|trim');
 			$this->form_validation->set_rules('product_sku_code', 'Product SKU Code', 'required|trim');
 			$this->form_validation->set_rules('fk_product_types_id', 'Product Type', 'required|trim');
-			// $this->form_validation->set_rules('fk_bottle_size_id', 'Bottle Size', 'required|trim');
-			// $this->form_validation->set_rules('fk_bottle_type_id', 'Bottle Type', 'required|trim');
 			$this->form_validation->set_rules('description', 'Description', 'required|trim');
 			$this->form_validation->set_rules('purchase_price', 'Purchase Price', 'required|trim');
 			$this->form_validation->set_rules('mrp', 'MRP', 'required|trim');
 			$this->form_validation->set_rules('selling_price', 'Selling Price', 'required|trim');
 			$this->form_validation->set_rules('add_quantity', 'Stock Quantity', 'required|trim');
 			$this->form_validation->set_rules('stock_availability', 'Stock Availability', 'required|trim');
-			// $this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim');
-			// $this->form_validation->set_rules('channel_type', 'Sale Channel', 'required|trim');
 			$this->form_validation->set_rules('expiry_date', 'Expiry date', 'required|trim');
 			$this->form_validation->set_rules('manufacture_date', 'Manufacture Date', 'required|trim');
 			$this->form_validation->set_rules('reason', 'Reason', 'required|trim');
 			$this->form_validation->set_rules('fk_sourcing_partner_id', 'Sourcing Partner', 'required|trim');
 			$this->form_validation->set_rules('inventory_entry_type', 'Inventory Type', 'required|trim');
-
+			$this->form_validation->set_rules('purchase_date', 'Purchase Date', 'required|trim');
 			// Check validation
 			if ($this->form_validation->run() == FALSE) {
 				foreach ($this->input->post() as $key => $value) {
@@ -496,6 +493,7 @@ class Admin extends CI_Controller
 					'expiry_date' => $expiry_date,
 					'manufactured_date' => $manufacture_date,
 					'quantity' => $add_quantity,
+					'purchase_date'=>$purchase_date
 				];
 				$product_batch_id = $this->model->insertData('tbl_product_batches', $product_batch_data); // Insert batch data
 
@@ -517,16 +515,14 @@ class Admin extends CI_Controller
 					'selling_price' => $selling_price,
 				];
 				$this->model->insertData('tbl_product_price', $product_price);
-				// print_r($product_price);
+				
 				$product_inventory = [
 					'fk_product_id' => $product_insert_id,
 					'fk_login_id' => $login_id,
 					'fk_batch_id' => $product_batch_id,
 					'add_quantity' => $add_quantity,
 					'total_quantity' => $add_quantity,
-					'used_status' => 1,
-					// 'channel_type' => $_POST['channel_type'],
-					// 'fk_sale_channel_id' => $sale_channel,
+					'used_status' => 1,					
 					'reason' => $reason,
 					'fk_sourcing_partner_id' => $fk_sourcing_partner_id,
 					'fk_inventory_entry_type'=>$inventory_entry_type
@@ -586,7 +582,7 @@ class Admin extends CI_Controller
 				'product_types' => array_unique($types),
 				'attributes' => []
 			];
-// 'purchase_price' => $product['purchase_price'],
+			// 'purchase_price' => $product['purchase_price'],
 			foreach ($attributes as $index => $attribute) {
 				$productDetails['attributes'][] = [
 					'name' => $attribute,
@@ -643,6 +639,7 @@ class Admin extends CI_Controller
 		$channel_type = $this->input->post('update_channel_type');
 		$sale_channel = $this->input->post('update_sale_channel');
 		$update_fk_inventory_entry_type = $this->input->post('update_fk_inventory_entry_type');
+		$update_purchase_date = $this->input->post('update_purchase_date');
 		
 		$product_price_id = $this->input->post('product_price_id');
 		// $product_price_id = explode(',', $product_price_id1);
@@ -661,7 +658,7 @@ class Admin extends CI_Controller
 		$add_new_inventory_entry_type = $this->input->post('add_new_inventory_entry_type');
 		$add_new_fk_sourcing_partner_id = $this->input->post('add_new_fk_sourcing_partner_id');
 		$update_fk_sourcing_partner_id = $this->input->post('update_fk_sourcing_partner_id');		
-
+		$add_new_purchase_date = $this->input->post('add_new_purchase_date');	
 		// Set validation rules
 		$this->form_validation->set_rules('update_product_name', 'Product Name', 'required');
 		$this->form_validation->set_rules('update_description', 'Description', 'required');
@@ -676,6 +673,7 @@ class Admin extends CI_Controller
 			$this->form_validation->set_rules('add_new_selling_price', 'Selling Price', 'required|numeric');
 			$this->form_validation->set_rules('add_new_quantity', 'Stock Quantity', 'required|numeric');
 			$this->form_validation->set_rules('add_new_manufacture_date', 'Manufacture Date', 'required');
+			$this->form_validation->set_rules('add_new_purchase_date', 'Purchase Date', 'required');
 			$this->form_validation->set_rules('add_new_expiry_date', 'Expiry Date', 'required');
 			$this->form_validation->set_rules('add_new_reason', 'Reason', 'required');
 			$this->form_validation->set_rules('add_new_fk_sourcing_partner_id', 'Sourcing Partner', 'required');
@@ -732,7 +730,8 @@ class Admin extends CI_Controller
 			foreach ($update_batch_id as $update_batch_id_key => $update_batch_id_row) {
 				$update_product_batch = array(
 					'expiry_date' => $update_expiry_date[$update_batch_id_key],
-					'manufactured_date' => $update_manufacture_date[$update_batch_id_key],					
+					'manufactured_date' => $update_manufacture_date[$update_batch_id_key],	
+					'purchase_date' => $update_purchase_date[$update_batch_id_key]				
 				);
 				$this->model->updateData('tbl_product_batches', $update_product_batch, ['id' => $update_batch_id_row, 'fk_product_id' => $product_id]);
 			}
@@ -780,7 +779,8 @@ class Admin extends CI_Controller
 				'batch_no' => $add_new_batch_no,
 				'quantity' => $add_new_quantity,
 				'manufactured_date' => $add_new_manufacture_date,
-				'expiry_date' => $add_new_expiry_date
+				'expiry_date' => $add_new_expiry_date,
+				'purchase_date' =>$add_new_purchase_date
 			);
 			$new_batch_inserted_id = $this->model->insertData('tbl_product_batches', $add_new_batch_wise_quantity);
 			$this->model->addUserLog($login_id, 'Inserted New Batch', 'tbl_product_batches', $add_new_batch_wise_quantity);
@@ -1468,9 +1468,9 @@ class Admin extends CI_Controller
 			'Selling Price',
 			'Product Type',
 			'Sourcing Partner',
-			'Inventory Entry Type'
+			'Inventory Entry Type',
+			'Purchase Date'
 		];
-
 		$sampleRow = [
 			'Sample Product',
 			'SKU123',
@@ -1487,6 +1487,7 @@ class Admin extends CI_Controller
 			'Honey',
 			'Test Sourcing Partner',
 			'Regular',
+			'Purchase Date',
 		];
 
 		// Fetch attribute names and types for the product type
@@ -1642,6 +1643,7 @@ class Admin extends CI_Controller
     					'quantity' => $quantity,
     					'manufactured_date' => $row[6],
     					'expiry_date' => $row[7],
+						'purchase_date' => $row[15]
     				];
     				$batch_id = $this->model->insertData('tbl_product_batches', $product_batch);
     				$this->model->addUserLog($login_id, 'Insert Product Batch', 'tbl_product_batches', $product_batch);
@@ -1673,11 +1675,11 @@ class Admin extends CI_Controller
     				$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $product_inventory);
                 }
 				$headers = $rows[0];
-				$dynamicHeaders = array_slice($headers, 15);
+				$dynamicHeaders = array_slice($headers, 16);
 
 				foreach ($dynamicHeaders as $index => $attrName) {
 					$attrName = trim($attrName);
-					$attrValue = trim($row[15 + $index] ?? '');
+					$attrValue = trim($row[16 + $index] ?? '');
 					if ($attrName === '' || $attrValue === '') continue;
 
 					$attribute = $this->model->selectWhereData('tbl_attribute_master', [

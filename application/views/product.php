@@ -186,6 +186,15 @@
                                             </div>
                                             <div class="col-lg-6 mb-3">
                                                 <div class="form-group">
+                                                    <label class="col-form-label" for="purchase_date">Purchase Date
+                                                        <span class="text-danger">*</span></label>
+                                                    <input type="date" class="form-control" id="purchase_date"
+                                                        name="purchase_date" placeholder="Select Purchase Date">
+                                                    <div class="text-danger"><?= form_error('purchase_date'); ?></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 mb-3">
+                                                <div class="form-group">
                                                     <label class="col-form-label" for="manufacture_date">Manufacture
                                                         Date <span class="text-danger">*</span></label>
                                                     <input type="date" class="form-control" id="manufacture_date"
@@ -500,7 +509,7 @@
                                     <h6><strong>Description:</strong></h6>
                                     <p id="view_description" class="text-muted"></p>
                                 </div>
-                                
+
                             </div>
                             <div class="col-md-12">
                                 <h6><strong>Batch Details:</strong></h6>
@@ -759,6 +768,15 @@
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
+                                    <label class="col-form-label" for="purchase_date">Purchase Date <span
+                                            class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="purchase_date" name="purchase_date"
+                                        placeholder="Select Purchase Date">
+                                    <div class="text-danger"><?= form_error('purchase_date'); ?></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="form-group">
                                     <label class="col-form-label" for="add_new_manufacture_date">Manufacture Date <span
                                             class="text-danger">*</span></label>
                                     <input type="date" class="form-control" id="add_new_manufacture_date"
@@ -824,8 +842,8 @@
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <div class="form-group">
-                                    <label class="col-form-label" for="add_new_inventory_entry_type">Inventory Entry Type <span
-                                            class="text-danger">*</span></label>
+                                    <label class="col-form-label" for="add_new_inventory_entry_type">Inventory Entry
+                                        Type <span class="text-danger">*</span></label>
                                     <select class="chosen-select form-control" id="add_new_inventory_entry_type"
                                         name="add_new_inventory_entry_type">
                                         <option value=""></option>

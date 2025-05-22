@@ -612,6 +612,7 @@ class Inventory_manager extends CI_Controller
 			// Get input values
 			$inventory_session = $this->session->userdata('inventory_session');
 			$login_id = $inventory_session['user_id'];
+			// Get input values
 			$product_name = $this->input->post('product_name');
 			$product_sku_code = $this->input->post('product_sku_code');
 			$batch_no = $this->input->post('batch_no');
@@ -623,7 +624,6 @@ class Inventory_manager extends CI_Controller
 			$selling_price = $this->input->post('selling_price');
 			$add_quantity = $this->input->post('add_quantity');
 			$stock_availability = $this->input->post('stock_availability');
-			$sale_channel = $this->input->post('sale_channel');
 
 			$fk_product_attribute_id = $this->input->post('fk_product_attribute_id'); // Example: [3, 2, 1]
 			$attributes_value = $this->input->post('attributes_value'); // Example: [19, 16, 1]
@@ -631,24 +631,24 @@ class Inventory_manager extends CI_Controller
 			$expiry_date = $this->input->post('expiry_date');
 			$manufacture_date = $this->input->post('manufacture_date');
 			$reason = $this->input->post('reason');
-			// Validation Rules
+			$fk_sourcing_partner_id = $this->input->post('fk_sourcing_partner_id');
+			$inventory_entry_type = $this->input->post('inventory_entry_type');
+			$purchase_date = $this->input->post('purchase_date');
 			// Validation Rules
 			$this->form_validation->set_rules('product_name', 'Product Name', 'required|trim');
 			$this->form_validation->set_rules('product_sku_code', 'Product SKU Code', 'required|trim');
 			$this->form_validation->set_rules('fk_product_types_id', 'Product Type', 'required|trim');
-			// $this->form_validation->set_rules('fk_bottle_size_id', 'Bottle Size', 'required|trim');
-			// $this->form_validation->set_rules('fk_bottle_type_id', 'Bottle Type', 'required|trim');
 			$this->form_validation->set_rules('description', 'Description', 'required|trim');
 			$this->form_validation->set_rules('purchase_price', 'Purchase Price', 'required|trim');
 			$this->form_validation->set_rules('mrp', 'MRP', 'required|trim');
 			$this->form_validation->set_rules('selling_price', 'Selling Price', 'required|trim');
 			$this->form_validation->set_rules('add_quantity', 'Stock Quantity', 'required|trim');
 			$this->form_validation->set_rules('stock_availability', 'Stock Availability', 'required|trim');
-			$this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim');
-			$this->form_validation->set_rules('channel_type', 'Sale Channel', 'required|trim');
 			$this->form_validation->set_rules('expiry_date', 'Expiry date', 'required|trim');
 			$this->form_validation->set_rules('manufacture_date', 'Manufacture Date', 'required|trim');
 			$this->form_validation->set_rules('reason', 'Reason', 'required|trim');
+			$this->form_validation->set_rules('fk_sourcing_partner_id', 'Sourcing Partner', 'required|trim');
+			$this->form_validation->set_rules('inventory_entry_type', 'Inventory Type', 'required|trim');
 
 			// Check validation
 			if ($this->form_validation->run() == FALSE) {
@@ -686,7 +686,7 @@ class Inventory_manager extends CI_Controller
 					}
 				}
 			}
-			$count = $this->model->CountWhereRecord('tbl_product_master', array('product_name' => $product_name, 'is_delete' => 1));
+			$count = $this->model->CountWhereRecord('tbl_product_master', array('product_name' => $product_name, 'product_sku_code' => $product_sku_code, 'is_delete' => 1));
 			if ($count == 1) {
 				$response = ["status" => "error", 'product_name_error' => "Already Exist"];
 			} else {
@@ -699,9 +699,7 @@ class Inventory_manager extends CI_Controller
 					'description' => $description,
 					'fk_product_types_id' => $fk_product_types_id,
 				];
-				//  print_r($product_data);
 				$product_insert_id = $this->model->insertData('tbl_product_master', $product_data);
-				$this->model->addUserLog($login_id, 'Insert Product Master', 'tbl_product_master', $product_data);
 
 				$product_batch_data = [
 					'fk_product_id' => $product_insert_id,
@@ -709,6 +707,7 @@ class Inventory_manager extends CI_Controller
 					'expiry_date' => $expiry_date,
 					'manufactured_date' => $manufacture_date,
 					'quantity' => $add_quantity,
+					'purchase_date'=>$purchase_date
 				];
 				$product_batch_id = $this->model->insertData('tbl_product_batches', $product_batch_data); // Insert batch data
 
@@ -730,7 +729,7 @@ class Inventory_manager extends CI_Controller
 					'selling_price' => $selling_price,
 				];
 				$this->model->insertData('tbl_product_price', $product_price);
-				// print_r($product_price);
+
 				$product_inventory = [
 					'fk_product_id' => $product_insert_id,
 					'fk_login_id' => $login_id,
@@ -738,11 +737,32 @@ class Inventory_manager extends CI_Controller
 					'add_quantity' => $add_quantity,
 					'total_quantity' => $add_quantity,
 					'used_status' => 1,
-					'channel_type' => $_POST['channel_type'],
-					'fk_sale_channel_id' => $sale_channel,
 					'reason' => $reason,
+					'fk_sourcing_partner_id' => $fk_sourcing_partner_id,
+					'fk_inventory_entry_type'=>$inventory_entry_type
 				];
-				$product_inventory_insert_id = $this->model->insertData('tbl_product_inventory', $product_inventory);			
+				$product_inventory_insert_id = $this->model->insertData('tbl_product_inventory', $product_inventory);
+
+				$CI = &get_instance();
+
+				// Create the dynamic body
+				$sku_code = $this->model->selectWhereData('tbl_sku_code_master', array('id' => $product_sku_code), 'sku_code', true);
+				$dynamic_body = '
+						<h2>Inventory Details!</h2>
+						<p>Product: <strong>' . $product_name . '(' . $sku_code['sku_code'] . ')' . '</strong></p>
+						<p>Quantity Added: <strong>' . $add_quantity . '</strong></p>
+						<p>Batch No: <strong>' . $batch_no . '</strong></p>
+					';
+
+				// Load the email template
+				$email_message = $this->load->view('email_template', [
+					'dynamic_body_content' => $dynamic_body,
+					'subject' => 'New Stock Added - ' . $product_name . '(' . $product_sku_code . ')',
+				], true);  // true = return as string
+
+				// Now send the email using your helper
+				$to_email = "shirin@sda-zone.com"; // Replace with actual receiver
+				$subject = 'New Stock Added - ' . $product_name . '(' . $product_sku_code . ')';
 			}
 			if ($product_inventory_insert_id) {
 				echo json_encode(['status' => 'success', 'message' => 'Product added successfully!']);
@@ -848,7 +868,8 @@ class Inventory_manager extends CI_Controller
 		$add_new_quantity = $this->input->post('add_new_quantity');
 		$add_new_reason = $this->input->post('add_new_reason');
 		$update_reason = $this->input->post('update_reason');
-
+		$update_purchase_date = $this->input->post('update_purchase_date');
+		$add_new_purchase_date = $this->input->post('add_new_purchase_date');
 		// Set validation rules
 		$this->form_validation->set_rules('update_product_name', 'Product Name', 'required');
 		$this->form_validation->set_rules('update_description', 'Description', 'required');
@@ -873,6 +894,7 @@ class Inventory_manager extends CI_Controller
 			$this->form_validation->set_rules('add_new_manufacture_date', 'Manufacture Date', 'required');
 			$this->form_validation->set_rules('add_new_expiry_date', 'Expiry Date', 'required');
 			$this->form_validation->set_rules('add_new_reason', 'Reason', 'required');
+			$this->form_validation->set_rules('add_new_purchase_date', 'Purchase Date', 'required');
 		}
 
 		if ($this->form_validation->run() == FALSE) {
@@ -926,6 +948,7 @@ class Inventory_manager extends CI_Controller
 				// 'batch_no' => $batch_no,
 				'expiry_date' => $update_expiry_date[$batch_no_key],
 				'manufactured_date' => $update_manufacture_date[$batch_no_key],
+				'purchase_date' => $update_purchase_date[$batch_no_key]			
 				// 'quantity' => $total_quantity[$batch_no_key],
 			);
 			$this->model->updateData('tbl_product_batches', $update_product_batch, ['id' => $update_batch_id[$batch_no_key], 'fk_product_id' => $product_id]);
@@ -976,7 +999,8 @@ class Inventory_manager extends CI_Controller
 				'batch_no' => $add_new_batch_no,
 				'quantity' => $add_new_quantity,
 				'manufactured_date' => $add_new_manufacture_date,
-				'expiry_date' => $add_new_expiry_date
+				'expiry_date' => $add_new_expiry_date,
+				'purchase_date'=> $add_new_purchase_date
 			);
 			$new_batch_inserted_id = $this->model->insertData('tbl_product_batches', $add_new_batch_wise_quantity);
 			$this->model->addUserLog($login_id, 'Insert Product Batch', 'tbl_product_batches', $add_new_batch_wise_quantity);
@@ -1212,16 +1236,16 @@ class Inventory_manager extends CI_Controller
 			'Barcode',
 			'Batch Number',
 			'Quantity',
-			'Expiry Date',
 			'Manufactured Date',
-			'Images',
+			'Expiry Date',
 			'Description',
 			'Purchase Price',
 			'MRP',
 			'Selling Price',
 			'Product Type',
-			'Channel Type',
-			'Sales Channel'
+			'Sourcing Partner',
+			'Inventory Entry Type',
+			'Purchase Date'
 		];
 
 		$sampleRow = [
@@ -1231,16 +1255,16 @@ class Inventory_manager extends CI_Controller
 			'987654321',
 			'BATCH001',
 			50,
-			'2025-12-31',
 			'2025-01-01',
-			'C:\Users\user\Downloads\Neem5.jpg,C:\Users\user\Downloads\Neem4.jpg',
+			'2025-12-31',
 			'Sample description',
 			60,
 			120,
 			100,
 			'Honey',
-			'Online',
-			'Amazon'
+			'Test Sourcing Partner',
+			'Regular',
+			'2025-12-31'
 		];
 
 		// Fetch attribute names and types for the product type
@@ -1553,8 +1577,8 @@ class Inventory_manager extends CI_Controller
 				$fk_product_types_id = $this->model->selectWhereData('tbl_product_types', ['product_type_name' => $row[12]], 'id', true);
 				// $fk_sale_channel_id = $this->model->selectWhereData('tbl_sale_channel', ['sale_channel' => $row[14]], 'id', true);
 				$quantity = $row[5];
-
-
+				$fk_inventory_entry_type = $this->model->selectWhereData('tbl_inventory_entry_type', ['name' => $row[14]], 'id', true);
+				$fk_sourcing_partner_id = $this->model->selectWhereData('tbl_sourcing_partner', ['name' => $row[13]], 'id', true);
 				// Handle the images (comma-separated list of image paths)
 				// $images = trim($row[8]); // Assuming images are in column 8
 
@@ -1583,6 +1607,7 @@ class Inventory_manager extends CI_Controller
     					'quantity' => $quantity,
     					'manufactured_date' => $row[6],
     					'expiry_date' => $row[7],
+						'purchase_date' => $row[15]
     				];
     				$batch_id = $this->model->insertData('tbl_product_batches', $product_batch);
     				$this->model->addUserLog($login_id, 'Insert Product Batch', 'tbl_product_batches', $product_batch);
@@ -1598,27 +1623,27 @@ class Inventory_manager extends CI_Controller
     				$this->model->insertData('tbl_product_price', $product_price);
     				$this->model->addUserLog($login_id, 'Insert Product Price', 'tbl_product_price', $product_price);
                 }
-                if(!empty($row[13])){
+                if(!empty($fk_sourcing_partner_id)){
     				$product_inventory = [
     					'fk_product_id' => $product_id,
     					'fk_batch_id' => $batch_id,
-    					'fk_sourcing_partner_id' => $row[13],
+    					'fk_sourcing_partner_id' => $fk_sourcing_partner_id['id'],
     					// 'fk_sale_channel_id' => $fk_sale_channel_id['id'] ?? null,
     					'add_quantity' => $quantity,
     					'total_quantity' => $quantity,
     					'used_status' => 1,
     					'fk_login_id' =>$login_id,
-						'fk_inventory_entry_type'=> $row[14],
+						'fk_inventory_entry_type'=> $fk_inventory_entry_type['id'],
     				];
     				$this->model->insertData('tbl_product_inventory', $product_inventory);
     				$this->model->addUserLog($login_id, 'Insert Product Inventory', 'tbl_product_inventory', $product_inventory);
                 }
 				$headers = $rows[0];
-				$dynamicHeaders = array_slice($headers, 15);
+				$dynamicHeaders = array_slice($headers, 16);
 
 				foreach ($dynamicHeaders as $index => $attrName) {
 					$attrName = trim($attrName);
-					$attrValue = trim($row[15 + $index] ?? '');
+					$attrValue = trim($row[16 + $index] ?? '');
 					if ($attrName === '' || $attrValue === '') continue;
 
 					$attribute = $this->model->selectWhereData('tbl_attribute_master', [

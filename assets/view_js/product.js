@@ -630,6 +630,7 @@ $(document).on("click", ".update-product", function () {
 			const batchNos = product.batch_no ? product.batch_no.split(",") : [];
 			const manufacturedDates = product.manufactured_date ? product.manufactured_date.split(",") : [];
 			const expiryDates = product.expiry_date ? product.expiry_date.split(",") : [];
+			const purchase_date = product.purchase_date ? product.purchase_date.split(",") : [];
 			const quantities = product.total_quantity ? product.total_quantity.split(",") : [];
 			const purchasePrices = product.purchase_price ? product.purchase_price.split(",") : [];
 			const mrpPrices = product.MRP ? product.MRP.split(",") : [];
@@ -845,6 +846,12 @@ $(document).on("click", ".update-product", function () {
 									${parseInt(quantity) > 0 ? `<input type="hidden" name="update_batch_id[]" value="${batchId}">` : ''}
 									${parseInt(quantity) > 0 ? `<input type="hidden" id="update_inventory_id" name="update_inventory_id[]" value="${update_inventory_id[index]}">` : ''}
                     				${parseInt(quantity) > 0 ? `<input type="hidden" id="product_price_id" name="product_price_id[]" value="${product_price_id[index]}">` : ''}
+								</div>
+							</div>
+							<div class="col-md-4">
+								<div class="form-group">
+									<label>Purchase Date</label>
+									<input type="date" name="update_purchase_date[]" class="form-control" value="${purchase_date[index] || ''}" ${parseInt(quantity) === 0 ? 'disabled' : ''}>
 								</div>
 							</div>
 							<div class="col-md-4">

@@ -70,6 +70,7 @@ public function get_product_detail()
             GROUP_CONCAT(DISTINCT tbl_product_batches.batch_no ORDER BY tbl_product_batches.id ASC) as batch_no,
             GROUP_CONCAT(tbl_product_batches.expiry_date ORDER BY tbl_product_batches.id ASC) as expiry_date,
             GROUP_CONCAT(tbl_product_batches.manufactured_date ORDER BY tbl_product_batches.id ASC) as manufactured_date,
+            GROUP_CONCAT(tbl_product_batches.purchase_date ORDER BY tbl_product_batches.id ASC) as purchase_date,
             GROUP_CONCAT(tbl_product_inventory.fk_inventory_entry_type ORDER BY tbl_product_inventory.fk_batch_id ASC) as fk_inventory_entry_type,
             GROUP_CONCAT(DISTINCT tbl_product_batches.id ORDER BY tbl_product_batches.id ASC) as batch_id,
             tbl_stock_availability.stock_availability,
