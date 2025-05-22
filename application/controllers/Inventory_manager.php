@@ -24,7 +24,6 @@ class Inventory_manager extends CI_Controller
 			->set_header("Pragma: no-cache");
 
 		$this->load->model('Product_model');
-		$this->load->model('user_model');
 		$this->load->model('Product_attribute_model');
 		$this->load->model('model');
 		$this->load->library('form_validation');
