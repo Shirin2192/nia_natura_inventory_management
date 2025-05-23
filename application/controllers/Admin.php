@@ -178,7 +178,6 @@ class Admin extends CI_Controller
 		$response['data'] = $data;
 		echo json_encode($response);
 	}
-
 	public function view_user()
 	{
 		$user_id = $this->input->post('user_id');
@@ -205,7 +204,6 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('edit_first_name', 'First Name', 'required|trim');
 		$this->form_validation->set_rules('edit_last_name', 'Last Name', 'required|trim');
 		$this->form_validation->set_rules('edit_role', 'Role', 'required|trim');
-
 		if ($this->form_validation->run() == FALSE) {
 			echo json_encode(["status" => false, "errors" => $this->form_validation->error_array()]);
 		} else {
@@ -245,7 +243,6 @@ class Admin extends CI_Controller
 		$data['current_sidebar_id'] = 6; // Set the sidebar ID for the current view
 		echo json_encode(['response' => $response, 'data' => $data]);
 	}
-
 	public function save_sale_channel()
 	{	
 		$admin_session = $this->session->userdata('admin_session');
@@ -269,10 +266,8 @@ class Admin extends CI_Controller
 					'channel_type' => $channel_type,
 					'sale_channel' => $sale_channel,
 				);
-
 				$this->model->insertData('tbl_sale_channel', $data);
 				$this->model->addUserLog($login_id, 'Inserted Sales Channel', 'tbl_sale_channel', $data);
-
 				$response = ["status" => "success", "message" => "Sale Channel added successfully"];
 			}
 		}
@@ -328,7 +323,6 @@ class Admin extends CI_Controller
 		$id = $this->input->post('id'); // Get the flavour ID from AJAX
 		$admin_session = $this->session->userdata('admin_session');
 		$login_id = $admin_session['user_id'];
-
 		if (!$id) {
 			echo json_encode(['status' => 'error', 'message' => 'Invalid flavour ID']);
 			return;
@@ -398,7 +392,6 @@ class Admin extends CI_Controller
 			$product_name = $this->input->post('product_name');
 			$product_sku_code = $this->input->post('product_sku_code');
 			$batch_no = $this->input->post('batch_no');
-
 			$barcode = $this->input->post('barcode');
 			$description = $this->input->post('description');
 			$purchase_price = $this->input->post('purchase_price');
@@ -406,8 +399,6 @@ class Admin extends CI_Controller
 			$selling_price = $this->input->post('selling_price');
 			$add_quantity = $this->input->post('add_quantity');
 			$stock_availability = $this->input->post('stock_availability');
-			// $sale_channel = $this->input->post('sale_channel');
-
 			$fk_product_attribute_id = $this->input->post('fk_product_attribute_id'); // Example: [3, 2, 1]
 			$attributes_value = $this->input->post('attributes_value'); // Example: [19, 16, 1]
 			$fk_product_types_id = $this->input->post('fk_product_types_id');
@@ -450,7 +441,6 @@ class Admin extends CI_Controller
 			if (!empty($_FILES['product_image']['name'][0])) {
 				$files = $_FILES;
 				$this->load->library('upload');
-
 				$config['upload_path'] = './uploads/products/';
 				$config['allowed_types'] = 'jpg|jpeg|png|gif';
 				$config['max_size'] = 2048;
@@ -463,7 +453,6 @@ class Admin extends CI_Controller
 					$_FILES['file']['size'] = $files['product_image']['size'][$key];
 
 					$this->upload->initialize($config);
-
 					if ($this->upload->do_upload('file')) {
 						$uploadData = $this->upload->data();
 						$product_images[] = $uploadData['file_name'];
@@ -474,7 +463,6 @@ class Admin extends CI_Controller
 			if ($count == 1) {
 				$response = ["status" => "error", 'product_name_error' => "Already Exist"];
 			} else {
-
 				$product_data = [
 					'product_name' => $product_name,
 					'product_sku_code' => $product_sku_code,
@@ -484,9 +472,7 @@ class Admin extends CI_Controller
 					'description' => $description,
 					'fk_product_types_id' => $fk_product_types_id,
 				];
-				//  print_r($product_data);
 				$product_insert_id = $this->model->insertData('tbl_product_master', $product_data);
-
 				$product_batch_data = [
 					'fk_product_id' => $product_insert_id,
 					'batch_no' => $batch_no,
@@ -496,7 +482,6 @@ class Admin extends CI_Controller
 					'purchase_date'=>$purchase_date
 				];
 				$product_batch_id = $this->model->insertData('tbl_product_batches', $product_batch_data); // Insert batch data
-
 				foreach ($fk_product_attribute_id as $key => $attribute_id) {
 					$product_attribute = [
 						'fk_product_id' => $product_insert_id,
@@ -514,8 +499,7 @@ class Admin extends CI_Controller
 					'MRP' => $mrp,
 					'selling_price' => $selling_price,
 				];
-				$this->model->insertData('tbl_product_price', $product_price);
-				
+				$this->model->insertData('tbl_product_price', $product_price);				
 				$product_inventory = [
 					'fk_product_id' => $product_insert_id,
 					'fk_login_id' => $login_id,
@@ -528,9 +512,7 @@ class Admin extends CI_Controller
 					'fk_inventory_entry_type'=>$inventory_entry_type
 				];
 				$product_inventory_insert_id = $this->model->insertData('tbl_product_inventory', $product_inventory);
-
 				$CI = &get_instance();
-
 				// Create the dynamic body
 				$sku_code = $this->model->selectWhereData('tbl_sku_code_master', array('id' => $product_sku_code), 'sku_code', true);
 				$dynamic_body = '
@@ -539,7 +521,6 @@ class Admin extends CI_Controller
 						<p>Quantity Added: <strong>' . $add_quantity . '</strong></p>
 						<p>Batch No: <strong>' . $batch_no . '</strong></p>
 					';
-
 				// Load the email template
 				$email_message = $this->load->view('email_template', [
 					'dynamic_body_content' => $dynamic_body,
@@ -549,7 +530,6 @@ class Admin extends CI_Controller
 				// Now send the email using your helper
 				$to_email = "shirin@sda-zone.com"; // Replace with actual receiver
 				$subject = 'New Stock Added - ' . $product_name . '(' . $product_sku_code . ')';
-
 				// $send = send_inventory_email($to_email, $subject, $email_message);
 			}
 			if ($product_inventory_insert_id) {
@@ -801,8 +781,6 @@ class Admin extends CI_Controller
 				'fk_batch_id' => $new_batch_inserted_id,
 				'add_quantity' => $add_new_quantity,
 				'total_quantity' => $add_new_quantity,					
-				// 'channel_type' => $channel_type,
-				// 'fk_sale_channel_id' => $sale_channel,
 				'reason' => $add_new_reason,
 				'used_status' => 1,
 				'fk_sourcing_partner_id' => $add_new_fk_sourcing_partner_id,
@@ -840,7 +818,6 @@ class Admin extends CI_Controller
 		}
 		echo json_encode(['status' => 'success', 'message' => 'Product updated successfully']);
 	}
-
 	public function delete_product()
 	{
 		$this->load->model('Product_model'); // Load the model
@@ -975,7 +952,6 @@ class Admin extends CI_Controller
 			echo json_encode(['status' => 'error', 'message' => 'Failed to delete Product Type']);
 		}
 	}
-
 	public function add_product_attributes()
 	{
 		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
@@ -1047,7 +1023,6 @@ class Admin extends CI_Controller
 		// Set validation rules
 		$this->form_validation->set_rules('edit_attribute_name', 'Attribute Name', 'required|trim|min_length[2]|max_length[100]');
 		$this->form_validation->set_rules('edit_attribute_type', 'Attribute Type', 'required|in_list[text,dropdown]');
-
 		// Run validation
 		if ($this->form_validation->run() == FALSE) {
 			$response = [
@@ -1101,7 +1076,6 @@ class Admin extends CI_Controller
 			echo json_encode(['status' => 'error', 'message' => 'Failed to delete Product Attribute']);
 		}
 	}
-
 	public function add_product_attributes_value()
 	{
 		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
@@ -1194,7 +1168,7 @@ class Admin extends CI_Controller
 			];
 
 			$updated = $this->model->updateData('tbl_attribute_values', $updateData, ['id' => $id]);
-			$this->model->addUserLog($login_id, 'Update Attribute Value', 'tbl_attribute_values', $data);
+			$this->model->addUserLog($login_id, 'Update Attribute Value', 'tbl_attribute_values', $updateData);
 
 			if ($updated) {
 				echo json_encode(["status" => "success", "message" => "Attribute Value updated successfully."]);

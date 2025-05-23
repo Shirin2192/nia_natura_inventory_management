@@ -3,7 +3,6 @@ $(document).ready(function () {
 		allow_single_deselect: true,
 		heigth: '100%'
 	});
-
 	//Save Product Details
 	$("#ProductForm").submit(function (e) {
 		e.preventDefault();
@@ -56,8 +55,6 @@ $(document).ready(function () {
 			}
 		});
 	});
-
-
 	function formatDetails(d) {
 		let attributeTable = '<table style="border-collapse: collapse; margin-left: 50px; width: 80%;">' +
 			'<thead style="background-color: #f2f2f2; text-align: left;">' +
@@ -180,7 +177,6 @@ $(document).ready(function () {
 	
 		order: [[1, 'asc']]
 	});
-	
 	// ✅ Handle Row Expansion (Plus/Minus toggle)
 	$('#product_table tbody').on('click', 'td.details-control .toggle-details', function () {
 		let tr = $(this).closest('tr');
@@ -196,18 +192,14 @@ $(document).ready(function () {
 			tr.addClass('shown');
 			button.text('-').removeClass('btn-info').addClass('btn-danger'); // minus
 		}
-	});
-	
-	
+	});	
 });
 $(document).ready(function () {
 	// Initialize chosen-select
 	$(".chosen-select").chosen({ width: "100%" });
-
 	// Unbind any existing change event to prevent duplicate bindings
 	$("#fk_product_types_id").off("change").on("change", function () {
 		var productTypeId = $(this).val(); // Get selected Product Type ID
-
 		if (productTypeId) {
 			$.ajax({
 				url: frontend + controllerName + "/get_attribute_on_product_types_id", // API to get attributes
@@ -216,15 +208,12 @@ $(document).ready(function () {
 				dataType: "json",
 				success: function (response) {
 					var options = '<option value="" disabled selected>Select Attribute</option>';
-
 					if (response.data.length === 0) {
 						options += '<option value="" disabled selected>No attributes available</option>';
 					}
-
 					$.each(response.data, function (index, item) {
 						options += `<option value="${item.id}" data-type="${item.attribute_type}">${item.attribute_name}</option>`;
 					});
-
 					$(".fk_product_attribute_id").html(options).trigger("chosen:updated");
 					$("#attribute_fields_container").empty(); // Clear fields when product type changes
 				},
@@ -237,7 +226,6 @@ $(document).ready(function () {
 			$("#attribute_fields_container").empty();
 		}
 	});
-
 	$("#channel_type").off("change").on("change", function () {
 		var channel_type = $(this).val(); // Get selected Product Type ID
 		if (channel_type) {
@@ -252,16 +240,12 @@ $(document).ready(function () {
 					if (response.data.length === 0) {
 						options += '<option value="" disabled>No Sale Channel available</option>';
 					}
-
 					$.each(response.data, function (_, item) {
 						options += `<option value="${item.id}">${item.sale_channel}</option>`;
 					});
-
 					$("#sale_channel").html(options);
-
 					const preselectedValue = "3"; // Replace with your dynamic value
 					$("#sale_channel").val(preselectedValue); // Set selected value here
-
 					if ($("#sale_channel").data('chosen')) {
 						$("#sale_channel").trigger("chosen:updated");
 					} else {
@@ -275,46 +259,37 @@ $(document).ready(function () {
 				$("#sale_channel").trigger("chosen:updated");
 			}
 		}
-
 	});
 });
-
 document.addEventListener("DOMContentLoaded", function () {
 	// Initialize chosen plugin for existing selects
 	$(".chosen-select").chosen({ width: "100%" });
-
 	let attributeIndex = 2; // Track new attribute indexes
 	let selectedAttributes = new Set(); // Track selected attribute IDs
-
 	/**
 	 * Add new attribute field
 	 */
 	document.getElementById('add_more_attributes').addEventListener('click', function () {
 		// Get the attributes container
 		let attributesContainer = document.getElementById('attributes_container');
-
 		// Create a new div for the attribute
 		let newAttributeDiv = document.createElement('div');
 		newAttributeDiv.classList.add('col-lg-6', 'mb-3');
 		newAttributeDiv.setAttribute('data-index', attributeIndex); // Add a data-index for tracking
-
 		// Create a form group for the attribute
 		let formGroupDiv = document.createElement('div');
 		formGroupDiv.classList.add('form-group');
-
 		// Create label for the select dropdown
 		let label = document.createElement('label');
 		label.classList.add('col-form-label');
 		label.setAttribute('for', 'fk_product_attribute_id_' + attributeIndex);
 		label.innerHTML = 'Attribute <span class="text-danger">*</span>';
-
 		// Create new attribute select dropdown
 		let select = document.createElement('select');
 		select.classList.add('chosen-select', 'form-control', 'fk_product_attribute_id');
 		select.setAttribute('id', 'fk_product_attribute_id_' + attributeIndex);
 		select.setAttribute('name', 'fk_product_attribute_id[]');
 		select.setAttribute('style', 'width: 100%;'); // Set width to 100% for Chosen select
-
 		// Copy existing options from the first dropdown but disable already selected options
 		let firstDropdown = document.querySelector('.fk_product_attribute_id');
 		if (firstDropdown) {
@@ -323,17 +298,14 @@ document.addEventListener("DOMContentLoaded", function () {
 				let newOption = document.createElement('option');
 				newOption.value = option.value;
 				newOption.text = option.text;
-
 				// Copy data attributes
 				if (option.dataset.type) {
 					newOption.dataset.type = option.dataset.type;
 				}
-
 				// Disable if this attribute is already selected
 				if (selectedAttributes.has(option.value) && option.value !== "") {
 					newOption.disabled = true;
 				}
-
 				select.appendChild(newOption);
 			});
 		}
@@ -347,8 +319,6 @@ document.addEventListener("DOMContentLoaded", function () {
 		removeButton.type = 'button';
 		removeButton.classList.add('btn', 'btn-danger', 'mt-2', 'remove-attribute');
 		removeButton.textContent = 'Remove';
-		
-
 		// Append elements
 		formGroupDiv.appendChild(label);
 		formGroupDiv.appendChild(select);
@@ -359,12 +329,9 @@ document.addEventListener("DOMContentLoaded", function () {
 		let rowWrapper = document.createElement('div');
 		rowWrapper.classList.add('row');
 		rowWrapper.appendChild(newAttributeDiv);
-
 		attributesContainer.appendChild(rowWrapper);
-
 		// Initialize Chosen plugin for the new select
 		$("#" + select.id).chosen({ width: "100%" });
-
 		// Increment index for the next attribute
 		attributeIndex++;
 	});
@@ -390,7 +357,6 @@ document.addEventListener("DOMContentLoaded", function () {
 				selectedAttributes.delete(selectedValue);
 				updateAllDropdowns();
 			}
-
 			// Remove the attribute div itself
 			attributeDiv.remove();
 		}
@@ -453,7 +419,6 @@ document.addEventListener("DOMContentLoaded", function () {
 			$("#attribute_fields_container").find(`[data-index="${attributeIndex}"]`).remove();
 			return;
 		}
-
 		// Fetch additional data related to selected attribute type dynamically
 		$.ajax({
 			url: frontend + controllerName + "/get_attribute_values_on_product_attributes_id",
@@ -789,12 +754,6 @@ $(document).on("click", ".update-product", function () {
 				{ value: 'Online', label: 'Online' },
 				{ value: 'Offline', label: 'Offline' },
 			];
-			
-			// Add console logs for debugging
-			// console.log("Channel Types:", channelTypes);
-			// console.log("Sale Channel IDs:", saleChannelIds);
-			// console.log("Sale Channels:", sale_channel);
-			
 			// Loop through each batch and add it to the UI
 			batchIds.forEach((batchId, index) => {
 				// Create channel type dropdown HTML with string comparison
@@ -920,8 +879,7 @@ $(document).on("click", ".update-product", function () {
 						</div>
 					</div>
 				</div>
-				`;
-			
+				`;			
 				// Check if the total quantity is 0, if so, wrap the entire row in a span
 				if (parseInt(quantity) === 0) {
 					batchRow = `<span class="out-of-stock">${batchRow}</span>`;
@@ -931,121 +889,7 @@ $(document).on("click", ".update-product", function () {
 				$("#batch_fields_container_edit").append(batchRow);
 			});
 			
-		// 	batchIds.forEach((batchId, index) => {
-		// 		// Create channel type dropdown HTML with string comparison
-		// 		let channelTypeOptionsHtml = channelTypeOptions.map(option => {
-		// 			const selected = String(option.value) === String(channelTypes[index] || '') ? 'selected' : '';
-		// 			return `<option value="${option.value}" ${selected}>${option.label}</option>`;
-		// 		}).join('');
-				
-		// 		// Create sale channel dropdown HTML with string comparison
-		// 		let saleChannelOptionsHtml = '';
-		// 		if (sale_channel && sale_channel.length > 0) {
-		// 			saleChannelOptionsHtml = sale_channel.map(sc => {
-		// 				const selected = String(sc.id) === String(saleChannelIds[index] || '') ? 'selected' : '';
-		// 				return `<option value="${sc.id}" ${selected}>${sc.sale_channel}</option>`;
-		// 			}).join('');
-		// 		}
-
-		// 		let sourcing_partnerOptionsHtml = '';
-		// 		if (sourcing_partner && sourcing_partner.length > 0) {
-		// 			sourcing_partnerOptionsHtml = sourcing_partner.map(sp => {
-		// 				const selected = String(sp.id) === String(fk_sourcing_partner_id[index] || '') ? 'selected' : '';
-		// 				return `<option value="${sp.id}" ${selected}>${sp.name}</option>`;
-		// 			}).join('');
-		// 		}
-				
-		// 		const batchRow = `
-		// 		<div class="card mb-3 batch-card" data-index="${index + 1}">
-		// 			<div class="card-body">
-		// 				<div class="row">
-		// 					<input type="hidden" name="update_batch_id[]" value="${batchId}">
-	
-		// 					<div class="col-md-4">
-		// 						<div class="form-group">
-		// 							<label>Batch No.</label>
-		// 							<input type="text" name="batch_no[]" class="form-control" value="${batchNos[index] || ''}" readonly>
-		// 						</div>
-		// 					</div>
-		// 					<div class="col-md-4">
-		// 						<div class="form-group">
-		// 							<label>Manufacture Date</label>
-		// 							<input type="date" name="update_manufacture_date[]" class="form-control" value="${manufacturedDates[index] || ''}">
-		// 						</div>
-		// 					</div>
-		// 					<div class="col-md-4">
-		// 						<div class="form-group">
-		// 							<label>Expiry Date</label>
-		// 							<input type="date" name="update_expiry_date[]" class="form-control" value="${expiryDates[index] || ''}">
-		// 						</div>
-		// 					</div>	
-		// 					<div class="col-md-4 mt-2">
-		// 						<div class="form-group">
-		// 							<label>Quantity</label>
-		// 							<input type="number" name="update_total_quantity[]" class="form-control" value="${quantities[index] || '0'}">
-		// 						</div>
-		// 					</div>	
-		// 					<div class="col-md-4 mt-2">
-		// 						<div class="form-group">
-		// 							<label>Purchase Price</label>
-		// 							<input type="text" name="update_purchase_price[]" class="form-control" value="${purchasePrices[index] || '0'}">
-		// 						</div>
-		// 					</div>	
-		// 					<div class="col-md-4 mt-2">
-		// 						<div class="form-group">
-		// 							<label>MRP</label>
-		// 							<input type="text" name="update_mrp[]" class="form-control" value="${mrpPrices[index] || '0'}">
-		// 						</div>
-		// 					</div>	
-		// 					<div class="col-md-4 mt-2">
-		// 						<div class="form-group">
-		// 							<label>Selling Price</label>
-		// 							<input type="text" name="update_selling_price[]" class="form-control" value="${sellingPrices[index] || '0'}">
-		// 						</div>
-		// 					</div>
-		// 					<div class="col-md-4 mt-2">
-		// 						<div class="form-group">
-		// 						<label>Sourcing Partener</label>
-		// 						<select name="update_fk_sourcing_partner_id[]" class="form-control batch-channel-type">
-		// 							<option value="">Select Sourcing Partener</option>
-		// 							${sourcing_partnerOptionsHtml}
-		// 						</select>
-		// 						</div>
-		// 					</div>
-							
-		// 					<div class="col-md-4 mt-2">
-		// 						<div class="form-group">
-		// 							<label>Status</label>
-		// 							<span class="badge ${parseInt(quantities[index] || '0') > 0 ? 'bg-success' : 'bg-danger'}">
-		// 								${parseInt(quantities[index] || '0') > 0 ? 'In Stock' : 'Out of Stock'}
-		// 							</span>
-		// 						</div>
-		// 					</div>
-		// 				</div>
-		// 			</div>
-		// 		</div>
-		// 		`;
-		// 		$("#batch_fields_container_edit").append(batchRow);
-
-		// // 	<div class="col-md-4 mt-2">
-		// // 		<div class="form-group">
-		// // 		<label>Channel Type</label>
-		// // 		<select name="update_channel_type[]" class="form-control batch-channel-type">
-		// // 			<option value="">Select Channel Type</option>
-		// // 			${channelTypeOptionsHtml}
-		// // 		</select>
-		// // 	</div>
-		// // </div>
-		// // <div class="col-md-4 mt-2">
-		// // 	<div class="form-group">
-		// // 		<label>Sale Channel</label>
-		// // 		<select name="update_sale_channel[]" class="form-control batch-sale-channel">
-		// // 			<option value="">Select Sale Channel</option>
-		// // 			${saleChannelOptionsHtml}
-		// // 		</select>
-		// // 	</div>
-		// // </div>
-		// 	});
+		
 			
 			// Initialize any chosen dropdowns inside new batch rows
 			$(".batch-channel-type, .batch-sale-channel").chosen({
@@ -1068,7 +912,6 @@ $(document).ready(function () {
 			alert("Please select a Product Type first.");
 			return;
 		}
-
 		// Fetch attribute options based on selected product type
 		$.ajax({
 			url: frontend + 'admin/get_attribute_on_product_types_id',
@@ -1146,7 +989,6 @@ $(document).on('change', '.fk_product_attribute_id_edit', function () {
             if (val) selectedIds.push(val);
         }
     });
-
     // Step 2: Loop through all selects and disable options already selected
     $(".fk_product_attribute_id_edit").each(function () {
         let $select = $(this);
@@ -1160,7 +1002,6 @@ $(document).on('change', '.fk_product_attribute_id_edit', function () {
                 $(this).removeAttr("disabled");
             }
         });
-
         // Refresh chosen
         $select.trigger("chosen:updated");
     });
@@ -1234,7 +1075,6 @@ function disableDuplicateAttributeOptions() {
 				$(this).prop("disabled", false);
 			}
 		});
-
 		// Update Chosen dropdown UI
 		$select.trigger("chosen:updated");
 	});
@@ -1242,7 +1082,6 @@ function disableDuplicateAttributeOptions() {
 
 $("#update_channel_type").off("change").on("change", function () {
 	var channel_type = $(this).val(); // Get selected Product Type ID
-
 	if (channel_type) {
 		$.ajax({
 			url: frontend + controllerName + "/get_sales_channel_on_channel_type", // API to get attributes
@@ -1255,16 +1094,12 @@ $("#update_channel_type").off("change").on("change", function () {
 				if (response.data.length === 0) {
 					update_options += '<option value="" disabled>No Sale Channel available</option>';
 				}
-
 				$.each(response.data, function (_, item) {
 					update_options += `<option value="${item.id}">${item.sale_channel}</option>`;
 				});
-
 				$("#update_sale_channel").html(update_options);
-
 				const preselectedValue = "3"; // Replace with your dynamic value
 				$("#update_sale_channel").val(preselectedValue); // Set selected value here
-
 				if ($("#update_sale_channel").data('chosen')) {
 					$("#update_sale_channel").trigger("chosen:updated");
 				} else {
@@ -1278,7 +1113,6 @@ $("#update_channel_type").off("change").on("change", function () {
 			$("#update_sale_channel").trigger("chosen:updated");
 		}
 	}
-
 });
 $("#add_new_channel_type").off("change").on("change", function () {
 	var add_new_channel_type = $(this).val(); // Get selected Product Type ID
@@ -1446,7 +1280,6 @@ $(document).ready(function() {
 				if (typeof response === "string") {
 					response = JSON.parse(response);
 				}
-	
 				// Reset form and UI
 				$("#excelUploadForm")[0].reset();
 				$(".chosen-select").val('').trigger('chosen:updated');

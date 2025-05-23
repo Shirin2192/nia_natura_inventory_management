@@ -70,55 +70,6 @@ $("#sku_code").off("change").on("change", function () {
         $("#product_id").val("").trigger("change");
     }
 });
-
-// Product ID change → fetch Batch Numbers
-// $("#product_id").off("change").on("change", function () {
-//     var product_id = $(this).val();
-//     if (product_id) {
-//         $.ajax({
-//             url: frontend + controllerName + "/get_batch_no_on_product_id",
-//             type: "POST",
-//             data: { product_id: product_id },
-//             dataType: "json",
-//             success: function (response) {
-//                 console.log(response);
-//                 var batch_no_option = '<option value="" disabled selected>Select Batch Number</option>';
-
-//                 if (response.data.length === 0) {
-//                     batch_no_option += '<option value="" disabled>No Batch Number available</option>';
-//                 }
-
-//                 if (response.data && typeof response.data === "object") {
-//                     batch_no_option += `<option value="${response.data.id}">${response.data.batch_no}</option>`;
-//                 } else {
-//                     batch_no_option += '<option value="" disabled>No Batch Number available</option>';
-//                 }
-
-//                 $("#fk_batch_id").html(batch_no_option);
-
-//                 // Re-initialize or update chosen
-//                 if ($("#fk_batch_id").data('chosen')) {
-//                     $("#fk_batch_id").trigger("chosen:updated");
-//                 } else {
-//                     $("#fk_batch_id").chosen({ width: "100%" });
-//                 }
-//             },
-//             error: function () {
-//                 alert("An error occurred while fetching the Batch Numbers.");
-//                 $("#fk_batch_id").html('<option value="">Select Batch Number</option>');
-//                 if ($("#fk_batch_id").data('chosen')) {
-//                     $("#fk_batch_id").trigger("chosen:updated");
-//                 }
-//             }
-//         });
-//     } else {
-//         // Clear fk_batch_id dropdown
-//         $("#fk_batch_id").html('<option value="">Select Batch Number</option>');
-//         if ($("#fk_batch_id").data('chosen')) {
-//             $("#fk_batch_id").trigger("chosen:updated");
-//         }
-//     }
-// });
 $("#product_id").off("change").on("change", function () {
     var product_id = $(this).val();
     if (product_id) {
@@ -349,9 +300,7 @@ $(document).ready(function () {
 });
 $('#ExcelOrderUploadForm').on('submit', function (e) {
     e.preventDefault();
-
     const formData = new FormData(this);
-
     $.ajax({
         url: frontend + controllerName + "/upload_order_excel",
         type: "POST",

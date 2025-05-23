@@ -52,7 +52,6 @@ $(document).ready(function () {
                             data-toggle="modal" data-target="#viewProductAttributeModal">
                             <i class="icon-eye menu-icon"></i>
                         </button>`;
-
                        }
                         if (currentPermission.can_edit === "1") {
                             actions += ` <button class="btn btn-sm btn-warning edit-attribute" 
@@ -82,9 +81,6 @@ $(document).ready(function () {
         responsive: true
     });
 });
-
-
-
 $("#productAttributeValueForm").on("submit", function (event) {
     event.preventDefault(); // Prevent page reload
     $.ajax({
@@ -109,13 +105,11 @@ $("#productAttributeValueForm").on("submit", function (event) {
                     button: false,
                     timer: 2000 // Auto close after 2 seconds
                 });
-                $("#productAttributeValueForm")[0].reset(); // Reset form
-                
+                $("#productAttributeValueForm")[0].reset(); // Reset form                
                 $("#attribute_value_error").html(""); // Clear error message
                 $("#fk_attribute_id_error").html(""); // Clear error message
                 $(".chosen-select").val("").trigger("chosen:updated"); // Clear chosen select
                 $('#ProductAttributeValueTable').DataTable().ajax.reload(); // Reload DataTable
-                
             }
         }
     });
@@ -199,7 +193,7 @@ $("#productAttributeValueForm").on("submit", function (event) {
                     });     
                     $("#editProductAttributeValueModal").modal("hide"); // Close modal
                     $("#editAttributeValueForm")[0].reset(); // Reset form
-                    // loadFlavours(); // Refresh DataTable         
+                   $('#ProductAttributeValueTable').DataTable().ajax.reload(); // Reload DataTable       
                     location.reload();  
                   
                 }
@@ -242,6 +236,7 @@ $("#productAttributeValueForm").on("submit", function (event) {
                         timer: 2000
                     });   
                     $("#deleteProductAttributeValueModal").modal("hide"); // Hide modal after successful deletion
+                    $('#ProductAttributeValueTable').DataTable().ajax.reload(); // Reload DataTable
                     location.reload(); // Refresh the page or update the table dynamically
                 } else {
                     alert("Error: Unable to delete attribute.");
