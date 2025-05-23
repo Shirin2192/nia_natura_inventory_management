@@ -51,7 +51,7 @@ $current_controller = $this->router->fetch_class();
                 </a>
             </li>
             <?php endif; ?>
-            <?php if (in_array(10, $accessible_sidebar_ids)) : ?>
+            <?php if (in_array(12, $accessible_sidebar_ids)) : ?>
             <li>
                 <a href="<?= base_url() . $current_controller ?>/sku_code" aria-expanded="false">
                     <i class="icon-star menu-icon"></i> <span class="nav-text"> SKU Code Master</span>

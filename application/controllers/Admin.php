@@ -1251,14 +1251,19 @@ class Admin extends CI_Controller
 		$role_id = $this->input->post('role_id');
 		$permissions = $this->input->post('permissions');
 
-		if (empty($permissions)) {
+		if (empty($permissions) || !is_array($permissions)) {
 			echo json_encode([
 				'status' => false,
-				'message' => "No permissions selected"
+				'message' => "No permissions selected or invalid data structure" 
 			]);
 			return;
 		}
+		  $this->db->trans_start(); // Start transaction
 
+    	// Optional: delete permissions that are no longer selected
+    	$this->db->where('fk_role_id', $role_id)
+             ->where_not_in('fk_sidebar_id', array_keys($permissions))
+             ->delete('tbl_permissions');
 		foreach ($permissions as $module_id => $perm) {
 			$data = [
 				'can_view' => !empty($perm['view']) ? 1 : 0,
@@ -1274,12 +1279,15 @@ class Admin extends CI_Controller
 				'fk_sidebar_id' => $module_id
 			]);
 
-			if ($existing) {
+			if ($existing > 0) {
 				// Update existing permission
 				$this->model->updateData('tbl_permissions', $data, [
 					'fk_role_id' => $role_id,
 					'fk_sidebar_id' => $module_id
 				]);
+				if ($updated === false) {
+					log_message('error', 'Failed to update permission for role_id: ' . $role_id . ' and sidebar_id: ' . $module_id);
+				}
 				$this->model->addUserLog($login_id, 'Update Role Permission', 'tbl_permissions', $data);
 
 			} else {
@@ -1290,8 +1298,19 @@ class Admin extends CI_Controller
 				$this->model->addUserLog($login_id, 'Inserted Role Permission', 'tbl_permissions', $data);
 			}
 		}
+		$this->db->trans_complete(); // Commit transaction
 
-		echo json_encode(['status' => true, 'message' => 'Permissions saved successfully']);
+		if ($this->db->trans_status() === FALSE) {
+			echo json_encode([
+				'status' => false,
+				'message' => 'Failed to save permissions due to database error.'
+			]);
+		} else {
+			echo json_encode([
+				'status' => true,
+				'message' => 'Permissions saved successfully'
+			]);
+		}
 	}
 
 	public function get_role_permissions()
