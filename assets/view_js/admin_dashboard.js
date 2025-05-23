@@ -1,46 +1,103 @@
 document.addEventListener('DOMContentLoaded', function () {
-    
-   // Stock Levels by Product (Bar) - Single Color Effect
-   var stockLevelChart = new Chart(document.getElementById('stockLevelChart'), {
+//     const fullLabels = stockProductNames;
+// var stockLevelChart = new Chart(document.getElementById('stockLevelChart'), {
+//     type: 'bar',
+//     data: {
+//         labels: stockProductNames.map(name => name.length > 15 ? name.substring(0, 15) + '...' : name), // 👈 Place it here
+//         datasets: [{
+//             label: 'Available Stock',
+//             data: stockQuantities,
+//             backgroundColor: 'rgba(123, 104, 238, 0.9)',
+//             borderColor: '#8A2BE2',
+//             borderWidth: 2,
+//             borderRadius: 10,
+//         }]
+//     },
+//     options: {
+//         responsive: true,
+//         maintainAspectRatio: false,
+//         plugins: {
+//             tooltip: {
+//                 callbacks: {
+//                     title: function(tooltipItems) {
+//                         return fullLabels[tooltipItems[0].dataIndex];
+//                     }
+//                 }
+//             },
+//             legend: {
+//                 display: true
+//             }
+//         },
+//         scales: {
+//             x: {
+//                 ticks: {
+//                     color: '#4B0082',
+//                     autoSkip: false,
+//                     maxRotation: 60,
+//                     minRotation: 45
+//                 },
+//                 grid: { color: 'rgba(200, 200, 200, 0.2)' }
+//             },
+//             y: {
+//                 beginAtZero: true,
+//                 ticks: { color: '#4B0082' },
+//                 grid: { color: 'rgba(200, 200, 200, 0.2)' }
+//             }
+//         }
+//     }
+// });
+// ✅ Set dynamic canvas width based on number of products
+const dynamicWidth = Math.max(stockProductNames.length * 60, 800); // 60px per bar minimum
+const chartCanvas = document.getElementById('stockLevelChart');
+chartCanvas.style.width = dynamicWidth + 'px'; // Set canvas width
+chartCanvas.parentElement.style.overflowX = 'auto'; // Enable horizontal scroll if needed
+
+// ✅ Initialize Chart.js
+const stockLevelChart = new Chart(chartCanvas, {
     type: 'bar',
     data: {
-        labels: stockProductNames, // JavaScript variable for product names
+        labels: stockProductNames.map(name => name.length > 15 ? name.substring(0, 15) + '...' : name),
         datasets: [{
             label: 'Available Stock',
-            data: stockQuantities, // JavaScript variable for quantities
-            backgroundColor: 'rgba(123, 104, 238, 0.9)', // Single vibrant color (Purple)
-            borderColor: '#8A2BE2',  // Border color matches the bar color (Violet)
+            data: stockQuantities,
+            backgroundColor: 'rgba(123, 104, 238, 0.9)',
+            borderColor: '#8A2BE2',
             borderWidth: 2,
-            borderRadius: 10, // Rounded corners for bars
+            borderRadius: 10,
         }]
     },
     options: {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
-            legend: { 
-                labels: { color: '#8A2BE2', font: { size: 14, weight: 'bold' } } // Legend color matching the theme
-            },
             tooltip: {
-                backgroundColor: '#8A2BE2', // Tooltip background with the same violet color
-                titleColor: '#fff',
-                bodyColor: '#fff',
-                borderColor: '#FFD700', // Golden border for contrast
-                borderWidth: 1
-            }
+                callbacks: {
+                    title: function(tooltipItems) {
+                        return stockProductNames[tooltipItems[0].dataIndex]; // Full name in tooltip
+                    }
+                }
+            },
+            legend: { display: true }
         },
         scales: {
+            x: {
+                ticks: {
+                    color: '#4B0082',
+                    autoSkip: false,
+                    maxRotation: 60,
+                    minRotation: 45
+                },
+                grid: { color: 'rgba(200, 200, 200, 0.2)' }
+            },
             y: {
                 beginAtZero: true,
-                ticks: { color: '#4B0082' }, // Indigo for ticks
-                grid: { color: 'rgba(200, 200, 200, 0.2)' } // Subtle grid lines
-            },
-            x: {
-                ticks: { color: '#4B0082' }, // Indigo for ticks
-                grid: { color: 'rgba(200, 200, 200, 0.2)' } // Subtle grid lines
+                ticks: { color: '#4B0082' },
+                grid: { color: 'rgba(200, 200, 200, 0.2)' }
             }
         }
     }
 });
+
  // Top 5 Products by Quantity (Horizontal Bar)
     var topProductsChart = new Chart(document.getElementById('topProductsChart'), {
         type: 'bar',

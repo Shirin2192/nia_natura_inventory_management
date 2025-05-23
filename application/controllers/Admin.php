@@ -69,11 +69,23 @@ class Admin extends CI_Controller
 				true
 			);
 			// 2. Stock Levels
-			$stock_data = $this->Dashboard_model->fetch_stock_levels();		    
-            $response['stock_product_names'] = array_map(function($item) {
-                return $item['product_name'] . ' (' . $item['sku_code'] . ')';
-            }, $stock_data);
-			$response['stock_quantities'] = array_column($stock_data, 'total_quantity');
+			// $stock_data = $this->Dashboard_model->fetch_stock_levels();		    
+            // $response['stock_product_names'] = array_map(function($item) {
+            //     return $item['product_name'] . ' (' . $item['sku_code'] . ')';
+            // }, $stock_data);
+			// $response['stock_quantities'] = array_column($stock_data, 'total_quantity');
+			$stock_data = $this->Dashboard_model->fetch_stock_levels();
+
+			$stock_product_names = array_map(function($item) {
+				return $item['product_name'] . ' (' . $item['sku_code'] . ')';
+			}, $stock_data);
+
+			$stock_quantities = array_column($stock_data, 'total_quantity');
+
+			$response['stock_product_names'] = $stock_product_names;
+			$response['stock_quantities'] = $stock_quantities;
+
+
 			// 3. Batch Expiry - Fetch product wise expiry summary
 			$batch_expiry = $this->Dashboard_model->getProductBatchExpirySummary(30); // 30 days
 			$response['batch_expiry_near'] = $batch_expiry['near_expiry']; // Near Expiry batches

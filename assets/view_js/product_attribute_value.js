@@ -31,7 +31,7 @@ $(document).ready(function () {
 					return meta.row + 1; // Auto-increment Sr No based on row index
 				}
 			},
-            { data: "product_type_name", title: "Attribute Name" },
+            { data: "product_type_name", title: "Product Type" },
             { data: "attribute_name", title: "Attribute Name" },
             { data: "attribute_value", title: "Attribute Value" },
             {

@@ -80,7 +80,7 @@ $("#ProductTypeForm").on("submit", function (event) {
 
 				$("#ProductTypeForm")[0].reset(); // Reset form
 				$("#product_type_name_error").text(""); // Clear error message
-				$("#ProductTypeTable").DataTable().ajax.reload(); // Reload DataTable
+				$("#productTypeTable").DataTable().ajax.reload(); // Reload DataTable
 			}
 		},
 	});
@@ -142,7 +142,7 @@ $("#editProductTypeForm").submit(function (e) {
 					timer: 2000, // Auto close after 2 seconds
 				});
 				$("#editProductTypeModal").modal("hide");
-				$("#ProductTypeTable").DataTable().ajax.reload(); // Reload DataTable
+				$("#productTypeTable").DataTable().ajax.reload(); // Reload DataTable
 				location.reload(); // Reload page
 			} else {
 				alert("Error updating data.");
@@ -177,8 +177,8 @@ $("#confirm-delete").on("click", function () {
 					timer: 2000,
 				});
 				$("#deleteModal").modal("hide"); // Hide modal after delete
-				$("#ProductTypeTable").DataTable().ajax.reload(); // Reload DataTable
-				location.reload(); // Reload page
+				$("#productTypeTable").DataTable().ajax.reload(); // Reload DataTable
+				// location.reload(); // Reload page
 			} else {
 				swal({
 					icon: "error",

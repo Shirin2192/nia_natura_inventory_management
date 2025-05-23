@@ -12,11 +12,9 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class Inventory_manager extends CI_Controller
 {
-
 	public function __construct()
 	{
 		parent::__construct();
-
 		// Prevent browser caching for all admin pages
 		$this->output
 			->set_header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0")
