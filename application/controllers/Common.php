@@ -115,10 +115,10 @@ class Common extends CI_Controller {
 	
 					$response = ['status' => 'success', 'redirect' => $redirect_url];
 				} else {
-					$response = ['status' => 'error', 'login_error' => 'Invalid Email or Password'];
+					$response = ['status' => 'error', 'password_error' => 'Invalid Password'];
 				}
 			} else {
-				$response = ['status' => 'error', 'login_error' => 'Invalid Email or Password'];
+				$response = ['status' => 'error', 'email_error' => 'Invalid Email'];
 			}
 		}
 	
