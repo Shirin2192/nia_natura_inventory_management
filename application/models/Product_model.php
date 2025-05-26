@@ -5,47 +5,57 @@ class Product_model extends CI_Model {
 		parent::__construct();
 	}
 
-public function get_product_detail()
-{
-    $this->db->select('
-        tbl_product_master.*,
-        tbl_sku_code_master.sku_code,
-        GROUP_CONCAT(DISTINCT tbl_product_attributes.fk_product_types_id) as fk_product_types_id,
-        GROUP_CONCAT(DISTINCT tbl_product_attributes.fk_attribute_id) as fk_attribute_id,
-        GROUP_CONCAT(DISTINCT tbl_product_attributes.fk_attribute_value_id) as fk_attribute_value_id,
-        GROUP_CONCAT(DISTINCT tbl_attribute_master.attribute_name) as attribute_name,
-        GROUP_CONCAT(DISTINCT tbl_product_types.product_type_name) as product_type_name,
-        GROUP_CONCAT(DISTINCT tbl_attribute_values.attribute_value) as attribute_value,
-        tbl_product_price.purchase_price,
-        IFNULL(product_inventory_sum.total_quantity, 0) as total_quantity
-    ');
-    $this->db->from('tbl_product_master');
+    public function get_product_detail()
+    {
+        $this->db->select('
+            tbl_product_master.*,
+            tbl_sku_code_master.sku_code,
+            MAX(IFNULL(inv_user.name, "Unknown")) AS user_name,
+            GROUP_CONCAT(DISTINCT tbl_product_attributes.fk_product_types_id) AS fk_product_types_id,
+            GROUP_CONCAT(DISTINCT tbl_product_attributes.fk_attribute_id) AS fk_attribute_id,
+            GROUP_CONCAT(DISTINCT tbl_product_attributes.fk_attribute_value_id) AS fk_attribute_value_id,
+            GROUP_CONCAT(DISTINCT tbl_attribute_master.attribute_name) AS attribute_name,
+            GROUP_CONCAT(DISTINCT tbl_product_types.product_type_name) AS product_type_name,
+            GROUP_CONCAT(DISTINCT tbl_attribute_values.attribute_value) AS attribute_value,
+            MAX(tbl_product_price.purchase_price) AS purchase_price,
+            IFNULL(MAX(product_inventory_sum.total_quantity), 0) AS total_quantity
+        ');    
+        $this->db->from('tbl_product_master');
+        // Joins
+        $this->db->join('tbl_product_attributes', 'tbl_product_attributes.fk_product_id = tbl_product_master.id', 'left');
+        $this->db->join('tbl_attribute_master', 'tbl_product_attributes.fk_attribute_id = tbl_attribute_master.id', 'left');
+        $this->db->join('tbl_attribute_values', 'tbl_product_attributes.fk_attribute_value_id = tbl_attribute_values.id', 'left');
+        $this->db->join('tbl_product_types', 'tbl_product_attributes.fk_product_types_id = tbl_product_types.id', 'left');
+        $this->db->join('tbl_product_price', 'tbl_product_price.fk_product_id = tbl_product_master.id', 'left');
+        $this->db->join('tbl_sku_code_master', 'tbl_product_master.product_sku_code = tbl_sku_code_master.id', 'left');
+        // Latest inventory join
+        $this->db->join('(
+            SELECT pi.fk_product_id, pi.fk_login_id
+            FROM tbl_product_inventory pi
+            JOIN (
+                SELECT fk_product_id, MAX(id) AS max_id
+                FROM tbl_product_inventory
+                WHERE is_delete = 1
+                GROUP BY fk_product_id
+            ) latest ON pi.fk_product_id = latest.fk_product_id AND pi.id = latest.max_id
+        ) latest_inv', 'latest_inv.fk_product_id = tbl_product_master.id', 'left');
+        $this->db->join('tbl_user AS inv_user', 'inv_user.id = latest_inv.fk_login_id', 'left');
+        // Inventory SUM
+        $this->db->join('(
+            SELECT fk_product_id, SUM(total_quantity) AS total_quantity
+            FROM tbl_product_inventory
+            WHERE used_status = 1 AND is_delete = 1
+            GROUP BY fk_product_id
+        ) AS product_inventory_sum', 'product_inventory_sum.fk_product_id = tbl_product_master.id', 'left');
+        // Filters
+        $this->db->where('tbl_product_master.is_delete', 1);
+        $this->db->where('tbl_product_price.is_delete', 1);
+        // Grouping
+        $this->db->group_by('tbl_product_master.id');
+        $this->db->order_by('tbl_product_master.id', 'DESC');
 
-    // Join attribute and other meta tables
-    $this->db->join('tbl_product_attributes', 'tbl_product_attributes.fk_product_id = tbl_product_master.id', 'left');
-    $this->db->join('tbl_attribute_master', 'tbl_product_attributes.fk_attribute_id = tbl_attribute_master.id', 'left');
-    $this->db->join('tbl_attribute_values', 'tbl_product_attributes.fk_attribute_value_id = tbl_attribute_values.id', 'left');
-    $this->db->join('tbl_product_types', 'tbl_product_attributes.fk_product_types_id = tbl_product_types.id', 'left');
-    $this->db->join('tbl_product_price', 'tbl_product_price.fk_product_id = tbl_product_master.id', 'left');
-    $this->db->join('tbl_sku_code_master', 'tbl_product_master.product_sku_code = tbl_sku_code_master.id', 'left');
-
-    // ✅ Subquery join to fix wrong SUM
-    $this->db->join('(SELECT fk_product_id, SUM(total_quantity) AS total_quantity
-                     FROM tbl_product_inventory
-                     WHERE used_status = 1 AND is_delete = 1
-                     GROUP BY fk_product_id) as product_inventory_sum',
-                     'product_inventory_sum.fk_product_id = tbl_product_master.id', 'left');
-
-    $this->db->where('tbl_product_master.is_delete', '1');
-    $this->db->where('tbl_product_price.is_delete', 1);
-
-    $this->db->group_by('tbl_product_master.id');
-    $this->db->order_by('tbl_product_master.id', 'DESC');
-
-    $query = $this->db->get();
-    return $query->result_array();
-}
-
+        return $this->db->get()->result_array();
+    }
     public function get_product_by_id($product_id) {
         $this->db->select('
             tbl_product_master.*,

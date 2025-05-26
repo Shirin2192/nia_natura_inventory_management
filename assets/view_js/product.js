@@ -85,7 +85,7 @@ $(document).ready(function () {
 				text: 'Export Nested Excel',
 				title: 'Product with Attributes',
 				exportOptions: {
-					columns: [1, 2, 3, 4, 5, 6] // exporting only visible main columns
+					columns: [1, 2, 3, 4, 5, 6, 7] // exporting only visible main columns
 				},
 				customizeData: function (data) {
 					let newBody = [];
@@ -100,7 +100,9 @@ $(document).ready(function () {
 							rowData.sku_code,
 							rowData.purchase_price,
 							rowData.total_quantity,
-							rowData.product_types.join(", ")
+							rowData.product_types.join(", "),
+							rowData.user_name
+							
 						]);
 	
 						// Child Attributes (Nested rows)
@@ -144,12 +146,14 @@ $(document).ready(function () {
 			{ data: 'sku_code' },
 			// { data: 'purchase_price' },
 			{ data: 'total_quantity' },
+			
 			{
 				data: 'product_types',
 				render: function (data) {
 					return data.join(", ");
 				}
 			},
+			{ data: 'user_name' },
 			{
 				data: 'id',
 				render: function (id, type, row, meta) {
@@ -175,7 +179,7 @@ $(document).ready(function () {
 			}
 		],
 	
-		order: [[1, 'asc']]
+		order: [[0, 'desc']]
 	});
 	// ✅ Handle Row Expansion (Plus/Minus toggle)
 	$('#product_table tbody').on('click', 'td.details-control .toggle-details', function () {
@@ -587,7 +591,7 @@ $(document).on("click", ".update-product", function () {
 			const attribute_master = response.attribute_master;
 			const sourcing_partner = response.sourcing_partner;
 			const inventory_entry_type = response.inventory_entry_type;
-
+			
 			// Clear previous batch details
 			$("#batch_fields_container_edit").empty();
 			// Extract batch data from response (comma-separated)
@@ -608,7 +612,6 @@ $(document).on("click", ".update-product", function () {
 			const update_inventory_id = product.inventory_id ? product.inventory_id.split(",") : [];
 			const fk_inventory_entry_type = product.fk_inventory_entry_type ? product.fk_inventory_entry_type.split(",") : [];
 
-
 			// Fill general product fields
 			$("#update_product_id").val(product.id);
 			$('#update_inventory_id').val(product.inventory_id);
@@ -623,20 +626,22 @@ $(document).on("click", ".update-product", function () {
 			$("#update_description").val(product.description);
 			$("#update_product_image").val(product.images);
 			$("#update_availability_status").val(product.fk_stock_availability_id).trigger("chosen:updated");
-			$("#update_channel_type").val(product.channel_type).trigger("chosen:updated");
+			// $("#update_channel_type").val(product.channel_type).trigger("chosen:updated");
 			$('#attribute_id').val(product.attribute_id);
 			$('#update_manufacture_date').val(product.manufactured_date);
 			$('#update_expiry_date').val(product.expiry_date);
 			$('#update_batch_id').val(product.batch_id);
 			$('#product_price_id').val(product.product_price_id);
 			$('#update_reason').val(product.reason);	
-
+			$("#update_fk_product_types_id").val(product.fk_product_types_id).trigger("chosen:updated");
 			// Populate image preview
-			var imageArray = product.images ? product.images.split(",") : [];
-			var imagePreview = imageArray.map(img =>
-				`<img src="${frontend + 'uploads/products/' + img.trim()}" class="img-fluid m-2" width="100" height="100">`
-			).join('');
-			$("#update_images").html(imagePreview || "<p>No images available</p>");
+			if(product.images) {
+				var imageArray = product.images ? product.images.split(",") : [];
+				var imagePreview = imageArray.map(img =>
+					`<img src="${frontend + 'uploads/products/' + img.trim()}" class="img-fluid m-2" width="100" height="100">`
+				).join('');
+				$("#update_images").html(imagePreview || "<p>No images available</p>");
+			}
 			// Build sale channel options dynamically
 			let saleChannelOptions = '<option value="" disabled>Select Sale Channel</option>';
 			if (sale_channel && sale_channel.length > 0) {
@@ -662,10 +667,8 @@ $(document).on("click", ".update-product", function () {
 			let attributeIds = product.fk_attribute_id.split(",");
 			let attributeTypes = product.attribute_name.split(",");
 			let attributeValues = product.attribute_value.split(",");
-			let attributeTypeIds = product.fk_product_types_id.split(",");
+			let attributeTypeIds = product.fk_product_types_id;
 			let valueIds = product.fk_attribute_value_id.split(",");
-
-			$("#update_fk_product_types_id").val(attributeTypeIds).trigger("chosen:updated");
 
 			attributeIds.forEach((attrId, index) => {
 				let attributeIndex = index + 1;

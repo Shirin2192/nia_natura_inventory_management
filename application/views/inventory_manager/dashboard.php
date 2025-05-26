@@ -75,7 +75,7 @@
                             <h5 class="mb-0">📦 Stock Levels by Product</h5>
                         </div>
                         <div class="card-body">
-                            <canvas id="stockLevelChart"></canvas>
+                           <canvas id="stockLevelChart" style="max-height: 500px;"></canvas>
                         </div>
                     </div>
                 </div>
@@ -109,13 +109,15 @@
     <?php include('common/js_files.php')?>
     <script>
     // Injecting PHP variables into JavaScript
-    var stockProductNames = <?php echo json_encode($stock_product_names); ?>;
-    var stockQuantities = <?php echo json_encode($stock_quantities); ?>;
+    // var stockProductNames = <?php echo json_encode($stock_product_names); ?>;
+    // var stockQuantities = <?php echo json_encode($stock_quantities); ?>;
   
     var top5ProductNames = <?php echo json_encode($top5_product_names); ?>;
     var top5Quantities = <?php echo json_encode($top5_quantities); ?>;
-    
+     const stockProductNames = <?php echo json_encode($stock_product_names); ?>;
+     const stockQuantities = <?php echo json_encode($stock_quantities); ?>;
     </script>
+
     <script src="<?= base_url()?>assets/view_js/admin_dashboard.js"></script>
 
 </body>
