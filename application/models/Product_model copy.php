@@ -10,7 +10,6 @@ public function get_product_detail()
     $this->db->select('
         tbl_product_master.*,
         tbl_sku_code_master.sku_code,
-        tbl_user.name as user_name,
         GROUP_CONCAT(DISTINCT tbl_product_attributes.fk_product_types_id) as fk_product_types_id,
         GROUP_CONCAT(DISTINCT tbl_product_attributes.fk_attribute_id) as fk_attribute_id,
         GROUP_CONCAT(DISTINCT tbl_product_attributes.fk_attribute_value_id) as fk_attribute_value_id,
@@ -32,8 +31,8 @@ public function get_product_detail()
     $this->db->join('tbl_sku_code_master', 'tbl_product_master.product_sku_code = tbl_sku_code_master.id', 'left');
 
     // ✅ Fix broken user join
-    $this->db->join('tbl_product_inventory', 'tbl_product_inventory.fk_product_id = tbl_product_master.id', 'left');
-    $this->db->join('tbl_user', 'tbl_product_inventory.fk_login_id = tbl_user.id', 'left');
+    // $this->db->join('tbl_product_inventory', 'tbl_product_inventory.fk_product_id = tbl_product_master.id', 'left');
+    // $this->db->join('tbl_user', 'tbl_product_inventory.fk_login_id = tbl_user.id', 'left');
 
     // ✅ Subquery join for inventory sum
     $this->db->join('(SELECT fk_product_id, SUM(total_quantity) AS total_quantity
@@ -44,7 +43,6 @@ public function get_product_detail()
 
     $this->db->where('tbl_product_master.is_delete', '1');
     $this->db->where('tbl_product_price.is_delete', 1);
-
     $this->db->group_by('tbl_product_master.id');
     $this->db->order_by('tbl_product_master.id', 'DESC');
 
@@ -149,7 +147,7 @@ public function get_product_detail()
         $this->db->where('tbl_product_inventory.used_status', 1);        
         $this->db->or_where('tbl_product_inventory.total_quantity', 0);
         $this->db->where('tbl_product_master.is_delete', '1');        
-        $this->db->order_by('tbl_product_master.id', 'DESC');
+        // $this->db->order_by('tbl_product_master.id', 'DESC');
         $this->db->group_by('tbl_product_master.id'); // Group by product ID to avoid duplicates
         $query = $this->db->get(); // Execute the query
         return $query->row_array(); // Return the result as an array
