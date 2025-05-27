@@ -100,9 +100,7 @@ $(document).ready(function () {
 							rowData.sku_code,
 							rowData.purchase_price,
 							rowData.total_quantity,
-							rowData.product_types.join(", "),
-							rowData.user_name
-							
+							rowData.product_types.join(", "),							
 						]);
 	
 						// Child Attributes (Nested rows)
@@ -590,8 +588,8 @@ $(document).on("click", ".update-product", function () {
 			const sale_channel = response.sale_channel;
 			const attribute_master = response.attribute_master;
 			const sourcing_partner = response.sourcing_partner;
-			const inventory_entry_type = response.inventory_entry_type;
-			
+            const inventory_entry_type = response.inventory_entry_type;
+            
 			// Clear previous batch details
 			$("#batch_fields_container_edit").empty();
 			// Extract batch data from response (comma-separated)
@@ -599,7 +597,6 @@ $(document).on("click", ".update-product", function () {
 			const batchNos = product.batch_no ? product.batch_no.split(",") : [];
 			const manufacturedDates = product.manufactured_date ? product.manufactured_date.split(",") : [];
 			const expiryDates = product.expiry_date ? product.expiry_date.split(",") : [];
-			const purchase_date = product.purchase_date ? product.purchase_date.split(",") : [];
 			const quantities = product.total_quantity ? product.total_quantity.split(",") : [];
 			const purchasePrices = product.purchase_price ? product.purchase_price.split(",") : [];
 			const mrpPrices = product.MRP ? product.MRP.split(",") : [];
@@ -610,7 +607,8 @@ $(document).on("click", ".update-product", function () {
 			const fk_sourcing_partner_id = product.fk_sourcing_partner_id ? product.fk_sourcing_partner_id.split(",") : [];
 			const product_price_id = product.product_price_id ? product.product_price_id.split(",") : [];
 			const update_inventory_id = product.inventory_id ? product.inventory_id.split(",") : [];
-			const fk_inventory_entry_type = product.fk_inventory_entry_type ? product.fk_inventory_entry_type.split(",") : [];
+            const fk_inventory_entry_type = product.fk_inventory_entry_type ? product.fk_inventory_entry_type.split(",") : [];
+            const purchase_date = product.purchase_date ? product.purchase_date.split(",") : [];
 
 			// Fill general product fields
 			$("#update_product_id").val(product.id);
@@ -626,22 +624,22 @@ $(document).on("click", ".update-product", function () {
 			$("#update_description").val(product.description);
 			$("#update_product_image").val(product.images);
 			$("#update_availability_status").val(product.fk_stock_availability_id).trigger("chosen:updated");
-			// $("#update_channel_type").val(product.channel_type).trigger("chosen:updated");
+			$("#update_channel_type").val(product.channel_type).trigger("chosen:updated");
 			$('#attribute_id').val(product.attribute_id);
 			$('#update_manufacture_date').val(product.manufactured_date);
 			$('#update_expiry_date').val(product.expiry_date);
 			$('#update_batch_id').val(product.batch_id);
 			$('#product_price_id').val(product.product_price_id);
-			$('#update_reason').val(product.reason);	
-			$("#update_fk_product_types_id").val(product.fk_product_types_id).trigger("chosen:updated");
+			$('#update_reason').val(product.reason);
+			
+
+
 			// Populate image preview
-			if(product.images) {
-				var imageArray = product.images ? product.images.split(",") : [];
-				var imagePreview = imageArray.map(img =>
-					`<img src="${frontend + 'uploads/products/' + img.trim()}" class="img-fluid m-2" width="100" height="100">`
-				).join('');
-				$("#update_images").html(imagePreview || "<p>No images available</p>");
-			}
+			var imageArray = product.images ? product.images.split(",") : [];
+			var imagePreview = imageArray.map(img =>
+				`<img src="${frontend + 'uploads/products/' + img.trim()}" class="img-fluid m-2" width="100" height="100">`
+			).join('');
+			$("#update_images").html(imagePreview || "<p>No images available</p>");
 			// Build sale channel options dynamically
 			let saleChannelOptions = '<option value="" disabled>Select Sale Channel</option>';
 			if (sale_channel && sale_channel.length > 0) {
@@ -667,8 +665,10 @@ $(document).on("click", ".update-product", function () {
 			let attributeIds = product.fk_attribute_id.split(",");
 			let attributeTypes = product.attribute_name.split(",");
 			let attributeValues = product.attribute_value.split(",");
-			let attributeTypeIds = product.fk_product_types_id;
+			let attributeTypeIds = product.fk_product_types_id.split(",");
 			let valueIds = product.fk_attribute_value_id.split(",");
+
+			$("#update_fk_product_types_id").val(attributeTypeIds).trigger("chosen:updated");
 
 			attributeIds.forEach((attrId, index) => {
 				let attributeIndex = index + 1;
@@ -757,6 +757,12 @@ $(document).on("click", ".update-product", function () {
 				{ value: 'Online', label: 'Online' },
 				{ value: 'Offline', label: 'Offline' },
 			];
+			
+			// Add console logs for debugging
+			// console.log("Channel Types:", channelTypes);
+			// console.log("Sale Channel IDs:", saleChannelIds);
+			// console.log("Sale Channels:", sale_channel);
+			
 			// Loop through each batch and add it to the UI
 			batchIds.forEach((batchId, index) => {
 				// Create channel type dropdown HTML with string comparison
@@ -781,7 +787,7 @@ $(document).on("click", ".update-product", function () {
 						return `<option value="${sp.id}" ${selected}>${sp.name}</option>`;
 					}).join('');
 				}
-
+				
 				let inventory_entry_typeOptionsHtml = '';
 				if (inventory_entry_type && inventory_entry_type.length > 0) {
 					inventory_entry_typeOptionsHtml = inventory_entry_type.map(ie => {
@@ -861,7 +867,7 @@ $(document).on("click", ".update-product", function () {
 									</select>
 								</div>
 							</div>
-														
+							
 							<div class="col-md-4 mt-2">
 								<div class="form-group">
 									<label>Status</label>
@@ -882,7 +888,8 @@ $(document).on("click", ".update-product", function () {
 						</div>
 					</div>
 				</div>
-				`;			
+				`;
+			
 				// Check if the total quantity is 0, if so, wrap the entire row in a span
 				if (parseInt(quantity) === 0) {
 					batchRow = `<span class="out-of-stock">${batchRow}</span>`;
@@ -892,7 +899,121 @@ $(document).on("click", ".update-product", function () {
 				$("#batch_fields_container_edit").append(batchRow);
 			});
 			
-		
+		// 	batchIds.forEach((batchId, index) => {
+		// 		// Create channel type dropdown HTML with string comparison
+		// 		let channelTypeOptionsHtml = channelTypeOptions.map(option => {
+		// 			const selected = String(option.value) === String(channelTypes[index] || '') ? 'selected' : '';
+		// 			return `<option value="${option.value}" ${selected}>${option.label}</option>`;
+		// 		}).join('');
+				
+		// 		// Create sale channel dropdown HTML with string comparison
+		// 		let saleChannelOptionsHtml = '';
+		// 		if (sale_channel && sale_channel.length > 0) {
+		// 			saleChannelOptionsHtml = sale_channel.map(sc => {
+		// 				const selected = String(sc.id) === String(saleChannelIds[index] || '') ? 'selected' : '';
+		// 				return `<option value="${sc.id}" ${selected}>${sc.sale_channel}</option>`;
+		// 			}).join('');
+		// 		}
+
+		// 		let sourcing_partnerOptionsHtml = '';
+		// 		if (sourcing_partner && sourcing_partner.length > 0) {
+		// 			sourcing_partnerOptionsHtml = sourcing_partner.map(sp => {
+		// 				const selected = String(sp.id) === String(fk_sourcing_partner_id[index] || '') ? 'selected' : '';
+		// 				return `<option value="${sp.id}" ${selected}>${sp.name}</option>`;
+		// 			}).join('');
+		// 		}
+				
+		// 		const batchRow = `
+		// 		<div class="card mb-3 batch-card" data-index="${index + 1}">
+		// 			<div class="card-body">
+		// 				<div class="row">
+		// 					<input type="hidden" name="update_batch_id[]" value="${batchId}">
+	
+		// 					<div class="col-md-4">
+		// 						<div class="form-group">
+		// 							<label>Batch No.</label>
+		// 							<input type="text" name="batch_no[]" class="form-control" value="${batchNos[index] || ''}" readonly>
+		// 						</div>
+		// 					</div>
+		// 					<div class="col-md-4">
+		// 						<div class="form-group">
+		// 							<label>Manufacture Date</label>
+		// 							<input type="date" name="update_manufacture_date[]" class="form-control" value="${manufacturedDates[index] || ''}">
+		// 						</div>
+		// 					</div>
+		// 					<div class="col-md-4">
+		// 						<div class="form-group">
+		// 							<label>Expiry Date</label>
+		// 							<input type="date" name="update_expiry_date[]" class="form-control" value="${expiryDates[index] || ''}">
+		// 						</div>
+		// 					</div>	
+		// 					<div class="col-md-4 mt-2">
+		// 						<div class="form-group">
+		// 							<label>Quantity</label>
+		// 							<input type="number" name="update_total_quantity[]" class="form-control" value="${quantities[index] || '0'}">
+		// 						</div>
+		// 					</div>	
+		// 					<div class="col-md-4 mt-2">
+		// 						<div class="form-group">
+		// 							<label>Purchase Price</label>
+		// 							<input type="text" name="update_purchase_price[]" class="form-control" value="${purchasePrices[index] || '0'}">
+		// 						</div>
+		// 					</div>	
+		// 					<div class="col-md-4 mt-2">
+		// 						<div class="form-group">
+		// 							<label>MRP</label>
+		// 							<input type="text" name="update_mrp[]" class="form-control" value="${mrpPrices[index] || '0'}">
+		// 						</div>
+		// 					</div>	
+		// 					<div class="col-md-4 mt-2">
+		// 						<div class="form-group">
+		// 							<label>Selling Price</label>
+		// 							<input type="text" name="update_selling_price[]" class="form-control" value="${sellingPrices[index] || '0'}">
+		// 						</div>
+		// 					</div>
+		// 					<div class="col-md-4 mt-2">
+		// 						<div class="form-group">
+		// 						<label>Sourcing Partener</label>
+		// 						<select name="update_fk_sourcing_partner_id[]" class="form-control batch-channel-type">
+		// 							<option value="">Select Sourcing Partener</option>
+		// 							${sourcing_partnerOptionsHtml}
+		// 						</select>
+		// 						</div>
+		// 					</div>
+							
+		// 					<div class="col-md-4 mt-2">
+		// 						<div class="form-group">
+		// 							<label>Status</label>
+		// 							<span class="badge ${parseInt(quantities[index] || '0') > 0 ? 'bg-success' : 'bg-danger'}">
+		// 								${parseInt(quantities[index] || '0') > 0 ? 'In Stock' : 'Out of Stock'}
+		// 							</span>
+		// 						</div>
+		// 					</div>
+		// 				</div>
+		// 			</div>
+		// 		</div>
+		// 		`;
+		// 		$("#batch_fields_container_edit").append(batchRow);
+
+		// // 	<div class="col-md-4 mt-2">
+		// // 		<div class="form-group">
+		// // 		<label>Channel Type</label>
+		// // 		<select name="update_channel_type[]" class="form-control batch-channel-type">
+		// // 			<option value="">Select Channel Type</option>
+		// // 			${channelTypeOptionsHtml}
+		// // 		</select>
+		// // 	</div>
+		// // </div>
+		// // <div class="col-md-4 mt-2">
+		// // 	<div class="form-group">
+		// // 		<label>Sale Channel</label>
+		// // 		<select name="update_sale_channel[]" class="form-control batch-sale-channel">
+		// // 			<option value="">Select Sale Channel</option>
+		// // 			${saleChannelOptionsHtml}
+		// // 		</select>
+		// // 	</div>
+		// // </div>
+		// 	});
 			
 			// Initialize any chosen dropdowns inside new batch rows
 			$(".batch-channel-type, .batch-sale-channel").chosen({
