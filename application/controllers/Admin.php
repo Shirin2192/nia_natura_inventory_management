@@ -546,51 +546,138 @@ class Admin extends CI_Controller
 		$this->load->view('email_template');
 	}
 	public function fetch_product_details()
-	{
-		$products = $this->Product_model->get_product_detail(); // Fetch product details
-		$structuredData = [];
+{
+    $products = $this->Product_model->get_product_detail(); // Fetch product details
+    $structuredData = [];
 
-		foreach ($products as $product) {
-			$attributes = explode(',', $product['attribute_name']);
-			$values = explode(',', $product['attribute_value']);
-			$types = explode(',', $product['product_type_name']);
+    foreach ($products as $product) {
+        // Use custom delimiter that matches the one used in SQL
+        $attributes = explode('||', $product['attribute_names']);
+        $values = explode('||', $product['attribute_values']);
+        $types = explode('||', $product['product_type_names']);
 
-			$productDetails = [
-				'id' => $product['id'],
-				'product_name' => $product['product_name'],
-				'sku_code' => $product['sku_code'],
-				'user_name' => $product['user_name'] ?? 'Unknown',
-				'total_quantity' => $product['total_quantity'],
-				'product_types' => array_unique($types),
-				'attributes' => []
-			];
-			// 'purchase_price' => $product['purchase_price'],
-			foreach ($attributes as $index => $attribute) {
-				$productDetails['attributes'][] = [
-					'name' => $attribute,
-					'value' => $values[$index] ?? ''
-				];
-			}
-			$structuredData[] = $productDetails;
-		}
-		echo json_encode(['data' => $structuredData, 'permissions' => $this->permissions, 'current_sidebar_id' => 7]); // Send JSON response
-	}
+        $productDetails = [
+            'id' => $product['id'],
+            'product_name' => $product['product_name'],
+            'sku_code' => $product['sku_code'],
+            'user_name' => $product['user_name'] ?? 'Unknown',
+            'total_quantity' => $product['total_quantity'],
+            'product_types' => array_unique($types),
+            'attributes' => []
+        ];
+
+        foreach ($attributes as $index => $attribute) {
+            $productDetails['attributes'][] = [
+                'name' => $attribute,
+                'value' => $values[$index] ?? ''
+            ];
+        }
+
+        $structuredData[] = $productDetails;
+    }
+
+    echo json_encode([
+        'data' => $structuredData,
+        'permissions' => $this->permissions,
+        'current_sidebar_id' => 7
+    ]);
+}
+
+	// public function fetch_product_details()
+	// {
+	// 	$products = $this->Product_model->get_product_detail(); // Fetch product details
+	// 	$structuredData = [];
+
+	// 	foreach ($products as $product) {
+	// 		$attributes = explode(',', $product['attribute_name']);
+	// 		$values = explode(',', $product['attribute_value']);
+	// 		$types = explode(',', $product['product_type_name']);
+
+	// 		$productDetails = [
+	// 			'id' => $product['id'],
+	// 			'product_name' => $product['product_name'],
+	// 			'sku_code' => $product['sku_code'],
+	// 			'user_name' => $product['user_name'] ?? 'Unknown',
+	// 			'total_quantity' => $product['total_quantity'],
+	// 			'product_types' => array_unique($types),
+	// 			'attributes' => []
+	// 		];
+	// 		// 'purchase_price' => $product['purchase_price'],
+	// 		foreach ($attributes as $index => $attribute) {
+	// 			$productDetails['attributes'][] = [
+	// 				'name' => $attribute,
+	// 				'value' => $values[$index] ?? ''
+	// 			];
+	// 		}
+	// 		$structuredData[] = $productDetails;
+	// 	}
+	// 	echo json_encode(['data' => $structuredData, 'permissions' => $this->permissions, 'current_sidebar_id' => 7]); // Send JSON response
+	// }
+	// public function view_product()
+	// {
+	// 	$id = $this->input->post('product_id');
+	// 	$data['product'] = $this->Product_model->get_product_by_id($id);		
+	// 	$fk_product_types_id = $data['product']['fk_product_types_id'];
+	// 	$product_type_id = explode(',', $fk_product_types_id);
+	// 	$data['attribute_master'] = $this->model->selectWhereData('tbl_attribute_master', array("fk_product_type_id" => $product_type_id[0], 'is_delete' => 1), "*", false, array('id', "DESC"));
+	// 	$data['sourcing_partner'] = $this->model->selectWhereData('tbl_sourcing_partner', array('is_delete' => 1), "*", false, array('id', "DESC"));
+	// 	$inventory_entry_type = $this->model->selectWhereData('tbl_inventory_entry_type', array('is_delete' => '1'), array('id','name'), false);
+	// 	$data['inventory_entry_type'] = array_slice($inventory_entry_type, 0, 2); // Get only 0th and 1st index
+	// 	echo json_encode($data);
+	// }
 	public function view_product()
 	{
 		$id = $this->input->post('product_id');
 		$data['product'] = $this->Product_model->get_product_by_id($id);
-		// echo "<pre>";print_r($data['product']);die;
-		$channel_type = explode(",", $data['product']['channel_type']);
-		$sale_channel = $this->model->selectWhereData('tbl_sale_channel', array('channel_type' => $channel_type[0], 'is_delete' => 1), "*", false, array('id', "DESC"));
-		$data['sale_channel'] = $sale_channel;
+
+		if (empty($data['product'])) {
+			echo json_encode(['error' => 'Product not found']);
+			return;
+		}
+
+		// Explode product types from concatenated string with '||' separator
 		$fk_product_types_id = $data['product']['fk_product_types_id'];
-		$product_type_id = explode(',', $fk_product_types_id);
-		$data['attribute_master'] = $this->model->selectWhereData('tbl_attribute_master', array("fk_product_type_id" => $product_type_id[0], 'is_delete' => 1), "*", false, array('id', "DESC"));
-		$data['sourcing_partner'] = $this->model->selectWhereData('tbl_sourcing_partner', array('is_delete' => 1), "*", false, array('id', "DESC"));
-		$inventory_entry_type = $this->model->selectWhereData('tbl_inventory_entry_type', array('is_delete' => '1'), array('id','name'), false);
-		$data['inventory_entry_type'] = array_slice($inventory_entry_type, 0, 2); // Get only 0th and 1st index
+		// $product_type_ids = explode('||', $product_types_str);
+		// // Take first product type ID if available for attribute master filter
+		// $first_type_id = !empty($product_type_ids[0]) ? $product_type_ids[0] : null;
+
+		$data['attribute_master'] = $this->model->selectWhereData(
+				'tbl_attribute_master',
+				['fk_product_type_id' => $fk_product_types_id, 'is_delete' => '1'],
+				'*',
+				false,
+				['id', 'DESC']
+			);
+		$attribute_ids = array_column($data['attribute_master'], 'id');
+		$data['attribute_values'] = $this->db
+			->where('is_delete', '1')
+			->where_in('fk_attribute_id', $attribute_ids)
+			->order_by('id', 'DESC')
+			->get('tbl_attribute_values')
+			->result_array();
+		// Get sourcing partners
+		$data['sourcing_partner'] = $this->model->selectWhereData(
+			'tbl_sourcing_partner',
+			['is_delete' => 1],
+			'*',
+			false,
+			['id', 'DESC']
+		);
+
+		// Get inventory entry types (only first two)
+		$inventory_entry_type = $this->model->selectWhereData(
+			'tbl_inventory_entry_type',
+			['is_delete' => '1'],
+			['id', 'name'],
+			false
+		);
+		$data['inventory_entry_type'] = array_slice($inventory_entry_type, 0, 2);
+
 		echo json_encode($data);
 	}
+
+
+
 	public function update_product()
 	{
 		$this->load->library('form_validation');
