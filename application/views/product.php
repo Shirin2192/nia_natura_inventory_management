@@ -446,7 +446,7 @@
                                                 <!-- <th>Purchase Price</th> -->
                                                 <th>Total Quantity</th>
                                                 <th>Product Types</th>
-                                                <th>Added By</th>
+                                                <!-- <th>Added By</th> -->
                                                 <th>Action</th>
                                             </tr>
                                         </thead>

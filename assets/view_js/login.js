@@ -1,9 +1,6 @@
 $(document).ready(function(){
     $("#loginForm").submit(function(event){
-        event.preventDefault(); // Prevent default form submission
-
-        // Debug: Check if `frontend` is defined
-        //console.log("Frontend URL:", frontend); 
+        event.preventDefault(); // Prevent default form submissio
 
         $.ajax({
             url: frontend + "common/login_process", // Use `frontend` correctly

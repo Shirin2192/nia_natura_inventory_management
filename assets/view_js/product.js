@@ -151,7 +151,7 @@ $(document).ready(function () {
 					return data.join(", ");
 				}
 			},
-			{ data: 'user_name' },
+			// { data: 'user_name' },
 			{
 				data: 'id',
 				render: function (id, type, row, meta) {
@@ -574,7 +574,243 @@ $(document).on("click", ".view-product", function () {
         }
     });
 });
+// $(document).on("click", ".update-product", function () {
+// 	var product_id = $(this).data("id");
 
+// 	$.ajax({
+// 		url: frontend + controllerName + "/view_product",
+// 		type: "POST",
+// 		data: { product_id: product_id },
+// 		dataType: "json",
+// 		success: function (response) {
+// 			const product = response.product;
+// 			const sale_channel = response.sale_channel;
+// 			const attribute_master = response.attribute_master;
+
+// 			 // Clear previous batch details
+// 			 $("#batch_fields_container_edit").empty();
+        
+// 			 // Extract batch data from response (comma-separated)
+// 			 const batchIds = product.batch_id.split(",");
+// 			 const batchNos = product.batch_no.split(",");
+// 			 const manufacturedDates = product.manufactured_date.split(",");
+// 			 const expiryDates = product.expiry_date.split(",");
+// 			 const quantities = product.total_quantity.split(","); // Adjust as per the response
+// 			 const purchasePrices = product.purchase_price.split(",");
+// 			 const mrpPrices = product.MRP.split(",");
+// 			 const sellingPrices = product.selling_price.split(",");
+
+// 			// Fill general product fields
+// 			$("#update_product_id").val(product.id);
+// 			$('#update_inventory_id').val(product.inventory_id);
+// 			$("#update_product_name").val(product.product_name);
+// 			$("#update_product_sku").text(response.product.sku_code);
+// 			$("#update_batch_no").text(response.product.batch_no);
+// 			$("#update_barcode").val(product.barcode);
+// 			$("#update_purchase_price").val(product.purchase_price);
+// 			$("#update_mrp").val(product.MRP);
+// 			$("#update_selling_price").val(product.selling_price);
+// 			$("#update_total_quantity").val(product.total_quantity);
+// 			$("#update_description").val(product.description);
+// 			$("#update_product_image").val(product.images);
+// 			$("#update_availability_status").val(product.fk_stock_availability_id).trigger("chosen:updated");
+// 			$("#update_channel_type").val(product.channel_type).trigger("chosen:updated");
+// 			$('#attribute_id').val(product.attribute_id);
+// 			$('#update_manufacture_date').val(product.manufactured_date);
+// 			$('#update_expiry_date').val(product.expiry_date);
+// 			$('#update_batch_id').val(product.batch_id);
+
+// 			batchIds.forEach((batchId, index) => {
+// 				const batchRow = `
+// 				<div class="card mb-3 batch-card" data-index="${index + 1}">
+// 					<div class="card-body">
+// 						<div class="row">
+// 							<input type="hidden" name="batch_id[]" value="${batchId}">
+	
+// 							<div class="col-md-4">
+// 								<div class="form-group">
+// 									<label>Batch No.</label>
+// 									<input type="text" name="batch_no[]" class="form-control" value="${batchNos[index]}" readonly>
+// 								</div>
+// 							</div>
+	
+// 							<div class="col-md-4">
+// 								<div class="form-group">
+// 									<label>Manufacture Date</label>
+// 									<input type="date" name="manufacture_date[]" class="form-control" value="${manufacturedDates[index]}">
+// 								</div>
+// 							</div>
+	
+// 							<div class="col-md-4">
+// 								<div class="form-group">
+// 									<label>Expiry Date</label>
+// 									<input type="date" name="expiry_date[]" class="form-control" value="${expiryDates[index]}">
+// 								</div>
+// 							</div>
+	
+// 							<div class="col-md-4 mt-2">
+// 								<div class="form-group">
+// 									<label>Quantity</label>
+// 									<input type="number" name="batch_quantity[]" class="form-control" value="${quantities[index]}">
+// 								</div>
+// 							</div>
+	
+// 							<div class="col-md-4 mt-2">
+// 								<div class="form-group">
+// 									<label>Purchase Price</label>
+// 									<input type="text" name="batch_purchase_price[]" class="form-control" value="${purchasePrices[index]}">
+// 								</div>
+// 							</div>
+	
+// 							<div class="col-md-4 mt-2">
+// 								<div class="form-group">
+// 									<label>MRP</label>
+// 									<input type="text" name="batch_mrp[]" class="form-control" value="${mrpPrices[index]}">
+// 								</div>
+// 							</div>
+	
+// 							<div class="col-md-4 mt-2">
+// 								<div class="form-group">
+// 									<label>Selling Price</label>
+// 									<input type="text" name="batch_selling_price[]" class="form-control" value="${sellingPrices[index]}">
+// 								</div>
+// 							</div>
+// 						</div>
+// 					</div>
+// 				</div>
+// 				`;
+// 				$("#batch_fields_container_edit").append(batchRow);
+// 			});
+			
+
+// 			// Populate image preview
+// 			var imageArray = product.images ? product.images.split(",") : [];
+// 			var imagePreview = imageArray.map(img =>
+// 				`<img src="${frontend + 'uploads/products/' + img.trim()}" class="img-fluid m-2" width="100" height="100">`
+// 			).join('');
+// 			$("#update_images").html(imagePreview || "<p>No images available</p>");
+
+// 			// Build sale channel options dynamically
+// 			let saleChannelOptions = '<option value="" disabled>Select Sale Channel</option>';
+
+// 			if (sale_channel && sale_channel.length > 0) {
+// 				sale_channel.forEach(item => {
+// 					const selected = item.id == product.fk_sale_channel_id ? 'selected' : '';
+// 					saleChannelOptions += `<option value="${item.id}" ${selected}>${item.sale_channel}</option>`;
+// 				});
+// 			} else {
+// 				saleChannelOptions += '<option value="" disabled>No Sale Channel Available</option>';
+// 			}
+
+// 			$("#update_sale_channel").html(saleChannelOptions);
+
+// 			// Update Chosen dropdown
+// 			if ($("#update_sale_channel").data('chosen')) {
+// 				$("#update_sale_channel").trigger("chosen:updated");
+// 			} else {
+// 				$("#update_sale_channel").chosen({ width: "100%" });
+// 			}
+
+// 			// Handle dynamic attributes
+// 			$("#attributes_container_edit").empty();
+// 			$("#attribute_fields_container_edit").empty();
+
+// 			let Productattribute_id = product.attribute_id.split(",");
+// 			let attributeIds = product.fk_attribute_id.split(",");
+// 			let attributeTypes = product.attribute_name.split(",");
+// 			let attributeValues = product.attribute_value.split(",");
+// 			let attributeTypeIds = product.fk_product_types_id.split(",");
+// 			let valueIds = product.fk_attribute_value_id.split(",");
+
+// 			$("#update_fk_product_types_id").val(attributeTypeIds).trigger("chosen:updated");
+
+// 			attributeIds.forEach((attrId, index) => {
+// 				let attributeIndex = index + 1;
+// 				let attributeName = attributeTypes[index];
+// 				let attributeValue = attributeValues[index];
+// 				let attributeValueId = valueIds[index];
+// 				let Productattribute_ids = Productattribute_id[index];
+
+// 				let attributeOptions1 = '<option value="" disabled>Select Attribute</option>';
+// 				$.each(response.attribute_master, function (index, item) {
+// 					let selected = item.id == attrId ? "selected" : "";
+// 					attributeOptions1 += `<option value="${item.id}" data-type="${item.attribute_type}" ${selected}>${item.attribute_name}</option>`;
+// 				});
+// 				// Create attribute row
+// 				let attributeRow = `
+// 				<div class="row attribute-row mb-2" data-index="${attributeIndex}">
+// 				<input type="hidden" name="attribute_id[]" id="attribute_id${attributeIndex}" value="${Productattribute_ids}">
+// 						<div class="col-lg-6">
+// 							<div class="form-group">
+// 								<label for="fk_product_attribute_id_${attributeIndex}">
+// 									${attributeName} <span class="text-danger">*</span>
+// 								</label>
+// 								<select id="fk_product_attribute_id_${attributeIndex}" name="edit_fk_product_attribute_id[]" 
+// 									class="chosen-select form-control fk_product_attribute_id_edit attribute-dropdown" 
+// 									data-index="${attributeIndex}" style="width: 100%;">
+// 									${attributeOptions1}
+// 								</select>
+// 							</div>
+// 						</div>
+// 						<div class="col-lg-6" id="attribute_value_container_${attributeIndex}">
+// 							<div class="form-group">
+// 								<label>${attributeName} Value</label>
+// 								<div id="attribute_input_${attributeIndex}">Loading...</div>
+// 							</div>
+// 						</div>
+// 					</div>
+// 				`;
+// 				$("#attribute_fields_container_edit").append(attributeRow);
+
+				
+// 				// Fetch attribute value options and append selected
+// 				$.ajax({
+// 					url: frontend + controllerName + "/get_attribute_values_on_product_attributes_id",
+// 					type: "POST",
+// 					data: { attribute_id: attrId },
+// 					dataType: "json",
+// 					success: function (res) {
+// 						let type = res.type || "dropdown"; // Assuming API returns `type`
+// 						let inputHtml = "";
+
+// 						if (type === "text") {
+// 							inputHtml = `<input type="text" name="edit_attributes_value[]" 
+// 												id="edit_attributes_value_${attributeIndex}" 
+// 												class="form-control" placeholder="Enter ${attributeName}" 
+// 												value="${attributeValue}">`;
+// 						} else if (type === "dropdown") {
+// 							inputHtml = `<select name="edit_attributes_value[]" id="edit_attributes_value_${attributeIndex}" 
+// 												class="chosen-select form-control" style="width: 100%;">
+// 												<option value="">Select ${attributeName}</option>`;
+// 							$.each(res.data, function (i, item) {
+// 								let selected = item.id == attributeValueId ? "selected" : "";
+// 								inputHtml += `<option value="${item.id}" ${selected}>${item.attribute_value}</option>`;
+// 							});
+// 							inputHtml += `</select>`;
+// 						} else if (type === "checkbox") {
+// 							$.each(res.data, function (i, item) {
+// 								let checked = attributeValue.includes(item.attribute_value) ? "checked" : "";
+// 								inputHtml += `<div class="form-check">
+// 									<input class="form-check-input" type="checkbox" 
+// 										name="edit_attributes_value[${attributeIndex}][]" 
+// 										value="${item.attribute_value}" ${checked}>
+// 									<label class="form-check-label">${item.attribute_value}</label>
+// 								</div>`;
+// 							});
+// 						}
+
+// 						$(`#attribute_input_${attributeIndex}`).html(inputHtml);
+// 						$(".chosen-select").chosen({ width: "100%" }).trigger("chosen:updated");
+// 						disableDuplicateAttributeOptions();
+// 					}
+// 				});
+
+// 			});
+// 		},
+// 	});
+// 	// Show the modal
+// 	$("#updateProductModal").modal("show");
+// });
 $(document).on("click", ".update-product", function () {
 	var product_id = $(this).data("id");
 
