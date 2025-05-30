@@ -209,6 +209,13 @@ $(document).ready(function () {
                     return meta.row + meta.settings._iDisplayStart + 1;
                 }
             },
+            { data: "order_date", title: "Date" },
+            { data: "name", title: "Customer Name" },
+            { data: "contact_no", title: "Mobile" },
+            { data: "email", title: "Email" },
+            { data: "address", title: "Address" },
+            { data: "pincode", title: "Pincode" },   
+            {data: "payment_type", title: "Payment Type" },                    
             { data: "product_name", title: "Product Name" },
             { data: "sku_code", title: "SKU CODE" },
             { data: "batch_no", title: "Batch No" },
@@ -216,7 +223,7 @@ $(document).ready(function () {
             { data: "sale_channel", title: "Sales Channel" },
             { data: "deduct_quantity", title: "Deducted Quantity" },
             { data: "total_quantity", title: "Total Quantity" },
-            { data: "created_at", title: "Date" }
+            
         ],
         order: [[7, "desc"]],
         responsive: true,
@@ -245,6 +252,13 @@ $(document).ready(function () {
                     return meta.row + meta.settings._iDisplayStart + 1;
                 }
             },
+             { data: "order_date", title: "Date" },
+            { data: "name", title: "Customer Name" },
+            { data: "contact_no", title: "Mobile" },
+            { data: "email", title: "Email" },
+            { data: "address", title: "Address" },
+            { data: "pincode", title: "Pincode" },   
+            {data: "payment_type", title: "Payment Type" },       
             { data: "product_name", title: "Product Name" },
             { data: "sku_code", title: "SKU CODE" },
             { data: "batch_no", title: "Batch No" },
@@ -252,7 +266,6 @@ $(document).ready(function () {
             { data: "sale_channel", title: "Sales Channel" },
             { data: "add_quantity", title: "Deducted Quantity" },
             { data: "total_quantity", title: "Total Quantity" },
-            { data: "created_at", title: "Date" }
         ],
         order: [[7, "desc"]],
         responsive: true,
@@ -281,6 +294,13 @@ $(document).ready(function () {
                     return meta.row + meta.settings._iDisplayStart + 1;
                 }
             },
+             { data: "order_date", title: "Date" },
+            { data: "name", title: "Customer Name" },
+            { data: "contact_no", title: "Mobile" },
+            { data: "email", title: "Email" },
+            { data: "address", title: "Address" },
+            { data: "pincode", title: "Pincode" },   
+            {data: "payment_type", title: "Payment Type" },       
             { data: "product_name", title: "Product Name" },
             { data: "sku_code", title: "SKU CODE" },
             { data: "batch_no", title: "Batch No" },
@@ -288,7 +308,6 @@ $(document).ready(function () {
             { data: "sale_channel", title: "Sales Channel" },
             { data: "deduct_quantity", title: "Deducted Quantity" },
             { data: "total_quantity", title: "Total Quantity" },
-            { data: "created_at", title: "Date" }
         ],
         order: [[7, "desc"]],
         responsive: true,

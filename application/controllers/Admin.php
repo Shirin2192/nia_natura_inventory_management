@@ -546,51 +546,138 @@ class Admin extends CI_Controller
 		$this->load->view('email_template');
 	}
 	public function fetch_product_details()
-	{
-		$products = $this->Product_model->get_product_detail(); // Fetch product details
-		$structuredData = [];
+{
+    $products = $this->Product_model->get_product_detail(); // Fetch product details
+    $structuredData = [];
 
-		foreach ($products as $product) {
-			$attributes = explode(',', $product['attribute_name']);
-			$values = explode(',', $product['attribute_value']);
-			$types = explode(',', $product['product_type_name']);
+    foreach ($products as $product) {
+        // Use custom delimiter that matches the one used in SQL
+        $attributes = explode('||', $product['attribute_names']);
+        $values = explode('||', $product['attribute_values']);
+        $types = explode('||', $product['product_type_names']);
 
-			$productDetails = [
-				'id' => $product['id'],
-				'product_name' => $product['product_name'],
-				'sku_code' => $product['sku_code'],
-				'user_name' => $product['user_name'] ?? 'Unknown',
-				'total_quantity' => $product['total_quantity'],
-				'product_types' => array_unique($types),
-				'attributes' => []
-			];
-			// 'purchase_price' => $product['purchase_price'],
-			foreach ($attributes as $index => $attribute) {
-				$productDetails['attributes'][] = [
-					'name' => $attribute,
-					'value' => $values[$index] ?? ''
-				];
-			}
-			$structuredData[] = $productDetails;
-		}
-		echo json_encode(['data' => $structuredData, 'permissions' => $this->permissions, 'current_sidebar_id' => 7]); // Send JSON response
-	}
+        $productDetails = [
+            'id' => $product['id'],
+            'product_name' => $product['product_name'],
+            'sku_code' => $product['sku_code'],
+            'user_name' => $product['user_name'] ?? 'Unknown',
+            'total_quantity' => $product['total_quantity'],
+            'product_types' => array_unique($types),
+            'attributes' => []
+        ];
+
+        foreach ($attributes as $index => $attribute) {
+            $productDetails['attributes'][] = [
+                'name' => $attribute,
+                'value' => $values[$index] ?? ''
+            ];
+        }
+
+        $structuredData[] = $productDetails;
+    }
+
+    echo json_encode([
+        'data' => $structuredData,
+        'permissions' => $this->permissions,
+        'current_sidebar_id' => 7
+    ]);
+}
+
+	// public function fetch_product_details()
+	// {
+	// 	$products = $this->Product_model->get_product_detail(); // Fetch product details
+	// 	$structuredData = [];
+
+	// 	foreach ($products as $product) {
+	// 		$attributes = explode(',', $product['attribute_name']);
+	// 		$values = explode(',', $product['attribute_value']);
+	// 		$types = explode(',', $product['product_type_name']);
+
+	// 		$productDetails = [
+	// 			'id' => $product['id'],
+	// 			'product_name' => $product['product_name'],
+	// 			'sku_code' => $product['sku_code'],
+	// 			'user_name' => $product['user_name'] ?? 'Unknown',
+	// 			'total_quantity' => $product['total_quantity'],
+	// 			'product_types' => array_unique($types),
+	// 			'attributes' => []
+	// 		];
+	// 		// 'purchase_price' => $product['purchase_price'],
+	// 		foreach ($attributes as $index => $attribute) {
+	// 			$productDetails['attributes'][] = [
+	// 				'name' => $attribute,
+	// 				'value' => $values[$index] ?? ''
+	// 			];
+	// 		}
+	// 		$structuredData[] = $productDetails;
+	// 	}
+	// 	echo json_encode(['data' => $structuredData, 'permissions' => $this->permissions, 'current_sidebar_id' => 7]); // Send JSON response
+	// }
+	// public function view_product()
+	// {
+	// 	$id = $this->input->post('product_id');
+	// 	$data['product'] = $this->Product_model->get_product_by_id($id);		
+	// 	$fk_product_types_id = $data['product']['fk_product_types_id'];
+	// 	$product_type_id = explode(',', $fk_product_types_id);
+	// 	$data['attribute_master'] = $this->model->selectWhereData('tbl_attribute_master', array("fk_product_type_id" => $product_type_id[0], 'is_delete' => 1), "*", false, array('id', "DESC"));
+	// 	$data['sourcing_partner'] = $this->model->selectWhereData('tbl_sourcing_partner', array('is_delete' => 1), "*", false, array('id', "DESC"));
+	// 	$inventory_entry_type = $this->model->selectWhereData('tbl_inventory_entry_type', array('is_delete' => '1'), array('id','name'), false);
+	// 	$data['inventory_entry_type'] = array_slice($inventory_entry_type, 0, 2); // Get only 0th and 1st index
+	// 	echo json_encode($data);
+	// }
 	public function view_product()
 	{
 		$id = $this->input->post('product_id');
 		$data['product'] = $this->Product_model->get_product_by_id($id);
-		// echo "<pre>";print_r($data['product']);die;
-		$channel_type = explode(",", $data['product']['channel_type']);
-		$sale_channel = $this->model->selectWhereData('tbl_sale_channel', array('channel_type' => $channel_type[0], 'is_delete' => 1), "*", false, array('id', "DESC"));
-		$data['sale_channel'] = $sale_channel;
+
+		if (empty($data['product'])) {
+			echo json_encode(['error' => 'Product not found']);
+			return;
+		}
+
+		// Explode product types from concatenated string with '||' separator
 		$fk_product_types_id = $data['product']['fk_product_types_id'];
-		$product_type_id = explode(',', $fk_product_types_id);
-		$data['attribute_master'] = $this->model->selectWhereData('tbl_attribute_master', array("fk_product_type_id" => $product_type_id[0], 'is_delete' => 1), "*", false, array('id', "DESC"));
-		$data['sourcing_partner'] = $this->model->selectWhereData('tbl_sourcing_partner', array('is_delete' => 1), "*", false, array('id', "DESC"));
-		$inventory_entry_type = $this->model->selectWhereData('tbl_inventory_entry_type', array('is_delete' => '1'), array('id','name'), false);
-		$data['inventory_entry_type'] = array_slice($inventory_entry_type, 0, 2); // Get only 0th and 1st index
+		// $product_type_ids = explode('||', $product_types_str);
+		// // Take first product type ID if available for attribute master filter
+		// $first_type_id = !empty($product_type_ids[0]) ? $product_type_ids[0] : null;
+
+		$data['attribute_master'] = $this->model->selectWhereData(
+				'tbl_attribute_master',
+				['fk_product_type_id' => $fk_product_types_id, 'is_delete' => '1'],
+				'*',
+				false,
+				['id', 'DESC']
+			);
+		$attribute_ids = array_column($data['attribute_master'], 'id');
+		$data['attribute_values'] = $this->db
+			->where('is_delete', '1')
+			->where_in('fk_attribute_id', $attribute_ids)
+			->order_by('id', 'DESC')
+			->get('tbl_attribute_values')
+			->result_array();
+		// Get sourcing partners
+		$data['sourcing_partner'] = $this->model->selectWhereData(
+			'tbl_sourcing_partner',
+			['is_delete' => 1],
+			'*',
+			false,
+			['id', 'DESC']
+		);
+
+		// Get inventory entry types (only first two)
+		$inventory_entry_type = $this->model->selectWhereData(
+			'tbl_inventory_entry_type',
+			['is_delete' => '1'],
+			['id', 'name'],
+			false
+		);
+		$data['inventory_entry_type'] = array_slice($inventory_entry_type, 0, 2);
+
 		echo json_encode($data);
 	}
+
+
+
 	public function update_product()
 	{
 		$this->load->library('form_validation');
@@ -1851,6 +1938,8 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim');
 		$this->form_validation->set_rules('reason', 'Reason', 'required|trim');
 		$this->form_validation->set_rules('inventory_type', 'Order Type', 'required|trim');
+		$this->form_validation->set_rules('payment_type', 'Payment Type', 'required|trim');
+		$this->form_validation->set_rules('order_date', 'Order Date', 'required|trim');
 		if ($this->form_validation->run() == FALSE) {
 			$response = [
 				'status' => 'error',
@@ -1862,6 +1951,8 @@ class Admin extends CI_Controller
 					'sale_channel' => form_error('sale_channel'),
 					'reason' => form_error('reason'),
 					'inventory_type' => form_error('inventory_type'),
+					'payment_type' => form_error('payment_type'),
+					'order_date' => form_error('order_date'),
 				]
 			];
 			echo json_encode($response);
@@ -1875,6 +1966,13 @@ class Admin extends CI_Controller
 		$sale_channel = $this->input->post('sale_channel');
 		$reason = $this->input->post('reason');
 		$inventory_type = $this->input->post('inventory_type');
+		$name = $this->input->post('name');
+		$email = $this->input->post('email');
+		$contact_no = $this->input->post('contact_no');
+		$address = $this->input->post('address');
+		$pincode = $this->input->post('pincode');
+		$payment_type = $this->input->post('payment_type');
+		$order_date = $this->input->post('order_date');
 		// Get current inventory
 		$last_quantity = $this->model->selectWhereData('tbl_product_inventory', [
 			'fk_product_id' => $product_id,
@@ -1907,7 +2005,6 @@ class Admin extends CI_Controller
 				return;
 			}
 		}
-
 		if ($inventory_type == 4) {
 			$total_sold_qty = $this->Product_Model->get_total_sold_quantity($product_id, $fk_batch_id);
 			$total_returned_qty = $this->Product_Model->get_total_returned_quantity($product_id, $fk_batch_id);
@@ -1923,11 +2020,9 @@ class Admin extends CI_Controller
 				return;
 			}
 		}
-
 		if ($inventory_type == 5) {
 			$total_returned_qty = $this->Product_Model->get_total_returned_quantity($product_id, $fk_batch_id);
 			$total_damaged_qty = $this->Product_Model->get_total_damaged_quantity($product_id, $fk_batch_id);
-
 			if (($total_damaged_qty + $quantity) > $total_returned_qty) {
 				$response = [
 					'status' => 'error',
@@ -1939,7 +2034,6 @@ class Admin extends CI_Controller
 				return;
 			}
 		}
-
 		$total_quantity = ($inventory_type == 4) 
 			? $previous_quantity + $quantity 
 			: $previous_quantity - $quantity;
@@ -1965,6 +2059,16 @@ class Admin extends CI_Controller
 			$this->model->addUserLog($login_id, 'Update Product Batch', 'tbl_product_batches', ['status' => 0]);
 		}
 		// Prepare insert data
+		$customer_data = [
+			'name' => $name,
+			'email' => $email,
+			'contact_no' => $contact_no,
+			'address' => $address,
+			'pincode' => $pincode,		
+			'payment_type' => $payment_type,
+		];
+		$customer_id = $this->model->insertData('tbl_customer', $customer_data);
+		$this->model->addUserLog($login_id, 'Insert Customer Data', 'tbl_customer', $customer_data);
 		$order_data = [
 			'fk_product_id' => $product_id,
 			'fk_batch_id' => $fk_batch_id,
@@ -1975,7 +2079,9 @@ class Admin extends CI_Controller
 			'fk_login_id' => $login_id,
 			'reason' => $reason,
 			'fk_inventory_entry_type' => $previous_inserted_data['fk_inventory_entry_type'],
-			'fk_sourcing_partner_id' => $previous_inserted_data['fk_sourcing_partner_id']
+			'fk_sourcing_partner_id' => $previous_inserted_data['fk_sourcing_partner_id'],
+			'fk_customer_id' => $customer_id,
+			'order_date' => $order_date,
 		];
 		if ($inventory_type == 3) {
 			$order_data['deduct_quantity'] = $quantity;
@@ -2077,13 +2183,20 @@ class Admin extends CI_Controller
 
 				for ($i = 2; $i < count($data); $i++) {
 					$row = $data[$i];
-					$sku_code     = trim($row[0]);
-					$batch_no     = trim($row[1]);
-					$channel_type = trim($row[2]);
-					$sale_channel = trim($row[3]);
-					$quantity     = trim($row[4]);
-					$reason     = trim($row[5]);
-					$order_type     = trim($row[6]);
+					$order_date  = trim($row[0]);
+					$name        = trim($row[1]);
+					$email       = trim($row[2]);
+					$contact_no  = trim($row[3]);
+					$address     = trim($row[4]);
+					$pincode     = trim($row[5]);
+					$payment_type= trim($row[6]);
+					$sku_code    = trim($row[7]);
+					$batch_no    = trim($row[8]);
+					$channel_type = trim($row[9]);
+					$sale_channel = trim($row[10]);
+					$quantity     = trim($row[11]);
+					$reason     = trim($row[12]);
+					$order_type     = trim($row[13]);
 
 					// Validate SKU
 					$skuValid = $this->model->selectWhereData('tbl_sku_code_master', [
@@ -2172,7 +2285,6 @@ class Admin extends CI_Controller
 							continue;
 						}
 					}
-
 					if ($inventory_type['id'] == 5) {
 						$total_returned_qty = $this->Product_Model->get_total_returned_quantity($product_id, $batchValid['id']);
 						$total_damaged_qty = $this->Product_Model->get_total_damaged_quantity($product_id, $batchValid['id']);
@@ -2199,6 +2311,17 @@ class Admin extends CI_Controller
 						'is_delete' => '0'
 					], ['fk_product_id' => $product_id, 'fk_batch_id' => $batchValid['id']]);
 
+					$customer_data = [
+						'name' => $name,
+						'email' => $email,
+						'contact_no' => $contact_no,
+						'address' => $address,
+						'pincode' => $pincode,		
+						'payment_type' => $payment_type,
+					];
+					$customer_id = $this->model->insertData('tbl_customer', $customer_data);
+					$this->model->addUserLog($login_id, 'Insert Customer Data', 'tbl_customer', $customer_data);
+
 						$insertData = [
 							'fk_product_id'       => $product_id,
 							'fk_batch_id'         => $batchValid['id'],
@@ -2209,9 +2332,11 @@ class Admin extends CI_Controller
 							'reason'			  => $reason,
 							'fk_login_id'		  => $login_id,
 							'fk_inventory_entry_type' => $last_quantity['fk_inventory_entry_type'],
-							'fk_sourcing_partner_id' => $last_quantity['fk_sourcing_partner_id']
-							
+							'fk_sourcing_partner_id' => $last_quantity['fk_sourcing_partner_id'],
+							'order_date' => $order_date,		
+							'fk_customer_id' => $customer_id							
 						];
+
 						if ($inventory_type['id'] == 3) {
 							$insertData['deduct_quantity'] = $quantity;
 							$insertData['fk_inventory_entry_type_sale_id'] = $inventory_type['id'];
@@ -2233,13 +2358,20 @@ class Admin extends CI_Controller
 
 					// Add to imported_products array
 					$imported_order[] = [
-						'SKU' => $row[0],
-						'Batch No' => $row[1],
-						'Channel Type' => $row[2],
-						'Sales Channel' => $row[3],
-						'Quantity' => $row[4],
-						'Reason' => $row[5],		
-					    'Order Type' => $row[6]		
+						'Order Date' => $row[0],
+						'Name' => $row[1],
+						'Email' => $row[2],
+						'Contact No' => $row[3],
+						'Address' => $row[4],
+						'Pincode' => $row[5],
+						'Payment Type' => $row[6],
+						'SKU' => $row[7],
+						'Batch No' => $row[8],
+						'Channel Type' => $row[9],
+						'Sales Channel' => $row[10],
+						'Quantity' => $row[11],
+						'Reason' => $row[12],		
+					    'Order Type' => $row[13]		
 					];
 				}
 				// Generate rejection Excel
