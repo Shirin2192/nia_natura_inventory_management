@@ -383,13 +383,20 @@ class Product_model extends CI_Model {
             tbl_sale_channel.sale_channel,
             tbl_product_inventory.deduct_quantity,
             tbl_product_inventory.total_quantity,
-            tbl_product_inventory.created_at
+            tbl_product_inventory.order_date,
+            tbl_customer.name,
+            tbl_customer.email,
+            tbl_customer.contact_no,
+            tbl_customer.address,
+            tbl_customer.pincode,
+            tbl_customer.payment_type,
         ');
         $this->db->from('tbl_product_master');
         $this->db->join('tbl_product_inventory', 'tbl_product_master.id = tbl_product_inventory.fk_product_id');
         $this->db->join('tbl_product_batches', 'tbl_product_inventory.fk_batch_id = tbl_product_batches.id');
         $this->db->join('tbl_sku_code_master', 'tbl_product_master.product_sku_code = tbl_sku_code_master.id');
         $this->db->join('tbl_sale_channel', 'tbl_product_inventory.fk_sale_channel_id = tbl_sale_channel.id');
+        $this->db->join('tbl_customer', 'tbl_product_inventory.fk_customer_id = tbl_customer.id', 'left');
         $this->db->where('tbl_product_inventory.deduct_quantity IS NOT NULL');
         $this->db->where('tbl_product_inventory.fk_inventory_entry_type_sale_id',3);
         $this->db->order_by('tbl_product_inventory.id DESC');
@@ -412,13 +419,20 @@ class Product_model extends CI_Model {
             tbl_sale_channel.sale_channel,
             tbl_product_inventory.add_quantity,
             tbl_product_inventory.total_quantity,
-            tbl_product_inventory.created_at
+             tbl_product_inventory.order_date,
+            tbl_customer.name,
+            tbl_customer.email,
+            tbl_customer.contact_no,
+            tbl_customer.address,
+            tbl_customer.pincode,
+            tbl_customer.payment_type,
         ');
         $this->db->from('tbl_product_master');
         $this->db->join('tbl_product_inventory', 'tbl_product_master.id = tbl_product_inventory.fk_product_id');
         $this->db->join('tbl_product_batches', 'tbl_product_inventory.fk_batch_id = tbl_product_batches.id');
         $this->db->join('tbl_sku_code_master', 'tbl_product_master.product_sku_code = tbl_sku_code_master.id');
         $this->db->join('tbl_sale_channel', 'tbl_product_inventory.fk_sale_channel_id = tbl_sale_channel.id');
+        $this->db->join('tbl_customer', 'tbl_product_inventory.fk_customer_id = tbl_customer.id', 'left');
         $this->db->where('tbl_product_inventory.add_quantity IS NOT NULL');
         $this->db->where('tbl_product_inventory.fk_inventory_entry_type_return_id',4);
         $this->db->order_by('tbl_product_inventory.id DESC');
@@ -443,13 +457,20 @@ class Product_model extends CI_Model {
             tbl_sale_channel.sale_channel,
             tbl_product_inventory.deduct_quantity,
             tbl_product_inventory.total_quantity,
-            tbl_product_inventory.created_at
+            tbl_product_inventory.order_date,
+            tbl_customer.name,
+            tbl_customer.email,
+            tbl_customer.contact_no,
+            tbl_customer.address,
+            tbl_customer.pincode,
+            tbl_customer.payment_type,
         ');
         $this->db->from('tbl_product_master');
         $this->db->join('tbl_product_inventory', 'tbl_product_master.id = tbl_product_inventory.fk_product_id');
         $this->db->join('tbl_product_batches', 'tbl_product_inventory.fk_batch_id = tbl_product_batches.id');
         $this->db->join('tbl_sku_code_master', 'tbl_product_master.product_sku_code = tbl_sku_code_master.id');
         $this->db->join('tbl_sale_channel', 'tbl_product_inventory.fk_sale_channel_id = tbl_sale_channel.id');
+        $this->db->join('tbl_customer', 'tbl_product_inventory.fk_customer_id = tbl_customer.id', 'left');
         $this->db->where('tbl_product_inventory.deduct_quantity IS NOT NULL');
         $this->db->where('tbl_product_inventory.fk_inventory_entry_type_damage_id',5);
         $this->db->order_by('tbl_product_inventory.id DESC');

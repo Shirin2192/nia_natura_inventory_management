@@ -1938,6 +1938,8 @@ class Admin extends CI_Controller
 		$this->form_validation->set_rules('sale_channel', 'Sale Channel', 'required|trim');
 		$this->form_validation->set_rules('reason', 'Reason', 'required|trim');
 		$this->form_validation->set_rules('inventory_type', 'Order Type', 'required|trim');
+		$this->form_validation->set_rules('payment_type', 'Payment Type', 'required|trim');
+		$this->form_validation->set_rules('order_date', 'Order Date', 'required|trim');
 		if ($this->form_validation->run() == FALSE) {
 			$response = [
 				'status' => 'error',
@@ -1949,6 +1951,8 @@ class Admin extends CI_Controller
 					'sale_channel' => form_error('sale_channel'),
 					'reason' => form_error('reason'),
 					'inventory_type' => form_error('inventory_type'),
+					'payment_type' => form_error('payment_type'),
+					'order_date' => form_error('order_date'),
 				]
 			];
 			echo json_encode($response);
@@ -1962,6 +1966,13 @@ class Admin extends CI_Controller
 		$sale_channel = $this->input->post('sale_channel');
 		$reason = $this->input->post('reason');
 		$inventory_type = $this->input->post('inventory_type');
+		$name = $this->input->post('name');
+		$email = $this->input->post('email');
+		$contact_no = $this->input->post('contact_no');
+		$address = $this->input->post('address');
+		$pincode = $this->input->post('pincode');
+		$payment_type = $this->input->post('payment_type');
+		$order_date = $this->input->post('order_date');
 		// Get current inventory
 		$last_quantity = $this->model->selectWhereData('tbl_product_inventory', [
 			'fk_product_id' => $product_id,
@@ -1994,7 +2005,6 @@ class Admin extends CI_Controller
 				return;
 			}
 		}
-
 		if ($inventory_type == 4) {
 			$total_sold_qty = $this->Product_Model->get_total_sold_quantity($product_id, $fk_batch_id);
 			$total_returned_qty = $this->Product_Model->get_total_returned_quantity($product_id, $fk_batch_id);
@@ -2010,11 +2020,9 @@ class Admin extends CI_Controller
 				return;
 			}
 		}
-
 		if ($inventory_type == 5) {
 			$total_returned_qty = $this->Product_Model->get_total_returned_quantity($product_id, $fk_batch_id);
 			$total_damaged_qty = $this->Product_Model->get_total_damaged_quantity($product_id, $fk_batch_id);
-
 			if (($total_damaged_qty + $quantity) > $total_returned_qty) {
 				$response = [
 					'status' => 'error',
@@ -2026,7 +2034,6 @@ class Admin extends CI_Controller
 				return;
 			}
 		}
-
 		$total_quantity = ($inventory_type == 4) 
 			? $previous_quantity + $quantity 
 			: $previous_quantity - $quantity;
@@ -2052,6 +2059,16 @@ class Admin extends CI_Controller
 			$this->model->addUserLog($login_id, 'Update Product Batch', 'tbl_product_batches', ['status' => 0]);
 		}
 		// Prepare insert data
+		$customer_data = [
+			'name' => $name,
+			'email' => $email,
+			'contact_no' => $contact_no,
+			'address' => $address,
+			'pincode' => $pincode,		
+			'payment_type' => $payment_type,
+		];
+		$customer_id = $this->model->insertData('tbl_customer', $customer_data);
+		$this->model->addUserLog($login_id, 'Insert Customer Data', 'tbl_customer', $customer_data);
 		$order_data = [
 			'fk_product_id' => $product_id,
 			'fk_batch_id' => $fk_batch_id,
@@ -2062,7 +2079,9 @@ class Admin extends CI_Controller
 			'fk_login_id' => $login_id,
 			'reason' => $reason,
 			'fk_inventory_entry_type' => $previous_inserted_data['fk_inventory_entry_type'],
-			'fk_sourcing_partner_id' => $previous_inserted_data['fk_sourcing_partner_id']
+			'fk_sourcing_partner_id' => $previous_inserted_data['fk_sourcing_partner_id'],
+			'fk_customer_id' => $customer_id,
+			'order_date' => $order_date,
 		];
 		if ($inventory_type == 3) {
 			$order_data['deduct_quantity'] = $quantity;
@@ -2164,13 +2183,20 @@ class Admin extends CI_Controller
 
 				for ($i = 2; $i < count($data); $i++) {
 					$row = $data[$i];
-					$sku_code     = trim($row[0]);
-					$batch_no     = trim($row[1]);
-					$channel_type = trim($row[2]);
-					$sale_channel = trim($row[3]);
-					$quantity     = trim($row[4]);
-					$reason     = trim($row[5]);
-					$order_type     = trim($row[6]);
+					$order_date  = trim($row[0]);
+					$name        = trim($row[1]);
+					$email       = trim($row[2]);
+					$contact_no  = trim($row[3]);
+					$address     = trim($row[4]);
+					$pincode     = trim($row[5]);
+					$payment_type= trim($row[6]);
+					$sku_code    = trim($row[7]);
+					$batch_no    = trim($row[8]);
+					$channel_type = trim($row[9]);
+					$sale_channel = trim($row[10]);
+					$quantity     = trim($row[11]);
+					$reason     = trim($row[12]);
+					$order_type     = trim($row[13]);
 
 					// Validate SKU
 					$skuValid = $this->model->selectWhereData('tbl_sku_code_master', [
@@ -2259,7 +2285,6 @@ class Admin extends CI_Controller
 							continue;
 						}
 					}
-
 					if ($inventory_type['id'] == 5) {
 						$total_returned_qty = $this->Product_Model->get_total_returned_quantity($product_id, $batchValid['id']);
 						$total_damaged_qty = $this->Product_Model->get_total_damaged_quantity($product_id, $batchValid['id']);
@@ -2286,6 +2311,17 @@ class Admin extends CI_Controller
 						'is_delete' => '0'
 					], ['fk_product_id' => $product_id, 'fk_batch_id' => $batchValid['id']]);
 
+					$customer_data = [
+						'name' => $name,
+						'email' => $email,
+						'contact_no' => $contact_no,
+						'address' => $address,
+						'pincode' => $pincode,		
+						'payment_type' => $payment_type,
+					];
+					$customer_id = $this->model->insertData('tbl_customer', $customer_data);
+					$this->model->addUserLog($login_id, 'Insert Customer Data', 'tbl_customer', $customer_data);
+
 						$insertData = [
 							'fk_product_id'       => $product_id,
 							'fk_batch_id'         => $batchValid['id'],
@@ -2296,9 +2332,11 @@ class Admin extends CI_Controller
 							'reason'			  => $reason,
 							'fk_login_id'		  => $login_id,
 							'fk_inventory_entry_type' => $last_quantity['fk_inventory_entry_type'],
-							'fk_sourcing_partner_id' => $last_quantity['fk_sourcing_partner_id']
-							
+							'fk_sourcing_partner_id' => $last_quantity['fk_sourcing_partner_id'],
+							'order_date' => $order_date,		
+							'fk_customer_id' => $customer_id							
 						];
+
 						if ($inventory_type['id'] == 3) {
 							$insertData['deduct_quantity'] = $quantity;
 							$insertData['fk_inventory_entry_type_sale_id'] = $inventory_type['id'];
@@ -2320,13 +2358,20 @@ class Admin extends CI_Controller
 
 					// Add to imported_products array
 					$imported_order[] = [
-						'SKU' => $row[0],
-						'Batch No' => $row[1],
-						'Channel Type' => $row[2],
-						'Sales Channel' => $row[3],
-						'Quantity' => $row[4],
-						'Reason' => $row[5],		
-					    'Order Type' => $row[6]		
+						'Order Date' => $row[0],
+						'Name' => $row[1],
+						'Email' => $row[2],
+						'Contact No' => $row[3],
+						'Address' => $row[4],
+						'Pincode' => $row[5],
+						'Payment Type' => $row[6],
+						'SKU' => $row[7],
+						'Batch No' => $row[8],
+						'Channel Type' => $row[9],
+						'Sales Channel' => $row[10],
+						'Quantity' => $row[11],
+						'Reason' => $row[12],		
+					    'Order Type' => $row[13]		
 					];
 				}
 				// Generate rejection Excel
