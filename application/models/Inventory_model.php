@@ -31,14 +31,13 @@ class Inventory_model extends CI_Model
         $date = $date ?? date('Y-m-d');
         
         // Define the end of the day (just before midnight)
-        $endOfDay = $date . ' 23:59:59';
-        
+        $endOfDay = $date . ' 23:59:59';        
         // Query to get total inventory quantity before the end of the given date
         $this->db->select("SUM(tbl_product_inventory.total_quantity) as total_inventory");
         $this->db->from("tbl_product_inventory");
         $this->db->where("tbl_product_inventory.created_at <= ", $endOfDay);
         $this->db->where("tbl_product_inventory.used_status", 1);
-        $this->db->where("tbl_product_inventory.is_delete", '1');
+        // $this->db->where("tbl_product_inventory.is_delete", '1');
         
         // Execute the query and return the result
         $query = $this->db->get();
@@ -67,21 +66,37 @@ class Inventory_model extends CI_Model
 		return $this->db->get()->result_array();
 	}
 	
-    public function get_sold_quantity($product_id = "", $date = null) {
-        $date = $date ?? date('Y-m-d');
+    // public function get_sold_quantity($product_id = "", $date = null) {
+    //     // $date = $date ?? date('Y-m-d');
     
-        $this->db->select("SUM(tbl_product_inventory.deduct_quantity) as sold_quantity, tbl_sale_channel.sale_channel");
-        $this->db->from("tbl_product_inventory");
-        $this->db->join("tbl_sale_channel", "tbl_product_inventory.fk_sale_channel_id = tbl_sale_channel.id", "left");
-        $this->db->where("tbl_product_inventory.created_at >=", $date . " 00:00:00");
-        $this->db->where("tbl_product_inventory.created_at <=", $date . " 23:59:59");
-        $this->db->where("tbl_product_inventory.fk_product_id", $product_id);
-        // $this->db->where("tbl_product_inventory.used_status", 1);
-        // $this->db->where("tbl_product_inventory.is_delete", '1');
-        $this->db->group_by("tbl_product_inventory.fk_sale_channel_id");
+    //     $this->db->select("SUM(tbl_product_inventory.deduct_quantity) as sold_quantity, tbl_sale_channel.sale_channel");
+    //     $this->db->from("tbl_product_inventory");
+    //     $this->db->join("tbl_sale_channel", "tbl_product_inventory.fk_sale_channel_id = tbl_sale_channel.id", "left");
+    //     $this->db->where("tbl_product_inventory.created_at >=", $date . " 00:00:00");
+    //     $this->db->where("tbl_product_inventory.created_at <=", $date . " 23:59:59");
+    //     $this->db->where("tbl_product_inventory.fk_product_id", $product_id);
+    //     // $this->db->where("tbl_product_inventory.used_status", 1);
+    //     // $this->db->where("tbl_product_inventory.is_delete", '1');
+    //     $this->db->group_by("tbl_product_inventory.fk_sale_channel_id");
     
-        return $this->db->get()->result_array();
-    }
+    //     return $this->db->get()->result_array();
+    // }
+	public function get_sold_quantity($product_id = "", $date = null) {
+		if (!$date) {
+			$date = date('Y-m-d');
+		}
+
+		$this->db->select("SUM(tbl_product_inventory.deduct_quantity) as sold_quantity, tbl_sale_channel.sale_channel");
+		$this->db->from("tbl_product_inventory");
+		$this->db->join("tbl_sale_channel", "tbl_product_inventory.fk_sale_channel_id = tbl_sale_channel.id", "left");
+		$this->db->where("tbl_product_inventory.created_at >=", $date . " 00:00:00");
+		$this->db->where("tbl_product_inventory.created_at <=", $date . " 23:59:59");
+		$this->db->where("tbl_product_inventory.fk_product_id", $product_id);
+		$this->db->group_by("tbl_product_inventory.fk_sale_channel_id");
+
+		return $this->db->get()->result_array();
+	}
+
     public function get_received_quantity($product_id = "", $date = null) {
         $date = $date ?? date('Y-m-d');
     

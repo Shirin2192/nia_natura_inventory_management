@@ -2426,118 +2426,305 @@ class Admin extends CI_Controller
 		// $this->email->send();
 	}
 	
-    public function generate_inventory_report() {
-    		$CI = &get_instance();
-    		$this->load->model("Inventory_model");
-    		$this->load->library('email');
-    		$date = date('Y-m-d');    	
-    		// Fetch Start of Day Inventory
-    		$start_of_day_inventory = $this->Inventory_model->get_start_of_day_inventory($date);
-    		$quantity_on_hand_inventory = $this->Inventory_model->get_quantity_on_hand_inventory($date);
-    		// echo "<pre>"; print_r($quantity_on_hand_inventory); die;
-    		$report_data = [];    	
-    		$total_qty_on_hand = 0;
-    		$total_received = 0;
-    		$total_sold = 0;
-    		foreach ($quantity_on_hand_inventory as $quantity_on_hand_inventory_key => $row) {
-    			$product_id = $row['fk_product_id'];
-    			// Add Qty on Hand only once per product
-    			$total_qty_on_hand += $row['qty_on_hand'];
-    			// Get sold and received quantities for the product
-    			$sold_quantities = $this->Inventory_model->get_sold_quantity($product_id, $date);
-    			$received_quantities = $this->Inventory_model->get_received_quantity($product_id, $date);
-    			$product_name = $this->Inventory_model->get_product_name($product_id);
-    			$channel_data = [];
-    			// Ensure sold quantities are included (even if none for today)
-    			foreach ($sold_quantities as $sold_row) {
-    				$channel = $sold_row['sale_channel'];
-    				$channel_data[$channel]['sold'] = $sold_row['sold_quantity'];
-    			}    	
-    			// Ensure received quantities are included (even if none for today)
-    			foreach ($received_quantities as $received_row) {
-    				$name = $received_row['name'];
-    				$channel_data[$channel]['received'] = $received_row['received_quantity'];
-    			}    	
-    			// If no sold or received quantities, still include the product with 0 sold and 0 received
-    			if (empty($channel_data)) {
-    				$channel_data['No_Channel'] = ['sold' => 0, 'received' => 0];
-    			}    	
-    			foreach ($channel_data as $channel => $data) {
-    				$received = $data['received'] ?? 0;
-    				$sold = $data['sold'] ?? 0;
-    				$attribute_value = explode(",",$product_name['attribute_value']);
-    				$product_name = $product_name['product_type_name'] . ' ' . $attribute_value[0] . ' ' . $attribute_value[1] . ' ' . $attribute_value[2];	
-    				$report_data[] = [
-    					'product_name' => $product_name,
-    					'sku_code' => $row['sku_code'],
-    					'qty_on_hand' => $row['qty_on_hand'],
-    					'received' => $received,
-    					'sold' => $sold,
-    					'sourcing_partner' => $name,
-    					'sale_channel' => $channel,
-    					'note' => $row['reason'] ?? ''
-    				];
+    // public function generate_inventory_report() {
+    // 		$CI = &get_instance();
+    // 		$this->load->model("Inventory_model");
+    // 		$this->load->library('email');
+    // 		$date = 2025-05-30;;    	
+    // 		// $date = date('Y-m-d');    	
+    // 		// Fetch Start of Day Inventory
+    // 		$start_of_day_inventory = $this->Inventory_model->get_start_of_day_inventory($date);
+    // 		$quantity_on_hand_inventory = $this->Inventory_model->get_quantity_on_hand_inventory($date);
+    // 		// echo "<pre>"; print_r($quantity_on_hand_inventory); die;
+    // 		$report_data = [];    	
+    // 		$total_qty_on_hand = 0;
+    // 		$total_received = 0;
+    // 		$total_sold = 0;
+    // 		foreach ($quantity_on_hand_inventory as $quantity_on_hand_inventory_key => $row) {
+    // 			$product_id = $row['fk_product_id'];
+    // 			// Add Qty on Hand only once per product
+    // 			$total_qty_on_hand += $row['qty_on_hand'];
+    // 			// Get sold and received quantities for the product
+    // 			$sold_quantities = $this->Inventory_model->get_sold_quantity($product_id, $date);
+    // 			$received_quantities = $this->Inventory_model->get_received_quantity($product_id, $date);
+    // 			$product_name = $this->Inventory_model->get_product_name($product_id);
+    // 			$channel_data = [];
+    // 			// Ensure sold quantities are included (even if none for today)
+    // 			foreach ($sold_quantities as $sold_row) {
+    // 				$channel = $sold_row['sale_channel'];
+    // 				$channel_data[$channel]['sold'] = $sold_row['sold_quantity'];
+    // 			}    	
+    // 			// Ensure received quantities are included (even if none for today)
+    // 			foreach ($received_quantities as $received_row) {
+    // 				$name = $received_row['name'];
+    // 				$channel_data[$channel]['received'] = $received_row['received_quantity'];
+    // 			}    	
+    // 			// If no sold or received quantities, still include the product with 0 sold and 0 received
+    // 			if (empty($channel_data)) {
+    // 				$channel_data['No_Channel'] = ['sold' => 0, 'received' => 0];
+    // 			}    	
+    // 			foreach ($channel_data as $channel => $data) {
+    // 				$received = $data['received'] ?? 0;
+    // 				$sold = $data['sold'] ?? 0;
+    // 				$attribute_value = explode(",",$product_name['attribute_value']);
+    // 				$product_name = $product_name['product_type_name'] . ' ' . $attribute_value[0] . ' ' . $attribute_value[1] . ' ' . $attribute_value[2];	
+    // 				$report_data[] = [
+    // 					'product_name' => $product_name,
+    // 					'sku_code' => $row['sku_code'],
+    // 					'qty_on_hand' => $row['qty_on_hand'],
+    // 					'received' => $received,
+    // 					'sold' => $sold,
+    // 					'sourcing_partner' => $name,
+    // 					'sale_channel' => $channel,
+    // 					'note' => $row['reason'] ?? ''
+    // 				];
     	
-    				$total_received += $received;
-    				$total_sold += $sold;
-    			}
-    		}    	
-    		// Calculate End of Day Inventory
-    		$calculated_end_of_day_inventory = $start_of_day_inventory + $total_received - $total_sold;
-    		// Build HTML table
-    		$now_date = date('jS M Y');  // outputs: 30th Apr 2025
-    		$html = "<h3>Inventory Report for {$now_date}</h3>";
-    		$html .= "<p><strong>Start of Day Inventory:</strong> {$start_of_day_inventory}</p>";
-    		$html .= "<p><strong>End of Day Inventory:</strong> {$calculated_end_of_day_inventory}</p>";
-    		$html .= "<table border='1' cellpadding='5' cellspacing='0'>
-    					<thead>
-    						<tr>
-    							<th>Product Name</th>
-    							<th>SKU</th>
-    							<th>Qty in Stock</th>
-    							<th>Received Today</th>
-    							<th>Sold Today</th>
-    							<th>Sourcing Partner</th>
-    							<th>Sales Channel</th>
-    							<th>Note</th>
-    						</tr>
-    					</thead>
-    					<tbody>";
-        		foreach ($report_data as $row) {
-                    $html .= "<tr>
-                                <td>" . (!empty($row['product_name']) ? $row['product_name'] : 'NA') . "</td>
-                                <td>" . (!empty($row['sku_code']) ? $row['sku_code'] : 'NA') . "</td>
-                                <td>" . (isset($row['qty_on_hand']) ? $row['qty_on_hand'] : 'NA') . "</td>
-                                <td>" . (isset($row['received']) ? $row['received'] : 'NA') . "</td>
-                                <td>" . (isset($row['sold']) ? $row['sold'] : 'NA') . "</td>
-                                <td>" . (($row['received'] == 0 || empty($row['sourcing_partner'])) ? 'NA' : $row['sourcing_partner']) . "</td>
-                                <td>" . (($row['sold'] == 0 || empty($row['sale_channel'])) ? 'NA' : $row['sale_channel']) . "</td>
-                                <td>" . ( $row['note']) . "</td>
-                            </tr>";
-                }    	
-    		// Add total row
-    		$html .= "<tr style='font-weight:bold; background-color:#f0f0f0;'>
-    					<td colspan='2'>Total</td>
-    					<td>{$total_qty_on_hand}</td>
-    					<td>{$total_received}</td>
-    					<td>{$total_sold}</td>
-    					<td colspan='2'></td>
-    				  </tr>";
-    		$html .= "</tbody></table>";
-    		    		echo"<pre>";print_r($html);die;
-    		// Email config
-        // 	$to_email = 'shirin@sda-zone.com, sanju@sda-zone.com';
-    		$to_email = 'shirin@sda-zone.com, shiraz@sda-zone.com, sanju@sda-zone.com, rekha@sda-zone.com, moiz@sda-zone.com';
-    		$subject = "Nia Natura Inventory Daily Report";
-    // 		$subject = "Nia Natura Inventory Daily Report - {$date}";
-    		$send = send_inventory_email($to_email, $subject, $html);
-    		if ($send) {
-    			echo "Email sent successfully!";
-    		} else {
-    			echo "Email failed to send.";
-    		}
-    	}
+    // 				$total_received += $received;
+    // 				$total_sold += $sold;
+    // 			}
+    // 		}    	
+    // 		// Calculate End of Day Inventory
+    // 		$calculated_end_of_day_inventory = $start_of_day_inventory + $total_received - $total_sold;
+    // 		// Build HTML table
+    // 		$now_date = date('jS M Y');  // outputs: 30th Apr 2025
+    // 		$html = "<h3>Inventory Report for {$now_date}</h3>";
+    // 		$html .= "<p><strong>Start of Day Inventory:</strong> {$start_of_day_inventory}</p>";
+    // 		$html .= "<p><strong>End of Day Inventory:</strong> {$calculated_end_of_day_inventory}</p>";
+    // 		$html .= "<table border='1' cellpadding='5' cellspacing='0'>
+    // 					<thead>
+    // 						<tr>
+    // 							<th>Product Name</th>
+    // 							<th>SKU</th>
+    // 							<th>Qty in Stock</th>
+    // 							<th>Received Today</th>
+    // 							<th>Sold Today</th>
+    // 							<th>Sourcing Partner</th>
+    // 							<th>Sales Channel</th>
+    // 							<th>Note</th>
+    // 						</tr>
+    // 					</thead>
+    // 					<tbody>";
+    //     		foreach ($report_data as $row) {
+    //                 $html .= "<tr>
+    //                             <td>" . (!empty($row['product_name']) ? $row['product_name'] : 'NA') . "</td>
+    //                             <td>" . (!empty($row['sku_code']) ? $row['sku_code'] : 'NA') . "</td>
+    //                             <td>" . (isset($row['qty_on_hand']) ? $row['qty_on_hand'] : 'NA') . "</td>
+    //                             <td>" . (isset($row['received']) ? $row['received'] : 'NA') . "</td>
+    //                             <td>" . (isset($row['sold']) ? $row['sold'] : 'NA') . "</td>
+    //                             <td>" . (($row['received'] == 0 || empty($row['sourcing_partner'])) ? 'NA' : $row['sourcing_partner']) . "</td>
+    //                             <td>" . (($row['sold'] == 0 || empty($row['sale_channel'])) ? 'NA' : $row['sale_channel']) . "</td>
+    //                             <td>" . ( $row['note']) . "</td>
+    //                         </tr>";
+    //             }    	
+    // 		// Add total row
+    // 		$html .= "<tr style='font-weight:bold; background-color:#f0f0f0;'>
+    // 					<td colspan='2'>Total</td>
+    // 					<td>{$total_qty_on_hand}</td>
+    // 					<td>{$total_received}</td>
+    // 					<td>{$total_sold}</td>
+    // 					<td colspan='2'></td>
+    // 				  </tr>";
+    // 		$html .= "</tbody></table>";
+    // 		    		echo"<pre>";print_r($html);die;
+    // 		// Email config
+    //     	// 	$to_email = 'shirin@sda-zone.com, sanju@sda-zone.com';
+    // 		// $to_email = 'shirin@sda-zone.com, shiraz@sda-zone.com, sanju@sda-zone.com, rekha@sda-zone.com, moiz@sda-zone.com';
+    // 		$subject = "Nia Natura Inventory Daily Report";
+    // 		// 		$subject = "Nia Natura Inventory Daily Report - {$date}";
+    // 		$send = send_inventory_email($to_email, $subject, $html);
+    // 		if ($send) {
+    // 			echo "Email sent successfully!";
+    // 		} else {
+    // 			echo "Email failed to send.";
+    // 		}
+    // 	}
+
+	public function generate_inventory_report() 
+	{
+		$CI = &get_instance();
+		$this->load->model("Inventory_model");
+		$this->load->library('email');
+		$date = date('Y-m-d');
+		// $date = '2025-05-30'; // Example date, change as needed
+		$start_of_day_inventory = $this->Inventory_model->get_start_of_day_inventory($date);
+		$quantity_on_hand_inventory = $this->Inventory_model->get_quantity_on_hand_inventory($date);
+		$report_data = [];
+		$total_qty_on_hand = 0;
+		$total_received = 0;
+		$total_sold = 0;
+
+		// foreach ($quantity_on_hand_inventory as $row) {
+		//     $product_id = $row['fk_product_id'];
+		//     $total_qty_on_hand += $row['qty_on_hand'];
+
+		//     $sold_quantities = $this->Inventory_model->get_sold_quantity($product_id, $date);
+		//     $received_quantities = $this->Inventory_model->get_received_quantity($product_id, $date);
+		//     $product_info = $this->Inventory_model->get_product_name($product_id);
+
+		//     $channel_data = [];
+
+		//     // Merge sold quantities
+		//     foreach ($sold_quantities as $sold_row) {
+		//         $channel = $sold_row['sale_channel'] ?: 'NA';
+		//         if (!isset($channel_data[$channel])) {
+		//             $channel_data[$channel] = ['sold' => 0, 'received' => 0, 'sourcing_partner' => 'NA'];
+		//         }
+		//         $channel_data[$channel]['sold'] = $sold_row['sold_quantity'];
+		//     }
+
+		//     // Merge received quantities
+		//     foreach ($received_quantities as $received_row) {
+		//         $channel = $received_row['sale_channel'] ?: 'NA';
+		//         if (!isset($channel_data[$channel])) {
+		//             $channel_data[$channel] = ['sold' => 0, 'received' => 0, 'sourcing_partner' => 'NA'];
+		//         }
+		//         $channel_data[$channel]['received'] = $received_row['received_quantity'];
+		//         $channel_data[$channel]['sourcing_partner'] = $received_row['name'];
+		//     }
+
+		//     if (empty($channel_data)) {
+		//         $channel_data['NA'] = ['sold' => 0, 'received' => 0, 'sourcing_partner' => 'NA'];
+		//     }
+
+		//     // Build product name
+		//     $attribute_values = explode(',', $product_info['attribute_value'] ?? '');
+		//     $product_display_name = $product_info['product_type_name'] ?? '';
+		//     for ($i = 0; $i < 3; $i++) {
+		//         $product_display_name .= isset($attribute_values[$i]) ? ' ' . $attribute_values[$i] : '';
+		//     }
+		//     foreach ($channel_data as $channel => $data) {
+		//         $received = $data['received'] ?? 0;
+		//         $sold = $data['sold'] ?? 0;
+		//         $sourcing_partner = $data['sourcing_partner'] ?? 'NA';
+
+		//         $report_data[] = [
+		//             'product_name' => $product_display_name,
+		//             'sku_code' => $row['sku_code'],
+		//             'qty_on_hand' => $row['qty_on_hand'],
+		//             'received' => $received,
+		//             'sold' => $sold,
+		//             'sourcing_partner' => $received > 0 ? $sourcing_partner : 'NA',
+		//             'sale_channel' => $sold > 0 ? $channel : 'NA',
+		//             'note' => $row['reason'] ?? ''
+		//         ];
+
+		//         $total_received += $received;
+		//         $total_sold += $sold;
+		//     }
+		// }
+		foreach ($quantity_on_hand_inventory as $row) {
+			$product_id = $row['fk_product_id'];
+			$total_qty_on_hand += $row['qty_on_hand'];
+
+			$sold_rows = $this->Inventory_model->get_sold_quantity($product_id, $date);
+			$received_quantities = $this->Inventory_model->get_received_quantity($product_id, $date);
+			$product_info = $this->Inventory_model->get_product_name($product_id);
+
+			// === New logic for sold + channel summary ===
+			$total_sold_per_product = 0;
+			$sale_channels = [];
+
+			foreach ($sold_rows as $s_row) {
+				$qty = (int)$s_row['sold_quantity'];
+				$channel = $s_row['sale_channel'] ?: 'NA';
+				$total_sold_per_product += $qty;
+
+				if ($qty > 0) {
+					$sale_channels[] = $channel . ': ' . $qty;
+				}
+			}
+
+			$sold = $total_sold_per_product;
+			$sale_channel_string = !empty($sale_channels) ? implode(', ', $sale_channels) : 'NA';
+
+			// === Prepare received quantity & sourcing partner ===
+			$received = 0;
+			$sourcing_partner = 'NA';
+
+			if (!empty($received_quantities)) {
+				foreach ($received_quantities as $rec_row) {
+					$received += $rec_row['received_quantity'];
+					if (!empty($rec_row['name'])) {
+						$sourcing_partner = $rec_row['name'];
+					}
+				}
+			}
+			// === Prepare product name ===
+			$attribute_values = explode(',', $product_info['attribute_value'] ?? '');
+			$product_display_name = $product_info['product_type_name'] ?? '';
+			for ($i = 0; $i < 3; $i++) {
+				$product_display_name .= isset($attribute_values[$i]) ? ' ' . $attribute_values[$i] : '';
+			}
+
+			$report_data[] = [
+				'product_name'     => $product_display_name,
+				'sku_code'         => $row['sku_code'],
+				'qty_on_hand'      => $row['qty_on_hand'],
+				'received'         => $received,
+				'sold'             => $sold,
+				'sourcing_partner' => $received > 0 ? $sourcing_partner : 'NA',
+				'sale_channel'     => $sold > 0 ? $sale_channel_string : 'NA',
+				'note'             => $row['reason'] ?? ''
+			];
+
+			$total_received += $received;
+			$total_sold += $sold;
+		}
+
+		$calculated_end_of_day_inventory = $start_of_day_inventory + $total_received - $total_sold;
+		$now_date = date('jS M Y');
+
+		$html = "<h3>Inventory Report for {$now_date}</h3>";
+		$html .= "<p><strong>Start of Day Inventory:</strong> {$start_of_day_inventory}</p>";
+		$html .= "<p><strong>End of Day Inventory:</strong> {$calculated_end_of_day_inventory}</p>";
+		$html .= "<table border='1' cellpadding='5' cellspacing='0'>
+					<thead>
+						<tr>
+							<th>Product Name</th>
+							<th>SKU</th>
+							<th>Qty in Stock</th>
+							<th>Received Today</th>
+							<th>Sold Today</th>
+							<th>Sourcing Partner</th>
+							<th>Sales Channel</th>
+							<th>Note</th>
+						</tr>
+					</thead>
+					<tbody>";
+
+		foreach ($report_data as $row) {
+			$html .= "<tr>
+						<td>" . (!empty($row['product_name']) ? $row['product_name'] : 'NA') . "</td>
+						<td>" . (!empty($row['sku_code']) ? $row['sku_code'] : 'NA') . "</td>
+						<td>" . (isset($row['qty_on_hand']) ? $row['qty_on_hand'] : 'NA') . "</td>
+						<td>" . (isset($row['received']) ? $row['received'] : 'NA') . "</td>
+						<td>" . (isset($row['sold']) ? $row['sold'] : 'NA') . "</td>
+						<td>" . $row['sourcing_partner'] . "</td>
+						<td>" . $row['sale_channel'] . "</td>
+						<td>" . $row['note'] . "</td>
+					</tr>";
+		}
+
+		$html .= "<tr style='font-weight:bold; background-color:#f0f0f0;'>
+					<td colspan='2'>Total</td>
+					<td>{$total_qty_on_hand}</td>
+					<td>{$total_received}</td>
+					<td>{$total_sold}</td>
+					<td colspan='3'></td>
+				</tr>";
+		$html .= "</tbody></table>";
+		print_r($html);die;
+
+		$to_email = 'shirin@sda-zone.com';
+		$subject = "Nia Natura Inventory Daily Report";
+
+		$send = send_inventory_email($to_email, $subject, $html);
+		echo $send ? "Email sent successfully!" : "Email failed to send.";
+	}
+
 	//Sourcing Partner
+	
+	
 	public function sourcing_partner()
 	{
 		$admin_session = $this->session->userdata('admin_session'); // Check if admin session exists
